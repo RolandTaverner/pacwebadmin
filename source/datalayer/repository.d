@@ -133,6 +133,7 @@ public:
         );
     }
 
+protected:
     KeyType getNewKey() const {
         if (!m_entities.length) {
             return 0;
