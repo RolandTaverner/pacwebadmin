@@ -9,40 +9,40 @@ import datalayer.repository.repository;
 
 class ProxyRulesValue : ISerializable
 {
-    this()
+    @safe this() pure
     {
     }
 
-    this(in ProxyRulesValue v)
+    @safe this(in ProxyRulesValue v) pure
     {
         m_proxyId = v.m_proxyId;
         m_enabled = v.enabled;
         m_hostRuleIds = v.m_hostRuleIds.dup;        
     }
 
-    this(in long proxyId, in bool enabled, in long[] hostRuleIds)
+    @safe this(in long proxyId, in bool enabled, in long[] hostRuleIds) pure
     {
         m_proxyId = proxyId;
         m_enabled = enabled;
         m_hostRuleIds = hostRuleIds.dup;
     }
 
-    long proxyId() const
+    @safe long proxyId() const pure
     {
         return m_proxyId;
     }
 
-    bool enabled() const
+    @safe bool enabled() const pure
     {
         return m_enabled;
     }
 
-    const(long[]) hostRuleIds() const
+    @safe const(long[]) hostRuleIds() const pure
     {
         return m_hostRuleIds;
     }
 
-    JSONValue toJSON() const
+    JSONValue toJSON() const pure
     {
         return JSONValue([
                 "proxyId": JSONValue(proxyId()),

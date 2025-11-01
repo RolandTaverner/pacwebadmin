@@ -9,34 +9,34 @@ import datalayer.repository.repository;
 
 class PACValue : ISerializable
 {
-    this()
+    @safe this() pure
     {
     }
 
-    this(in PACValue v)
+    @safe this(in PACValue v) pure
     {
         m_name = v.m_name.dup;
         m_description = v.m_description.dup;
     }
 
-    this(in string name, in string description, in long[] proxyRuleIds)
+    @safe this(in string name, in string description, in long[] proxyRuleIds) pure
     {
         m_name = name;
         m_description = description;
         m_proxyRuleIds = proxyRuleIds.dup;
     }
 
-    const(string) name() const
+    @safe const(string) name() const pure
     {
         return m_name;
     }
 
-    const(string) description() const
+    @safe const(string) description() const pure
     {
         return m_description;
     }
 
-    const(long[]) proxyRuleIds() const
+    @safe const(long[]) proxyRuleIds() const pure
     {
         return m_proxyRuleIds;
     }

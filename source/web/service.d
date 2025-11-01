@@ -9,9 +9,11 @@ import vibe.http.common;
 
 import model.model;
 import model.category;
+import model.proxy;
 
 import web.api.root;
 import web.api.category;
+import web.api.proxy;
 
 
 class Service : APIRoot 
@@ -19,7 +21,9 @@ class Service : APIRoot
     this(Model model)
     {
         m_model = model;
+
         m_categoriesSvc = new CategoriesService(m_model);
+        m_proxiesSvc = new ProxiesService(m_model);
     }
 
     override @property CategoriesAPI categories()
@@ -27,9 +31,15 @@ class Service : APIRoot
         return m_categoriesSvc;
     }
 
+    override @property ProxiesAPI proxies()
+    {
+        return m_proxiesSvc;
+    }
+
 private:    
     Model m_model;
     CategoriesService m_categoriesSvc;
+    ProxiesService m_proxiesSvc;
 }
 
 class CategoriesService : CategoriesAPI
@@ -41,17 +51,17 @@ class CategoriesService : CategoriesAPI
 
     @safe override Categories getAll()
     {
-        Categories response = { array(m_model.categories().map!(c => toDTO(c))) };
+        Categories response = { array(m_model.getCategories().map!(c => toDTO(c))) };
         return response;
     }
 
-    @safe override CategoryDTO postCreate(in NewCategoryDTO c)
+    @safe override CategoryDTO create(in NewCategoryDTO c)
     {
         const Category created = m_model.createCategory(new Category(0, c.name));
         return toDTO(created);
     }
 
-    @safe override CategoryDTO putUpdate(in CategoryDTO c)
+    @safe override CategoryDTO update(in CategoryDTO c)
     {
         return remapExceptions!(delegate() 
         { 
@@ -69,7 +79,7 @@ class CategoriesService : CategoriesAPI
         }, CategoryDTO);        
     }
 
-    @safe override CategoryDTO deleteRemove(in long id)
+    @safe override CategoryDTO remove(in long id)
     {
         return remapExceptions!(delegate() 
         { 
@@ -82,16 +92,79 @@ private:
     Model m_model;
 }
 
+
+class ProxiesService : ProxiesAPI
+{
+    this(Model model)
+    {
+        m_model = model;
+    }
+
+    @safe override Proxies getAll()
+    {
+        Proxies response = { array(m_model.getProxies().map!(c => toDTO(c))) };
+        return response;
+    }
+
+    @safe override ProxyDTO create(in NewProxyDTO p)
+    {
+        const Proxy created = m_model.createProxy(new Proxy(0, p.hostAddress, p.description, p.builtIn));
+        return toDTO(created);
+    }
+
+    @safe override ProxyDTO update(in ProxyDTO p)
+    {
+        return remapExceptions!(delegate() 
+        { 
+            const Proxy updated = m_model.updateProxy(new Proxy(p.id, p.hostAddress, p.description, p.builtIn));
+            return toDTO(updated);
+        }, ProxyDTO);
+    }
+
+    @safe override ProxyDTO getById(in long id)
+    {
+        return remapExceptions!(delegate() 
+        { 
+            const Proxy got = m_model.proxyById(id);
+            return toDTO(got);
+        }, ProxyDTO);        
+    }
+
+    @safe override ProxyDTO remove(in long id)
+    {
+        return remapExceptions!(delegate() 
+        { 
+            const Proxy removed = m_model.deleteProxy(id);
+            return toDTO(removed);
+        }, ProxyDTO);
+    }
+
+private:    
+    Model m_model;
+}
+
+
 T remapExceptions(alias fun, T)() @safe {
-    try {
+    try
+    {
         return fun();
-    } catch (CategoryNotFound e) {
+    } 
+    catch (CategoryNotFound e)
+    {
+        throw new HTTPStatusException(404, e.getEntityType() ~ " id=" ~ to!string(e.getEntityId()) ~ " not found");
+    }
+    catch (ProxyNotFound e)
+    {
         throw new HTTPStatusException(404, e.getEntityType() ~ " id=" ~ to!string(e.getEntityId()) ~ " not found");
     }
 }
 
 @safe CategoryDTO toDTO(in Category c) {
     return CategoryDTO(c.id(), c.name());
+}
+
+@safe ProxyDTO toDTO(in Proxy p) {
+    return ProxyDTO(p.id(), p.hostAddress(), p.description(), p.builtIn());
 }
 
 // class WebService {

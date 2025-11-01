@@ -7,35 +7,35 @@ import datalayer.repository.repository;
 
 class HostRuleValue : ISerializable
 {
-    this()
+    @safe this() pure
     {
     }
 
-    this(in HostRuleValue v)
+    @safe this(in HostRuleValue v) pure
     {
         m_hostTemplate = v.m_hostTemplate.dup;
         m_strict = v.m_strict;
         m_categoryId = v.m_categoryId;
     }
 
-    this(in string hostTemplate, in bool strict, in long categoryId)
+    @safe this(in string hostTemplate, in bool strict, in long categoryId) pure
     {
         m_hostTemplate = hostTemplate;
         m_strict = strict;
         m_categoryId = categoryId;
     }
 
-    const(string) hostTemplate() const
+    @safe const(string) hostTemplate() const pure
     {
         return m_hostTemplate;
     }
 
-    bool strict() const
+    @safe bool strict() const pure
     {
         return m_strict;
     }
 
-    long categoryId() const
+    @safe long categoryId() const pure
     {
         return m_categoryId;
     }

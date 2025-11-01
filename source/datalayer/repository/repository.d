@@ -23,22 +23,22 @@ class DataObject(K, V : ISerializable) : ISerializable
     alias KeyType = K;
     alias ValueType = V;
 
-    this() 
+    @safe this() pure
     {
     }
 
-    this(in KeyType k, in ValueType v) 
+    @safe this(in KeyType k, in ValueType v) pure
     {
         m_key = KeyType(k);
         m_value = new ValueType(v);
     }
 
-    @safe const(KeyType) key() const 
+    @safe const(KeyType) key() const pure
     {
         return m_key;
     }
 
-    @safe const(ValueType) value() const 
+    @safe const(ValueType) value() const pure
     {
         return m_value;
     }

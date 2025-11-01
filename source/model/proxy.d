@@ -1,5 +1,8 @@
 module model.proxy;
 
+import model.errors.base;
+
+
 class Proxy {
     @safe this(in Proxy other) pure
     {
@@ -42,4 +45,10 @@ private:
    string m_hostAddress;
    string m_description;
    bool m_builtIn;
+}
+
+
+class ProxyNotFound : NotFoundBase!(Proxy)
+{
+    mixin finalEntityErrorCtors!("not found");
 }

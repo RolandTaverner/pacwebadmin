@@ -41,27 +41,27 @@ class Storage : ISerializable {
         m_proxyRules.fromJSON(v.object["proxyrule"]);
     }
 
-    @safe inout (CategoryRepository) categories() inout
+    @safe inout(CategoryRepository) categories() inout pure
     {
         return m_categories;
     }
 
-    @safe inout(HostRuleRepository) hostRules() inout
+    @safe inout(HostRuleRepository) hostRules() inout pure
     {
         return m_hostRules;
     }
 
-    @safe inout(PACRepository) pacs() inout
+    @safe inout(PACRepository) pacs() inout pure
     {
         return m_pacs;
     }
 
-    @safe inout(ProxyRepository) proxies() inout
+    @safe inout(ProxyRepository) proxies() inout pure
     {
         return m_proxies;
     }
 
-    @safe inout(ProxyRulesRepository) proxyRules() inout
+    @safe inout(ProxyRulesRepository) proxyRules() inout pure
     {
         return m_proxyRules;
     }

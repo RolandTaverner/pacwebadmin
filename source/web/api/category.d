@@ -7,19 +7,20 @@ import vibe.http.server;
 interface CategoriesAPI
 {
 @safe:
+    @method(HTTPMethod.GET) @path("/all")
     Categories getAll();
 
-    @path(":id")
+    @method(HTTPMethod.GET) @path(":id")
     CategoryDTO getById(in long _id);
 
-    @bodyParam("c") 
-    CategoryDTO postCreate(in NewCategoryDTO c);
+    @method(HTTPMethod.POST) @path("/create") @bodyParam("c") 
+    CategoryDTO create(in NewCategoryDTO c);
 
-    @bodyParam("c") 
-    CategoryDTO putUpdate(in CategoryDTO c);
+    @method(HTTPMethod.PUT) @path("/update") @bodyParam("c")
+    CategoryDTO update(in CategoryDTO c);
 
-    @path(":id")
-    CategoryDTO deleteRemove(in long _id);
+    @method(HTTPMethod.DELETE) @path(":id")
+    CategoryDTO remove(in long _id);
 }
 
 struct Categories

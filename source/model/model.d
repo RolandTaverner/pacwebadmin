@@ -23,14 +23,16 @@ class Model {
         m_storage = storage;
     }
 
-    @trusted const(Category[]) categories() const {
-        return array(m_storage.categories().getAll().map!(c => makeCategory(c)));
+    // Categories ======================
+
+    @trusted const(Category[]) getCategories() const {
+        return array(categories.getAll().map!(c => makeCategory(c)));
     }
 
     @trusted const(Category) categoryById(in long id) const {
         try
         {
-            return makeCategory(m_storage.categories().getByKey(id));
+            return makeCategory(categories.getByKey(id));
         } 
         catch (re.NotFoundError e) 
         {
@@ -39,14 +41,15 @@ class Model {
     }
 
     @trusted const(Category) createCategory(in Category category) {
-        const auto created = m_storage.categories().create(new dlcategory.CategoryValue(category.name()));
+        const auto created = categories.create(new dlcategory.CategoryValue(category.name()));
         return makeCategory(created);
     }
 
     @trusted const(Category) updateCategory(Category category) {
         try
         {
-            const auto updated = m_storage.categories().update(category.id(), new dlcategory.CategoryValue(category.name()));
+            // TODO: check name uniqueness
+            const auto updated = categories.update(category.id(), new dlcategory.CategoryValue(category.name()));
             return makeCategory(updated);
         } 
         catch (re.NotFoundError e) 
@@ -58,7 +61,8 @@ class Model {
     @trusted const(Category) deleteCategory(long id) {
         try
         {
-            const auto deleted = m_storage.categories().remove(id);
+            // TODO: update hosts
+            const auto deleted = categories.remove(id);
             return makeCategory(deleted);
         } 
         catch (re.NotFoundError e) 
@@ -67,7 +71,57 @@ class Model {
         }
     }
 
-    const(HostRule[]) hostRules() const {
+    // Proxies ======================
+
+    @trusted const(Proxy[]) getProxies() const {
+        return array(proxies.getAll().map!(c => makeProxy(c)));
+    }
+
+    @trusted const(Proxy) proxyById(in long id) const {
+        try
+        {
+            return makeProxy(proxies.getByKey(id));
+        } 
+        catch (re.NotFoundError e) 
+        {
+            throw new ProxyNotFound(id);
+        }
+    }
+
+    @trusted const(Proxy) createProxy(in Proxy proxy) {
+        const auto created = proxies.create(new dlproxy.ProxyValue(proxy.hostAddress(), proxy.description(), proxy.builtIn()));
+        return makeProxy(created);
+    }
+
+    @trusted const(Proxy) updateProxy(Proxy proxy) {
+        try
+        {
+            // TODO: check name uniqueness
+            const auto updated = proxies.update(proxy.id(), new dlproxy.ProxyValue(proxy.hostAddress(), proxy.description(), proxy.builtIn()));
+            return makeProxy(updated);
+        } 
+        catch (re.NotFoundError e) 
+        {
+            throw new ProxyNotFound(proxy.id());
+        }
+    }
+
+    @trusted const(Proxy) deleteProxy(long id) {
+        try
+        {
+            // TODO: update proxy rules
+            const auto deleted = proxies.remove(id);
+            return makeProxy(deleted);
+        } 
+        catch (re.NotFoundError e) 
+        {
+            throw new ProxyNotFound(id);
+        }
+    }
+
+    // =====
+
+    const(HostRule[]) getHostRules() const {
         return array(m_storage.hostRules().getAll().map!(c => makeHostRule(c)));
     }
 
@@ -75,21 +129,9 @@ class Model {
         return makeHostRule(m_storage.hostRules().getByKey(id));
     }
 
-    const(Proxy[]) proxies() const {
-        return array(m_storage.proxies().getAll().map!(c => makeProxy(c)));
-    }
-
-    const(Proxy) proxyById(in long id) const {
-        return makeProxy(m_storage.proxies().getByKey(id));
-    }
-
-    const(Proxy) updateProxy(Proxy proxy) {
-        return makeProxy(m_storage.proxies().update(proxy.id(),
-            new dlproxy.ProxyValue(proxy.hostAddress(), proxy.description(), proxy.builtIn())));
-    }
-
 protected:
-    Category makeCategory(in dlcategory.CategoryRepository.DataObjectType dto) const {
+    @safe Category makeCategory(in dlcategory.CategoryRepository.DataObjectType dto) const pure
+    {
         return new Category(dto.key(), dto.value().name());
     }
 
@@ -102,8 +144,34 @@ protected:
         return new HostRule(id, hostTemplate, strict, category);
     }
 
-    Proxy makeProxy(in dlproxy.ProxyRepository.DataObjectType dto) const {
+    @safe Proxy makeProxy(in dlproxy.ProxyRepository.DataObjectType dto) const pure
+    {
         return new Proxy(dto.key(), dto.value().hostAddress(), dto.value().description(), dto.value().builtIn());
+    }
+
+    @property @safe inout(dlcategory.CategoryRepository) categories() inout pure
+    {
+        return m_storage.categories;
+    }
+
+    @property @safe inout(dlhostrule.HostRuleRepository) hostRules() inout pure
+    {
+        return m_storage.hostRules();
+    }
+
+    @property @safe inout(dlpac.PACRepository) pacs() inout pure
+    {
+        return m_storage.pacs();
+    }
+
+    @property @safe inout(dlproxy.ProxyRepository) proxies() inout pure
+    {
+        return m_storage.proxies();
+    }
+
+    @property @safe inout(dlproxyrules.ProxyRulesRepository) proxyRules() inout pure
+    {
+        return m_storage.proxyRules();
     }
 
 private:

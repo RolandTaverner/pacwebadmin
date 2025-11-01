@@ -6,21 +6,21 @@ import datalayer.repository.repository;
 
 class CategoryValue : ISerializable
 {
-    this()
+    @safe this() pure
     {
     }
 
-    this(in CategoryValue v)
+    @safe this(in CategoryValue v) pure
     {
         m_name = v.m_name.dup;
     }
 
-    this(in string name)
+    @safe this(in string name) pure
     {
         m_name = name;
     }
 
-    const(string) name() const
+    @safe const(string) name() const pure
     {
         return m_name;
     }

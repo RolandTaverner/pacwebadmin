@@ -32,8 +32,8 @@ private:
     string m_name;
 }
 
+
 class CategoryNotFound : NotFoundBase!(Category)
 {
     mixin finalEntityErrorCtors!("not found");
 }
-
