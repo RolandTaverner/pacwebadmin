@@ -4,11 +4,11 @@ import vibe.web.rest;
 import vibe.http.server;
 
 
-interface CategoriesAPI
+interface CategoryAPI
 {
 @safe:
     @method(HTTPMethod.GET) @path("/all")
-    Categories getAll();
+    CategoryList getAll();
 
     @method(HTTPMethod.GET) @path(":id")
     CategoryDTO getById(in long _id);
@@ -23,7 +23,7 @@ interface CategoriesAPI
     CategoryDTO remove(in long _id);
 }
 
-struct Categories
+struct CategoryList
 {
     CategoryDTO[] categories;
 }

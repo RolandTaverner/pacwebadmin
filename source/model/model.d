@@ -1,6 +1,8 @@
 module model.model;
 
+import std.algorithm.iteration : filter;
 import std.algorithm.iteration : map;
+import std.algorithm : canFind;
 import std.array;
 
 import datalayer.storage;
@@ -15,6 +17,8 @@ import dlproxyrules = datalayer.proxyrules;
 import model.entities.category;
 import model.entities.hostrule;
 import model.entities.proxy;
+import model.entities.proxyrules;
+import model.errors.base : ConstraintError;
 
 
 class Model {
@@ -171,6 +175,95 @@ class Model {
     }
 
 
+    // ProxyRules ======================
+
+    @trusted const(ProxyRules[]) getProxyRules() const {
+        return array(proxyRules.getAll().map!(c => makeProxyRules(c)));
+    }
+
+    @trusted const(ProxyRules) proxyRulesById(in long id) const {
+        try
+        {
+            return makeProxyRules(proxyRules.getByKey(id));
+        } 
+        catch (re.NotFoundError e) 
+        {
+            throw new ProxyRulesNotFound(id);
+        }
+    }
+
+    @trusted const(ProxyRules) createProxyRules(in ProxyRulesInput pri) {
+        // TODO: check hostRuleIds uniqueness and existance
+        const auto created = proxyRules.create(new dlproxyrules.ProxyRulesValue(pri.proxyId, pri.enabled, pri.hostRuleIds));
+        return makeProxyRules(created);
+    }
+
+    @trusted const(ProxyRules) updateProxyRules(in long id, in ProxyRulesInput pri) {
+        try
+        {
+            // TODO: check hostRuleIds uniqueness and existance
+            const auto updated = proxyRules.update(id, new dlproxyrules.ProxyRulesValue(pri.proxyId, pri.enabled, pri.hostRuleIds));
+            return makeProxyRules(updated);
+        } 
+        catch (re.NotFoundError e) 
+        {
+            throw new ProxyRulesNotFound(id);
+        }
+    }
+
+    @trusted const(HostRule[]) proxyRulesAddHostRule(in long id, in long hostRuleId) {
+        try
+        {
+            // TODO: check hostRuleIds uniqueness and existance
+            const auto pr = proxyRules.getByKey(id);
+            const auto hrIds = pr.value().hostRuleIds();
+            if (hrIds.canFind(hostRuleId)) {
+                throw new ConstraintError("already exists"); // TODO: add info
+            }
+            const auto newHrIds = hrIds ~ hostRuleId;
+            const auto updated = proxyRules.update(id, new dlproxyrules.ProxyRulesValue(pr.value().proxyId(), pr.value().enabled(), newHrIds));
+
+            return makeProxyRules(updated).hostRules();
+        } 
+        catch (re.NotFoundError e) 
+        {
+            throw new ProxyRulesNotFound(id);
+        }
+    }
+
+    @trusted const(HostRule[]) proxyRulesRemoveHostRule(in long id, in long hostRuleId) {
+        try
+        {
+            // TODO: check hostRuleIds uniqueness and existance
+            const auto pr = proxyRules.getByKey(id);
+            const auto hrIds = pr.value().hostRuleIds();
+            if (!hrIds.canFind(hostRuleId)) {
+                throw new ConstraintError("not exists"); // TODO: add info
+            }
+            const auto filteredHrIds = array(hrIds.filter!(i => i != hostRuleId));
+            const auto updated = proxyRules.update(id, new dlproxyrules.ProxyRulesValue(pr.value().proxyId(), pr.value().enabled(), filteredHrIds));
+
+            return makeProxyRules(updated).hostRules();
+        } 
+        catch (re.NotFoundError e) 
+        {
+            throw new ProxyRulesNotFound(id);
+        }
+    }
+
+    @trusted const(ProxyRules) deleteProxyRules(long id) {
+        try
+        {
+            // TODO: update proxy rules
+            const auto deleted = proxyRules.remove(id);
+            return makeProxyRules(deleted);
+        } 
+        catch (re.NotFoundError e) 
+        {
+            throw new ProxyRulesNotFound(id);
+        }
+    }
+
 // ===========
 
 
@@ -195,6 +288,20 @@ protected:
         auto category = makeCategory(c);
 
         return new HostRule(id, hostTemplate, strict, category);
+    }
+
+    @safe ProxyRules makeProxyRules(in dlproxyrules.ProxyRulesRepository.DataObjectType dto) const pure
+    {
+        auto id = dto.key();
+
+        auto p =  proxies.getByKey(dto.value().proxyId());
+        auto proxy = makeProxy(p);
+        
+        auto enabled = dto.value().enabled();
+
+        auto hostRules = array(dto.value().hostRuleIds.map!( id => makeHostRule(hostRules.getByKey(id)) ));
+
+        return new ProxyRules(id, proxy, enabled, hostRules);
     }
 
     @property @safe inout(dlcategory.CategoryRepository) categories() inout pure

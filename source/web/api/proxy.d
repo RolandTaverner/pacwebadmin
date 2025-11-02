@@ -4,11 +4,11 @@ import vibe.web.rest;
 import vibe.http.server;
 
 
-interface ProxiesAPI
+interface ProxyAPI
 {
 @safe:
     @method(HTTPMethod.GET) @path("/all")
-    Proxies getAll();
+    ProxyList getAll();
 
     @method(HTTPMethod.GET) @path(":id")
     ProxyDTO getById(in long _id);
@@ -23,7 +23,7 @@ interface ProxiesAPI
     ProxyDTO remove(in long _id);
 }
 
-struct Proxies
+struct ProxyList
 {
     ProxyDTO[] proxies;
 }
@@ -50,6 +50,14 @@ struct ProxyDTO
         this.hostAddress = hostAddress.dup;
         this.description = description.dup;
         this.builtIn = builtIn;
+    }
+
+    @safe this(in ProxyDTO other) pure
+    {
+        this.id = other.id;
+        this.hostAddress = other.hostAddress.dup;
+        this.description = other.description.dup;
+        this.builtIn = other.builtIn;
     }
 
     long id;

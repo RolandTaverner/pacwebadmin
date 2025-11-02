@@ -83,9 +83,9 @@ class PACValue : ISerializable
     }
 
 protected:
-   string m_name;
-   string m_description;
-   long[] m_proxyRuleIds;
+    string m_name;
+    string m_description;
+    long[] m_proxyRuleIds;
 }
 
 

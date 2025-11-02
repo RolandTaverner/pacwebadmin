@@ -3,20 +3,23 @@ module web.api.root;
 import vibe.web.rest;
 import vibe.http.server;
 
-import  web.api.category : CategoriesAPI;
-import  web.api.proxy : ProxiesAPI;
-import  web.api.hostrule : HostRulesAPI;
-
+import  web.api.category : CategoryAPI;
+import  web.api.proxy : ProxyAPI;
+import  web.api.hostrule : HostRuleAPI;
+import  web.api.proxyrules : ProxyRulesAPI;
 
 @path("/api/")
 interface APIRoot
 {
-    @path("categories/") 
-    @property CategoriesAPI categories();
+    @path("category/") 
+    @property CategoryAPI categories();
     
-    @path("proxies/") 
-    @property ProxiesAPI proxies();
+    @path("proxy/") 
+    @property ProxyAPI proxies();
 
-    @path("hostrules/") 
-    @property HostRulesAPI hostRules();
+    @path("hostrule/") 
+    @property HostRuleAPI hostRules();
+
+    @path("proxyrules/") 
+    @property ProxyRulesAPI proxyRules();
 }

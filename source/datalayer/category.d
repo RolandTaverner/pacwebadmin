@@ -55,7 +55,7 @@ class CategoryValue : ISerializable
     }
 
 protected:
-   string m_name;
+    string m_name;
 }
 
 

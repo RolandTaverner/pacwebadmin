@@ -81,9 +81,9 @@ class ProxyValue : ISerializable
     }
 
 protected:
-   string m_hostAddress;
-   string m_description;
-   bool m_builtIn;
+    string m_hostAddress;
+    string m_description;
+    bool m_builtIn;
 }
 
 

@@ -11,12 +11,14 @@ import model.model;
 import model.entities.category;
 import model.entities.proxy;
 import model.entities.hostrule;
+import model.entities.proxyrules;
+import model.errors.base : ConstraintError;
 
 import web.api.root;
 import web.api.category;
 import web.api.proxy;
 import web.api.hostrule;
-
+import web.api.proxyrules;
 
 class Service : APIRoot 
 {
@@ -24,44 +26,51 @@ class Service : APIRoot
     {
         m_model = model;
 
-        m_categoriesSvc = new CategoriesService(m_model);
-        m_proxiesSvc = new ProxiesService(m_model);
-        m_hostRulesSvc = new HostRulesService(m_model);
+        m_categorySvc = new CategoryService(m_model);
+        m_proxySvc = new ProxyService(m_model);
+        m_hostRuleSvc = new HostRuleService(m_model);
+        m_proxyRulesSvc = new ProxyRulesService(m_model);
     }
 
-    override @property CategoriesAPI categories()
+    override @property CategoryAPI categories()
     {
-        return m_categoriesSvc;
+        return m_categorySvc;
     }
 
-    override @property ProxiesAPI proxies()
+    override @property ProxyAPI proxies()
     {
-        return m_proxiesSvc;
+        return m_proxySvc;
     }
 
-    override @property HostRulesAPI hostRules()
+    override @property HostRuleAPI hostRules()
     {
-        return m_hostRulesSvc;
+        return m_hostRuleSvc;
+    }
+
+    override @property ProxyRulesAPI proxyRules()
+    {
+        return m_proxyRulesSvc;
     }
 
 private:    
     Model m_model;
-    CategoriesService m_categoriesSvc;
-    ProxiesService m_proxiesSvc;
-    HostRulesService m_hostRulesSvc;
+    CategoryService m_categorySvc;
+    ProxyService m_proxySvc;
+    HostRuleService m_hostRuleSvc;
+    ProxyRulesService m_proxyRulesSvc;
 }
 
 
-class CategoriesService : CategoriesAPI
+class CategoryService : CategoryAPI
 {
     this(Model model)
     {
         m_model = model;
     }
 
-    @safe override Categories getAll()
+    @safe override CategoryList getAll()
     {
-        Categories response = { array(m_model.getCategories().map!(c => toDTO(c))) };
+        CategoryList response = { array(m_model.getCategories().map!(c => toDTO(c))) };
         return response;
     }
 
@@ -105,16 +114,16 @@ private:
 }
 
 
-class ProxiesService : ProxiesAPI
+class ProxyService : ProxyAPI
 {
     this(Model model)
     {
         m_model = model;
     }
 
-    @safe override Proxies getAll()
+    @safe override ProxyList getAll()
     {
-        Proxies response = { array(m_model.getProxies().map!(c => toDTO(c))) };
+        ProxyList response = { array(m_model.getProxies().map!(c => toDTO(c))) };
         return response;
     }
 
@@ -158,16 +167,16 @@ private:
 }
 
 
-class HostRulesService : HostRulesAPI
+class HostRuleService : HostRuleAPI
 {
     this(Model model)
     {
         m_model = model;
     }
 
-    @safe override HostRules getAll()
+    @safe override HostRuleList getAll()
     {
-        HostRules response = { array(m_model.getHostRules().map!(c => toDTO(c))) };
+        HostRuleList response = { array(m_model.getHostRules().map!(c => toDTO(c))) };
         return response;
     }
 
@@ -210,7 +219,90 @@ private:
     Model m_model;
 }
 
-T remapExceptions(alias fun, T)() @safe {
+
+class ProxyRulesService : ProxyRulesAPI
+{
+    this(Model model)
+    {
+        m_model = model;
+    }
+
+    @safe override ProxyRulesList getAll()
+    {
+        ProxyRulesList response = { array(m_model.getProxyRules().map!(c => toDTO(c))) };
+        return response;
+    }
+
+    @safe override ProxyRulesDTO create(in ProxyRulesInputDTO prs)
+    {
+        const ProxyRulesInput prsi = { proxyId: prs.proxyId, enabled: prs.enabled, hostRuleIds: prs.hostRuleIds.dup };
+        const ProxyRules created = m_model.createProxyRules(prsi);
+        return toDTO(created);
+    }
+
+    @safe override ProxyRulesDTO update(in long id, in ProxyRulesInputDTO prs)
+    {
+        return remapExceptions!(delegate() 
+        { 
+            const ProxyRulesInput prsi = { proxyId: prs.proxyId, enabled: prs.enabled, hostRuleIds: prs.hostRuleIds.dup };
+            const ProxyRules updated = m_model.updateProxyRules(id, prsi);
+            return toDTO(updated);
+        }, ProxyRulesDTO);
+    }
+
+    @safe override ProxyRulesDTO getById(in long id)
+    {
+        return remapExceptions!(delegate() 
+        { 
+            const ProxyRules got = m_model.proxyRulesById(id);
+            return toDTO(got);
+        }, ProxyRulesDTO);        
+    }
+
+    @safe override ProxyRulesDTO remove(in long id)
+    {
+        return remapExceptions!(delegate() 
+        { 
+            const ProxyRules removed = m_model.deleteProxyRules(id);
+            return toDTO(removed);
+        }, ProxyRulesDTO);
+    }
+
+    @safe override HostRuleList getHostRules(in long id)
+    {
+        return remapExceptions!(delegate() 
+        { 
+            HostRuleList response = { array(m_model.proxyRulesById(id).hostRules().map!(c => toDTO(c))) };
+            return response;
+        }, HostRuleList);        
+    }
+
+    @safe override HostRuleList addHostRule(in long id, in long hrid)
+    {
+        return remapExceptions!(delegate() 
+        { 
+            const auto updated = m_model.proxyRulesAddHostRule(id, hrid);
+            HostRuleList response = { array(updated.map!(c => toDTO(c))) };
+            return response;
+        }, HostRuleList);
+    }
+
+    @safe override HostRuleList removeHostRule(in long id, in long hrid)
+    {
+        return remapExceptions!(delegate() 
+        { 
+            const auto updated = m_model.proxyRulesRemoveHostRule(id, hrid);
+            HostRuleList response = { array(updated.map!(c => toDTO(c))) };
+            return response;
+        }, HostRuleList);
+    }
+
+private:    
+    Model m_model;
+}
+
+
+T remapExceptions(alias fun, T)() @trusted {
     try
     {
         return fun();
@@ -227,6 +319,14 @@ T remapExceptions(alias fun, T)() @safe {
     {
         throw new HTTPStatusException(404, e.getEntityType() ~ " id=" ~ to!string(e.getEntityId()) ~ " not found");
     }
+    catch (ProxyRulesNotFound e)
+    {
+        throw new HTTPStatusException(404, e.getEntityType() ~ " id=" ~ to!string(e.getEntityId()) ~ " not found");
+    }
+    catch (ConstraintError e)
+    {
+        throw new HTTPStatusException(400, e.toString());
+    }
 }
 
 
@@ -240,6 +340,11 @@ T remapExceptions(alias fun, T)() @safe {
 
 @safe HostRuleDTO toDTO(in HostRule hr) {
     return HostRuleDTO(hr.id(), hr.hostTemplate, hr.strict, toDTO(hr.category()));
+}
+
+@safe ProxyRulesDTO toDTO(in ProxyRules prs) {
+    auto hostRules = array(prs.hostRules().map!( hr => toDTO(hr) ));
+    return ProxyRulesDTO(prs.id(), toDTO(prs.proxy()), prs.enabled(), hostRules);
 }
 
 // class WebService {

@@ -54,6 +54,7 @@ struct HostRuleInput
     long categoryId;
 }
 
+
 class HostRuleNotFound : NotFoundBase!(HostRule)
 {
     mixin finalEntityErrorCtors!("not found");

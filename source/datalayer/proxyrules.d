@@ -84,9 +84,9 @@ class ProxyRulesValue : ISerializable
     }
 
 protected:
-   long m_proxyId;
-   bool m_enabled;
-   long[] m_hostRuleIds;
+    long m_proxyId;
+    bool m_enabled;
+    long[] m_hostRuleIds;
 }
 
 class ProxyRulesRepository : RepositoryBase!(Key, ProxyRulesValue)

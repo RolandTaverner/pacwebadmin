@@ -5,11 +5,11 @@ import vibe.http.server;
 
 import web.api.category;
 
-interface HostRulesAPI
+interface HostRuleAPI
 {
 @safe:
     @method(HTTPMethod.GET) @path("/all")
-    HostRules getAll();
+    HostRuleList getAll();
 
     @method(HTTPMethod.GET) @path(":id")
     HostRuleDTO getById(in long _id);
@@ -24,7 +24,7 @@ interface HostRulesAPI
     HostRuleDTO remove(in long _id);
 }
 
-struct HostRules
+struct HostRuleList
 {
     HostRuleDTO[] hostRules;
 }

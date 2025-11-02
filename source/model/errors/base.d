@@ -10,6 +10,12 @@ abstract class ModelError : Exception
     mixin basicExceptionCtors;
 }
 
+
+class ConstraintError : ModelError {
+    mixin basicExceptionCtors;
+}
+
+
 abstract class EntityErrorBase(T) : ModelError 
 {
     this(long id, string msg, string file = __FILE__, size_t line = __LINE__, Throwable next = null) @nogc @safe pure nothrow
@@ -39,15 +45,18 @@ protected:
     string m_entityType;    
 }
 
+
 abstract class NotFoundBase(T) : EntityErrorBase!(T) 
 {
     mixin entityErrorCtors;
 }
 
+
 abstract class AlreadyExistsBase(T) : EntityErrorBase!(T) 
 {
     mixin entityErrorCtors;
 }
+
 
 private mixin template entityErrorCtors()
 {
@@ -61,6 +70,7 @@ private mixin template entityErrorCtors()
         super(id, msg, file, line, next);
     }
 }
+
 
 mixin template finalEntityErrorCtors(string msg)
 {
