@@ -1,5 +1,6 @@
-module model.category;
+module model.entities.category;
 
+import model.entities.common;
 import model.errors.base;
 
 
@@ -17,19 +18,21 @@ class Category
         m_name = other.m_name.dup;
     }
 
-    @safe long id() const pure
-    {
-        return m_id;
-    }
-
     @safe const(string) name() const pure
     {
         return m_name;
     }
 
+    mixin entityId!();
+
 private:
-    long m_id;
     string m_name;
+}
+
+
+struct CategoryInput
+{
+    string name;
 }
 
 

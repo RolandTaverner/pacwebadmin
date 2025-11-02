@@ -12,9 +12,9 @@ import dlpac = datalayer.pac;
 import dlproxy = datalayer.proxy;
 import dlproxyrules = datalayer.proxyrules;
 
-import model.category;
-import model.hostrule;
-import model.proxy;
+import model.entities.category;
+import model.entities.hostrule;
+import model.entities.proxy;
 
 
 class Model {
@@ -40,25 +40,26 @@ class Model {
         }
     }
 
-    @trusted const(Category) createCategory(in Category category) {
-        const auto created = categories.create(new dlcategory.CategoryValue(category.name()));
+    @trusted const(Category) createCategory(in CategoryInput ci) {
+        // TODO: check name uniqueness
+        const auto created = categories.create(new dlcategory.CategoryValue(ci.name));
         return makeCategory(created);
     }
 
-    @trusted const(Category) updateCategory(Category category) {
+    @trusted const(Category) updateCategory(in long id, in CategoryInput ci) {
         try
         {
             // TODO: check name uniqueness
-            const auto updated = categories.update(category.id(), new dlcategory.CategoryValue(category.name()));
+            const auto updated = categories.update(id, new dlcategory.CategoryValue(ci.name));
             return makeCategory(updated);
         } 
         catch (re.NotFoundError e) 
         {
-            throw new CategoryNotFound(category.id());
+            throw new CategoryNotFound(id);
         }
     }
 
-    @trusted const(Category) deleteCategory(long id) {
+    @trusted const(Category) deleteCategory(in long id) {
         try
         {
             // TODO: update hosts
@@ -88,21 +89,22 @@ class Model {
         }
     }
 
-    @trusted const(Proxy) createProxy(in Proxy proxy) {
-        const auto created = proxies.create(new dlproxy.ProxyValue(proxy.hostAddress(), proxy.description(), proxy.builtIn()));
+    @trusted const(Proxy) createProxy(in ProxyInput pi) {
+        // TODO: check hostAddress uniqueness
+        const auto created = proxies.create(new dlproxy.ProxyValue(pi.hostAddress, pi.description, pi.builtIn));
         return makeProxy(created);
     }
 
-    @trusted const(Proxy) updateProxy(Proxy proxy) {
+    @trusted const(Proxy) updateProxy(in long id, in ProxyInput pi) {
         try
         {
-            // TODO: check name uniqueness
-            const auto updated = proxies.update(proxy.id(), new dlproxy.ProxyValue(proxy.hostAddress(), proxy.description(), proxy.builtIn()));
+            // TODO: check hostAddress uniqueness
+            const auto updated = proxies.update(id, new dlproxy.ProxyValue(pi.hostAddress, pi.description, pi.builtIn));
             return makeProxy(updated);
         } 
         catch (re.NotFoundError e) 
         {
-            throw new ProxyNotFound(proxy.id());
+            throw new ProxyNotFound(id);
         }
     }
 
@@ -119,15 +121,58 @@ class Model {
         }
     }
 
-    // =====
+    // HostRules ======================
 
-    const(HostRule[]) getHostRules() const {
-        return array(m_storage.hostRules().getAll().map!(c => makeHostRule(c)));
+    @trusted const(HostRule[]) getHostRules() const {
+        return array(hostRules.getAll().map!(c => makeHostRule(c)));
     }
 
-    const(HostRule) hostRuleById(in long id) const {
-        return makeHostRule(m_storage.hostRules().getByKey(id));
+    @trusted const(HostRule) hostRuleById(in long id) const {
+        try
+        {
+            return makeHostRule(hostRules.getByKey(id));
+        } 
+        catch (re.NotFoundError e) 
+        {
+            throw new HostRuleNotFound(id);
+        }
     }
+
+    @trusted const(HostRule) createHostRule(in HostRuleInput hri) {
+        // TODO: check hostTemplate uniqueness
+        const auto created = hostRules.create(new dlhostrule.HostRuleValue(hri.hostTemplate, hri.strict, hri.categoryId));
+        return makeHostRule(created);
+    }
+
+    @trusted const(HostRule) updateHostRule(in long id, in HostRuleInput hri) {
+        try
+        {
+            // TODO: check hostTemplate uniqueness
+            const auto updated = hostRules.update(id, new dlhostrule.HostRuleValue(hri.hostTemplate, hri.strict, hri.categoryId));
+            return makeHostRule(updated);
+        } 
+        catch (re.NotFoundError e) 
+        {
+            throw new HostRuleNotFound(id);
+        }
+    }
+
+    @trusted const(HostRule) deleteHostRule(long id) {
+        try
+        {
+            // TODO: update proxy rules
+            const auto deleted = hostRules.remove(id);
+            return makeHostRule(deleted);
+        } 
+        catch (re.NotFoundError e) 
+        {
+            throw new HostRuleNotFound(id);
+        }
+    }
+
+
+// ===========
+
 
 protected:
     @safe Category makeCategory(in dlcategory.CategoryRepository.DataObjectType dto) const pure
@@ -135,18 +180,21 @@ protected:
         return new Category(dto.key(), dto.value().name());
     }
 
-    HostRule makeHostRule(in dlhostrule.HostRuleRepository.DataObjectType dto) const {
-        auto id = dto.key();
-        auto hostTemplate = dto.value().hostTemplate();
-        auto strict = dto.value().strict();
-        auto category = makeCategory(m_storage.categories.getByKey(dto.value().categoryId()));
-
-        return new HostRule(id, hostTemplate, strict, category);
-    }
-
     @safe Proxy makeProxy(in dlproxy.ProxyRepository.DataObjectType dto) const pure
     {
         return new Proxy(dto.key(), dto.value().hostAddress(), dto.value().description(), dto.value().builtIn());
+    }
+
+    @safe HostRule makeHostRule(in dlhostrule.HostRuleRepository.DataObjectType dto) const pure
+    {
+        auto id = dto.key();
+        auto hostTemplate = dto.value().hostTemplate();
+        auto strict = dto.value().strict();
+        
+        auto c = categories.getByKey(dto.value().categoryId());
+        auto category = makeCategory(c);
+
+        return new HostRule(id, hostTemplate, strict, category);
     }
 
     @property @safe inout(dlcategory.CategoryRepository) categories() inout pure

@@ -14,10 +14,10 @@ interface CategoriesAPI
     CategoryDTO getById(in long _id);
 
     @method(HTTPMethod.POST) @path("/create") @bodyParam("c") 
-    CategoryDTO create(in NewCategoryDTO c);
+    CategoryDTO create(in CategoryInputDTO c);
 
-    @method(HTTPMethod.PUT) @path("/update") @bodyParam("c")
-    CategoryDTO update(in CategoryDTO c);
+    @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("c")
+    CategoryDTO update(in long _id, in CategoryInputDTO c);
 
     @method(HTTPMethod.DELETE) @path(":id")
     CategoryDTO remove(in long _id);
@@ -28,7 +28,7 @@ struct Categories
     CategoryDTO[] categories;
 }
 
-struct NewCategoryDTO
+struct CategoryInputDTO
 {
     @safe this(in string name) pure {
         this.name = name.dup;

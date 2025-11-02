@@ -96,18 +96,18 @@ class RepositoryBase(K, V) : IRepository!(K, V)
         m_mutex = new ReadWriteMutex();
     }
 
-    const(DataObjectType)[] getAll() const
+    const(DataObjectType)[] getAll() const pure
     {
         return m_entities.values;
     }
 
-    const(DataObjectType) getByKey(in KeyType key) const
+    @safe const(DataObjectType) getByKey(in KeyType key) const pure
     {
         auto entity = enforce!NotFoundError(key in m_entities, "not found");
         return *entity;
     }
 
-    const(DataObjectType) create(in ValueType value)
+    @safe const(DataObjectType) create(in ValueType value)
     {
         immutable KeyType key = getNewKey();
         DataObjectType newDataObject = new DataObject!(K, V)(key, value);
@@ -115,7 +115,7 @@ class RepositoryBase(K, V) : IRepository!(K, V)
         return newDataObject;
     }
 
-    const(DataObjectType) update(in KeyType key, in ValueType value)
+    @safe const(DataObjectType) update(in KeyType key, in ValueType value)
     {
         enforce!NotFoundError(key in m_entities, "not found");
 
@@ -124,7 +124,7 @@ class RepositoryBase(K, V) : IRepository!(K, V)
         return newDataObject;
     }
 
-    DataObjectType remove(in KeyType key)
+    @safe DataObjectType remove(in KeyType key)
     {
         auto entity = enforce!NotFoundError(key in m_entities, "not found");
         m_entities.remove(key);
@@ -151,10 +151,10 @@ class RepositoryBase(K, V) : IRepository!(K, V)
     }
 
 protected:
-    KeyType getNewKey() const
+    @safe KeyType getNewKey() const pure
     {
         if (!m_entities.length) {
-            return 0;
+            return 1;
         }
 
         return m_entities.keys.maxElement + 1;
@@ -166,34 +166,41 @@ private:
 }
 
 
-private class TestValue : ISerializable {
-    public:
-        this() {
-        }
-
-        this(in TestValue v) {
-            m_data = v.m_data.dup;
-        }
-
-        this(in string data) {
-            m_data = data;
-        }
-
-        const(string) data() const {
-            return m_data;
-        }
-
-        JSONValue toJSON() const {
-            return JSONValue(["data": JSONValue(data())]);
-        }
-
-        void fromJSON(in JSONValue v) {
-            m_data = v.object["data"].str;
-        }
-
-    protected:
-        string m_data;
+private class TestValue : ISerializable
+{
+    @safe this() pure
+    {
     }
+
+    @safe this(in TestValue v) pure
+    {
+        m_data = v.m_data.dup;
+    }
+
+    @safe this(in string data) pure
+    {
+        m_data = data;
+    }
+
+    @safe const(string) data() const pure
+    {
+        return m_data;
+    }
+
+    JSONValue toJSON() const
+    {
+        return JSONValue(["data": JSONValue(data())]);
+    }
+
+    void fromJSON(in JSONValue v)
+    {
+        m_data = v.object["data"].str;
+    }
+
+protected:
+    string m_data;
+}
+
 
 unittest
 {

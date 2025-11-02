@@ -8,12 +8,14 @@ import vibe.vibe;
 import vibe.http.common;
 
 import model.model;
-import model.category;
-import model.proxy;
+import model.entities.category;
+import model.entities.proxy;
+import model.entities.hostrule;
 
 import web.api.root;
 import web.api.category;
 import web.api.proxy;
+import web.api.hostrule;
 
 
 class Service : APIRoot 
@@ -24,6 +26,7 @@ class Service : APIRoot
 
         m_categoriesSvc = new CategoriesService(m_model);
         m_proxiesSvc = new ProxiesService(m_model);
+        m_hostRulesSvc = new HostRulesService(m_model);
     }
 
     override @property CategoriesAPI categories()
@@ -36,11 +39,18 @@ class Service : APIRoot
         return m_proxiesSvc;
     }
 
+    override @property HostRulesAPI hostRules()
+    {
+        return m_hostRulesSvc;
+    }
+
 private:    
     Model m_model;
     CategoriesService m_categoriesSvc;
     ProxiesService m_proxiesSvc;
+    HostRulesService m_hostRulesSvc;
 }
+
 
 class CategoriesService : CategoriesAPI
 {
@@ -55,17 +65,19 @@ class CategoriesService : CategoriesAPI
         return response;
     }
 
-    @safe override CategoryDTO create(in NewCategoryDTO c)
+    @safe override CategoryDTO create(in CategoryInputDTO c)
     {
-        const Category created = m_model.createCategory(new Category(0, c.name));
+        const CategoryInput ci = { name: c.name };
+        const Category created = m_model.createCategory(ci);
         return toDTO(created);
     }
 
-    @safe override CategoryDTO update(in CategoryDTO c)
+    @safe override CategoryDTO update(in long id, in CategoryInputDTO c)
     {
         return remapExceptions!(delegate() 
-        { 
-            const Category updated = m_model.updateCategory(new Category(c.id, c.name));
+        {
+            const CategoryInput ci = { name: c.name };
+            const Category updated = m_model.updateCategory(id, ci);
             return toDTO(updated);
         }, CategoryDTO);
     }
@@ -106,17 +118,19 @@ class ProxiesService : ProxiesAPI
         return response;
     }
 
-    @safe override ProxyDTO create(in NewProxyDTO p)
+    @safe override ProxyDTO create(in ProxyInputDTO p)
     {
-        const Proxy created = m_model.createProxy(new Proxy(0, p.hostAddress, p.description, p.builtIn));
+        const ProxyInput pi = { hostAddress: p.hostAddress, description: p.description, builtIn: p.builtIn };
+        const Proxy created = m_model.createProxy(pi);
         return toDTO(created);
     }
 
-    @safe override ProxyDTO update(in ProxyDTO p)
+    @safe override ProxyDTO update(in long id, in ProxyInputDTO p)
     {
         return remapExceptions!(delegate() 
         { 
-            const Proxy updated = m_model.updateProxy(new Proxy(p.id, p.hostAddress, p.description, p.builtIn));
+            const ProxyInput pi = { hostAddress: p.hostAddress, description: p.description, builtIn: p.builtIn };
+            const Proxy updated = m_model.updateProxy(id, pi);
             return toDTO(updated);
         }, ProxyDTO);
     }
@@ -144,6 +158,58 @@ private:
 }
 
 
+class HostRulesService : HostRulesAPI
+{
+    this(Model model)
+    {
+        m_model = model;
+    }
+
+    @safe override HostRules getAll()
+    {
+        HostRules response = { array(m_model.getHostRules().map!(c => toDTO(c))) };
+        return response;
+    }
+
+    @safe override HostRuleDTO create(in HostRuleInputDTO p)
+    {
+        const HostRuleInput hri = { hostTemplate: p.hostTemplate, strict: p.strict, categoryId: p.categoryId };
+        const HostRule created = m_model.createHostRule(hri);
+        return toDTO(created);
+    }
+
+    @safe override HostRuleDTO update(in long id, in HostRuleInputDTO p)
+    {
+        return remapExceptions!(delegate() 
+        { 
+            const HostRuleInput hri = { hostTemplate: p.hostTemplate, strict: p.strict, categoryId: p.categoryId };
+            const HostRule updated = m_model.updateHostRule(id, hri);
+            return toDTO(updated);
+        }, HostRuleDTO);
+    }
+
+    @safe override HostRuleDTO getById(in long id)
+    {
+        return remapExceptions!(delegate() 
+        { 
+            const HostRule got = m_model.hostRuleById(id);
+            return toDTO(got);
+        }, HostRuleDTO);        
+    }
+
+    @safe override HostRuleDTO remove(in long id)
+    {
+        return remapExceptions!(delegate() 
+        { 
+            const HostRule removed = m_model.deleteHostRule(id);
+            return toDTO(removed);
+        }, HostRuleDTO);
+    }
+
+private:    
+    Model m_model;
+}
+
 T remapExceptions(alias fun, T)() @safe {
     try
     {
@@ -157,7 +223,12 @@ T remapExceptions(alias fun, T)() @safe {
     {
         throw new HTTPStatusException(404, e.getEntityType() ~ " id=" ~ to!string(e.getEntityId()) ~ " not found");
     }
+    catch (HostRuleNotFound e)
+    {
+        throw new HTTPStatusException(404, e.getEntityType() ~ " id=" ~ to!string(e.getEntityId()) ~ " not found");
+    }
 }
+
 
 @safe CategoryDTO toDTO(in Category c) {
     return CategoryDTO(c.id(), c.name());
@@ -165,6 +236,10 @@ T remapExceptions(alias fun, T)() @safe {
 
 @safe ProxyDTO toDTO(in Proxy p) {
     return ProxyDTO(p.id(), p.hostAddress(), p.description(), p.builtIn());
+}
+
+@safe HostRuleDTO toDTO(in HostRule hr) {
+    return HostRuleDTO(hr.id(), hr.hostTemplate, hr.strict, toDTO(hr.category()));
 }
 
 // class WebService {

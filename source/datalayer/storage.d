@@ -11,7 +11,8 @@ import datalayer.proxyrules;
 import datalayer.repository.repository : ISerializable;
 
 
-class Storage : ISerializable {
+class Storage : ISerializable
+{
     this()
     {
         m_categories = new CategoryRepository();
