@@ -17,22 +17,22 @@ class Proxy
     @safe this(in long id, in string hostAddress, in string description, in bool builtIn) pure
     {
         m_id = id;
-        m_hostAddress = hostAddress;
-        m_description = description;
+        m_hostAddress = hostAddress.dup;
+        m_description = description.dup;
         m_builtIn = builtIn;
     }
 
-    @safe const(string) hostAddress() const 
+    @safe const(string) hostAddress() const pure
     {
         return m_hostAddress;
     }
 
-    @safe const(string) description() const 
+    @safe const(string) description() const pure
     {
         return m_description;
     }
 
-    @safe bool builtIn() const 
+    @safe bool builtIn() const pure
     {
         return m_builtIn;
     }

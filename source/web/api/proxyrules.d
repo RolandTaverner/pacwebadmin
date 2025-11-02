@@ -34,10 +34,12 @@ interface ProxyRulesAPI
     HostRuleList removeHostRule(in long _id, in long _hrid);
 }
 
+
 struct ProxyRulesList
 {
     ProxyRulesDTO[] hostRules;
 }
+
 
 struct ProxyRulesInputDTO
 {
@@ -55,9 +57,11 @@ struct ProxyRulesInputDTO
     long[] hostRuleIds;
 }
 
+
 struct ProxyRulesDTO
 {
-    @safe this(in long id, in ProxyDTO proxy, in bool enabled, in string name, in HostRuleDTO[] hostRules) pure {
+    @safe this(in long id, in ProxyDTO proxy, in bool enabled, in string name, in HostRuleDTO[] hostRules) pure
+    {
         this.id = id;
         this.proxy = proxy;
         this.enabled = enabled;
@@ -65,9 +69,25 @@ struct ProxyRulesDTO
         this.hostRules = hostRules.dup;
     }
 
+    @safe this(in ProxyRulesDTO other) pure
+    {
+        this.id = other.id;
+        this.proxy = other.proxy;
+        this.enabled = other.enabled;
+        this.name = other.name.dup;
+        this.hostRules = other.hostRules.dup;
+    }
+
     long id;
     ProxyDTO proxy;
     bool enabled;
     string name;
     HostRuleDTO[] hostRules;
+}
+
+unittest
+{
+    const HostRuleDTO[] hostRules = [];
+    auto p = ProxyRulesDTO(1, ProxyDTO(), true, "name", hostRules);
+    assert( p.id == 1 );
 }

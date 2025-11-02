@@ -28,6 +28,7 @@ struct ProxyList
     ProxyDTO[] proxies;
 }
 
+
 struct ProxyInputDTO
 {
     @safe this(in string hostAddress, in string description, in bool builtIn) pure
@@ -41,6 +42,7 @@ struct ProxyInputDTO
     string description;
     bool builtIn;
 }
+
 
 struct ProxyDTO
 {

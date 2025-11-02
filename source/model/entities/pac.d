@@ -28,8 +28,8 @@ class PAC
         bool serve, string servePath, bool saveToFS, string saveToFSPath) pure
     {
         m_id = id;
-        m_name = name;
-        m_description = description;
+        m_name = name.dup;
+        m_description = description.dup;
         
         foreach (pr; proxyRules)
         {
@@ -42,25 +42,41 @@ class PAC
         m_saveToFSPath = saveToFSPath.dup;
     }
 
-    // @safe const(Proxy) proxy() const pure
-    // {
-    //     return m_proxy;
-    // }
 
-    // @safe bool enabled() const pure
-    // {
-    //     return m_enabled;
-    // }
+    @safe const(string) name() const pure
+    {
+        return m_name;
+    }
 
-    // @safe const(string) name() const pure
-    // {
-    //     return m_name;
-    // }
+    @safe const(string) description() const pure
+    {
+        return m_description;
+    }
 
-    // @safe const(HostRule[]) hostRules() const pure
-    // {
-    //     return m_hostRules;
-    // }
+    @safe const(ProxyRules[]) proxyRules() const pure
+    {
+        return m_proxyRules;
+    }
+
+    @safe bool serve() const pure
+    {
+        return m_serve;
+    }
+
+    @safe const(string) servePath() const pure
+    {
+        return m_servePath;
+    }
+
+    @safe bool saveToFS() const pure
+    {
+        return m_saveToFS;
+    }
+
+    @safe const(string) saveToFSPath() const pure
+    {
+        return m_saveToFSPath;
+    }
 
     mixin entityId!();
 
@@ -77,13 +93,13 @@ private:
 
 struct PACInput
 {
-    string m_name;
-    string m_description;
-    long[] m_proxyRulesIds;
-    bool m_serve;
-    string m_servePath;
-    bool m_saveToFS;
-    string m_saveToFSPath;
+    string name;
+    string description;
+    long[] proxyRulesIds;
+    bool serve;
+    string servePath;
+    bool saveToFS;
+    string saveToFSPath;
 }
 
 

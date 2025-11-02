@@ -9,7 +9,7 @@ class Category
     @safe this(in long id, in string name) pure
     {
         m_id = id;
-        m_name = name;
+        m_name = name.dup;
     }
 
     @safe this(in Category other) pure

@@ -111,3 +111,11 @@ unittest
     ProxyRulesRepository r = new ProxyRulesRepository();
     r.create(new ProxyRulesValue());
 }
+
+unittest
+{
+    const ProxyRulesValue v1 = new ProxyRulesValue();
+    ProxyRulesValue v2 = new ProxyRulesValue(v1);
+
+    assert( v1.proxyId() == v2.proxyId() );
+}

@@ -23,25 +23,36 @@ interface CategoryAPI
     CategoryDTO remove(in long _id);
 }
 
+
 struct CategoryList
 {
     CategoryDTO[] categories;
 }
 
+
 struct CategoryInputDTO
 {
-    @safe this(in string name) pure {
+    @safe this(in string name) pure
+    {
         this.name = name.dup;
     }
 
     string name;
 }
 
+
 struct CategoryDTO
 {
-    @safe this(in long id, in string name) pure {
+    @safe this(in long id, in string name) pure
+    {
         this.id = id;
         this.name = name.dup;
+    }
+
+    @safe this(in CategoryDTO other) pure
+    {
+        this.id = other.id;
+        this.name = other.name.dup;
     }
 
     long id;

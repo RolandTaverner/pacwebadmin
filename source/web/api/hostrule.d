@@ -5,6 +5,7 @@ import vibe.http.server;
 
 import web.api.category;
 
+
 interface HostRuleAPI
 {
 @safe:
@@ -24,10 +25,12 @@ interface HostRuleAPI
     HostRuleDTO remove(in long _id);
 }
 
+
 struct HostRuleList
 {
     HostRuleDTO[] hostRules;
 }
+
 
 struct HostRuleInputDTO
 {
@@ -43,13 +46,23 @@ struct HostRuleInputDTO
     long categoryId;
 }
 
+
 struct HostRuleDTO
 {
-    @safe this(in long id, in string hostTemplate, in bool strict, in CategoryDTO category) pure {
+    @safe this(in long id, in string hostTemplate, in bool strict, in CategoryDTO category) pure
+    {
         this.id = id;
         this.hostTemplate = hostTemplate.dup;
         this.strict = strict;
         this.category = category;
+    }
+
+    @safe this(in HostRuleDTO other) pure
+    {
+        this.id = other.id;
+        this.hostTemplate = other.hostTemplate.dup;
+        this.strict = other.strict;
+        this.category = other.category;
     }
 
     long id;

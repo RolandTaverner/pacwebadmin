@@ -10,7 +10,7 @@ class HostRule
     @safe this(in long id, in string hostTemplate, in bool strict, in Category category) pure
     {
         m_id = id;
-        m_hostTemplate = hostTemplate;
+        m_hostTemplate = hostTemplate.dup;
         m_strict = strict;
         m_category = new Category(category);
     }
@@ -18,7 +18,7 @@ class HostRule
     @safe this(in HostRule other) pure
     {
         m_id = other.m_id;
-        m_hostTemplate = other.m_hostTemplate;
+        m_hostTemplate = other.m_hostTemplate.dup;
         m_strict = other.m_strict;
         m_category = new Category(other.m_category);
     }

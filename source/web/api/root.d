@@ -3,10 +3,12 @@ module web.api.root;
 import vibe.web.rest;
 import vibe.http.server;
 
-import  web.api.category : CategoryAPI;
-import  web.api.proxy : ProxyAPI;
-import  web.api.hostrule : HostRuleAPI;
-import  web.api.proxyrules : ProxyRulesAPI;
+import web.api.category : CategoryAPI;
+import web.api.proxy : ProxyAPI;
+import web.api.hostrule : HostRuleAPI;
+import web.api.proxyrules : ProxyRulesAPI;
+import web.api.pac : PACAPI;
+
 
 @path("/api/")
 interface APIRoot
@@ -22,4 +24,8 @@ interface APIRoot
 
     @path("proxyrules/") 
     @property ProxyRulesAPI proxyRules();
+
+    @path("pac/") 
+    @property PACAPI pacs();
 }
+
