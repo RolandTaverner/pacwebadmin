@@ -14,10 +14,10 @@ interface ProxiesAPI
     ProxyDTO getById(in long _id);
 
     @method(HTTPMethod.POST) @path("/create") @bodyParam("c") 
-    ProxyDTO create(in NewProxyDTO c);
+    ProxyDTO create(in ProxyInputDTO c);
 
-    @method(HTTPMethod.PUT) @path("/update") @bodyParam("c")
-    ProxyDTO update(in ProxyDTO c);
+    @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("p")
+    ProxyDTO update(in long _id, in ProxyInputDTO p);
 
     @method(HTTPMethod.DELETE) @path(":id")
     ProxyDTO remove(in long _id);
@@ -28,7 +28,7 @@ struct Proxies
     ProxyDTO[] proxies;
 }
 
-struct NewProxyDTO
+struct ProxyInputDTO
 {
     @safe this(in string hostAddress, in string description, in bool builtIn) pure
     {

@@ -1,6 +1,8 @@
-module model.hostrule;
+module model.entities.hostrule;
 
-public import model.category;
+import model.entities.category;
+import model.entities.common;
+import model.errors.base;
 
 
 class HostRule
@@ -21,11 +23,6 @@ class HostRule
         m_category = new Category(other.m_category);
     }
 
-    @safe long id() const pure
-    {
-        return m_id;
-    }
-
     @safe const(string) hostTemplate() const pure
     {
         return m_hostTemplate;
@@ -41,9 +38,23 @@ class HostRule
         return m_category;
     }
 
+    mixin entityId!();
+
 private:
-    long m_id;
     string m_hostTemplate;
     bool m_strict;
     Category m_category;
+}
+
+
+struct HostRuleInput
+{
+    string hostTemplate;
+    bool strict;
+    long categoryId;
+}
+
+class HostRuleNotFound : NotFoundBase!(HostRule)
+{
+    mixin finalEntityErrorCtors!("not found");
 }

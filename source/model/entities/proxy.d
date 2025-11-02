@@ -1,9 +1,11 @@
-module model.proxy;
+module model.entities.proxy;
 
+import model.entities.common;
 import model.errors.base;
 
 
-class Proxy {
+class Proxy 
+{
     @safe this(in Proxy other) pure
     {
         m_id = other.m_id;
@@ -18,11 +20,6 @@ class Proxy {
         m_hostAddress = hostAddress;
         m_description = description;
         m_builtIn = builtIn;
-    }
-
-    @safe long id() const pure
-    {
-        return m_id;
     }
 
     @safe const(string) hostAddress() const 
@@ -40,11 +37,20 @@ class Proxy {
         return m_builtIn;
     }
 
+    mixin entityId!();
+
 private:
-   long m_id;
-   string m_hostAddress;
-   string m_description;
-   bool m_builtIn;
+    string m_hostAddress;
+    string m_description;
+    bool m_builtIn;
+}
+
+
+struct ProxyInput
+{
+    string hostAddress;
+    string description;
+    bool builtIn;
 }
 
 
