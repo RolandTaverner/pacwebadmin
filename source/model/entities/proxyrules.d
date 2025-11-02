@@ -8,11 +8,12 @@ import model.errors.base;
 
 class ProxyRules
 {
-    @safe this(in long id, in Proxy proxy, in bool enabled, in HostRule[] hostRules) pure
+    @safe this(in long id, in Proxy proxy, in bool enabled, in string name, in HostRule[] hostRules) pure
     {
         m_id = id;
         m_proxy = new Proxy(proxy);
         m_enabled = enabled;
+        m_name = name.dup;
 
         foreach (hr; hostRules)
         {
@@ -25,6 +26,7 @@ class ProxyRules
         m_id = other.m_id;
         m_proxy = new Proxy(other.m_proxy);
         m_enabled = other.m_enabled;
+        m_name = other.m_name.dup;
 
         foreach (hr; other.m_hostRules)
         {
@@ -42,6 +44,11 @@ class ProxyRules
         return m_enabled;
     }
 
+    @safe const(string) name() const pure
+    {
+        return m_name;
+    }
+
     @safe const(HostRule[]) hostRules() const pure
     {
         return m_hostRules;
@@ -52,6 +59,7 @@ class ProxyRules
 private:
     Proxy m_proxy;
     bool m_enabled;
+    string m_name;
     HostRule[] m_hostRules;
 }
 
@@ -60,6 +68,7 @@ struct ProxyRulesInput
 {
     long proxyId;
     bool enabled;
+    string name;
     long[] hostRuleIds;
 }
 

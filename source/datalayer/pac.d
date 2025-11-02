@@ -17,6 +17,7 @@ class PACValue : ISerializable
     {
         m_name = v.m_name.dup;
         m_description = v.m_description.dup;
+        m_proxyRuleIds = v.m_proxyRuleIds.dup;
     }
 
     @safe this(in string name, in string description, in long[] proxyRuleIds) pure

@@ -4,6 +4,7 @@ import std.algorithm.iteration : filter;
 import std.algorithm.iteration : map;
 import std.algorithm : canFind;
 import std.array;
+import std.exception : enforce;
 
 import datalayer.storage;
 import re = datalayer.repository.errors;
@@ -143,12 +144,16 @@ class Model {
     }
 
     @trusted const(HostRule) createHostRule(in HostRuleInput hri) {
+        enforce!bool(categories.exists(hri.categoryId), new CategoryNotFound(hri.categoryId));
+
         // TODO: check hostTemplate uniqueness
         const auto created = hostRules.create(new dlhostrule.HostRuleValue(hri.hostTemplate, hri.strict, hri.categoryId));
         return makeHostRule(created);
     }
 
     @trusted const(HostRule) updateHostRule(in long id, in HostRuleInput hri) {
+        enforce!bool(categories.exists(hri.categoryId), new CategoryNotFound(hri.categoryId));
+
         try
         {
             // TODO: check hostTemplate uniqueness
@@ -193,16 +198,27 @@ class Model {
     }
 
     @trusted const(ProxyRules) createProxyRules(in ProxyRulesInput pri) {
-        // TODO: check hostRuleIds uniqueness and existance
-        const auto created = proxyRules.create(new dlproxyrules.ProxyRulesValue(pri.proxyId, pri.enabled, pri.hostRuleIds));
+        enforce!bool(proxies.exists(pri.proxyId), new ProxyNotFound(pri.proxyId));
+        foreach (hrId; pri.hostRuleIds)
+        {
+            enforce!bool(hostRules.exists(hrId), new HostRuleNotFound(hrId));
+        }
+
+        const auto created = proxyRules.create(new dlproxyrules.ProxyRulesValue(pri.proxyId, pri.enabled, pri.name, pri.hostRuleIds));
         return makeProxyRules(created);
     }
 
     @trusted const(ProxyRules) updateProxyRules(in long id, in ProxyRulesInput pri) {
+        enforce!bool(proxies.exists(pri.proxyId), new ProxyNotFound(pri.proxyId));
+        foreach (hrId; pri.hostRuleIds)
+        {
+            enforce!bool(hostRules.exists(hrId), new HostRuleNotFound(hrId));
+        }
+
         try
         {
             // TODO: check hostRuleIds uniqueness and existance
-            const auto updated = proxyRules.update(id, new dlproxyrules.ProxyRulesValue(pri.proxyId, pri.enabled, pri.hostRuleIds));
+            const auto updated = proxyRules.update(id, new dlproxyrules.ProxyRulesValue(pri.proxyId, pri.enabled, pri.name, pri.hostRuleIds));
             return makeProxyRules(updated);
         } 
         catch (re.NotFoundError e) 
@@ -212,6 +228,8 @@ class Model {
     }
 
     @trusted const(HostRule[]) proxyRulesAddHostRule(in long id, in long hostRuleId) {
+        enforce!bool(hostRules.exists(hostRuleId), new HostRuleNotFound(hostRuleId));
+
         try
         {
             // TODO: check hostRuleIds uniqueness and existance
@@ -221,7 +239,7 @@ class Model {
                 throw new ConstraintError("already exists"); // TODO: add info
             }
             const auto newHrIds = hrIds ~ hostRuleId;
-            const auto updated = proxyRules.update(id, new dlproxyrules.ProxyRulesValue(pr.value().proxyId(), pr.value().enabled(), newHrIds));
+            const auto updated = proxyRules.update(id, new dlproxyrules.ProxyRulesValue(pr.value().proxyId(), pr.value().enabled(), pr.value().name(), newHrIds));
 
             return makeProxyRules(updated).hostRules();
         } 
@@ -241,7 +259,7 @@ class Model {
                 throw new ConstraintError("not exists"); // TODO: add info
             }
             const auto filteredHrIds = array(hrIds.filter!(i => i != hostRuleId));
-            const auto updated = proxyRules.update(id, new dlproxyrules.ProxyRulesValue(pr.value().proxyId(), pr.value().enabled(), filteredHrIds));
+            const auto updated = proxyRules.update(id, new dlproxyrules.ProxyRulesValue(pr.value().proxyId(), pr.value().enabled(), pr.value().name(), filteredHrIds));
 
             return makeProxyRules(updated).hostRules();
         } 
@@ -254,7 +272,7 @@ class Model {
     @trusted const(ProxyRules) deleteProxyRules(long id) {
         try
         {
-            // TODO: update proxy rules
+            // TODO: update PAC
             const auto deleted = proxyRules.remove(id);
             return makeProxyRules(deleted);
         } 
@@ -298,10 +316,11 @@ protected:
         auto proxy = makeProxy(p);
         
         auto enabled = dto.value().enabled();
+        auto name = dto.value().name();
 
         auto hostRules = array(dto.value().hostRuleIds.map!( id => makeHostRule(hostRules.getByKey(id)) ));
 
-        return new ProxyRules(id, proxy, enabled, hostRules);
+        return new ProxyRules(id, proxy, enabled, name, hostRules);
     }
 
     @property @safe inout(dlcategory.CategoryRepository) categories() inout pure

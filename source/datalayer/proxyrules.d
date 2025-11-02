@@ -17,13 +17,15 @@ class ProxyRulesValue : ISerializable
     {
         m_proxyId = v.m_proxyId;
         m_enabled = v.enabled;
+        m_name = v.m_name.dup;
         m_hostRuleIds = v.m_hostRuleIds.dup;        
     }
 
-    @safe this(in long proxyId, in bool enabled, in long[] hostRuleIds) pure
+    @safe this(in long proxyId, in bool enabled, in string name, in long[] hostRuleIds) pure
     {
         m_proxyId = proxyId;
         m_enabled = enabled;
+        m_name = name.dup;
         m_hostRuleIds = hostRuleIds.dup;
     }
 
@@ -35,6 +37,11 @@ class ProxyRulesValue : ISerializable
     @safe bool enabled() const pure
     {
         return m_enabled;
+    }
+
+    @safe const(string) name() const pure
+    {
+        return m_name;
     }
 
     @safe const(long[]) hostRuleIds() const pure
@@ -86,6 +93,7 @@ class ProxyRulesValue : ISerializable
 protected:
     long m_proxyId;
     bool m_enabled;
+    string m_name;
     long[] m_hostRuleIds;
 }
 

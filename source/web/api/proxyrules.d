@@ -41,29 +41,33 @@ struct ProxyRulesList
 
 struct ProxyRulesInputDTO
 {
-    @safe this(in long proxyId, in bool enabled, in long[] hostRuleIds) pure
+    @safe this(in long proxyId, in bool enabled, in string name, in long[] hostRuleIds) pure
     {
         this.proxyId = proxyId;
         this.enabled = enabled;
+        this.name = name.dup;
         this.hostRuleIds = hostRuleIds.dup;
     }
 
     long proxyId;
     bool enabled;
+    string name;
     long[] hostRuleIds;
 }
 
 struct ProxyRulesDTO
 {
-    @safe this(in long id, in ProxyDTO proxy, in bool enabled, in HostRuleDTO[] hostRules) pure {
+    @safe this(in long id, in ProxyDTO proxy, in bool enabled, in string name, in HostRuleDTO[] hostRules) pure {
         this.id = id;
         this.proxy = proxy;
         this.enabled = enabled;
+        this.name = name.dup;
         this.hostRules = hostRules.dup;
     }
 
     long id;
     ProxyDTO proxy;
     bool enabled;
+    string name;
     HostRuleDTO[] hostRules;
 }

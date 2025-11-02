@@ -262,7 +262,7 @@ class ProxyRulesService : ProxyRulesAPI
 
     @safe override ProxyRulesDTO create(in ProxyRulesInputDTO prs)
     {
-        const ProxyRulesInput prsi = { proxyId: prs.proxyId, enabled: prs.enabled, hostRuleIds: prs.hostRuleIds.dup };
+        const ProxyRulesInput prsi = { proxyId: prs.proxyId, enabled: prs.enabled, name: prs.name.dup, hostRuleIds: prs.hostRuleIds.dup };
         const ProxyRules created = m_model.createProxyRules(prsi);
         return toDTO(created);
     }
@@ -271,7 +271,7 @@ class ProxyRulesService : ProxyRulesAPI
     {
         return remapExceptions!(delegate() 
         { 
-            const ProxyRulesInput prsi = { proxyId: prs.proxyId, enabled: prs.enabled, hostRuleIds: prs.hostRuleIds.dup };
+            const ProxyRulesInput prsi = { proxyId: prs.proxyId, enabled: prs.enabled, name: prs.name.dup, hostRuleIds: prs.hostRuleIds.dup };
             const ProxyRules updated = m_model.updateProxyRules(id, prsi);
             return toDTO(updated);
         }, ProxyRulesDTO);
@@ -374,7 +374,7 @@ T remapExceptions(alias fun, T)() @trusted {
         .map!( hr => toDTO(hr) ).array
         .sort!( (a, b) => a.id < b.id, SwapStrategy.stable ).array;
 
-    return ProxyRulesDTO(prs.id(), toDTO(prs.proxy()), prs.enabled(), hostRules);
+    return ProxyRulesDTO(prs.id(), toDTO(prs.proxy()), prs.enabled(), prs.name(), hostRules);
 }
 
 // class WebService {

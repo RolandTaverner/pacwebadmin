@@ -5,8 +5,10 @@ import std.algorithm.iteration : each;
 import std.algorithm.iteration : map;
 import std.algorithm.searching : maxElement;
 import std.array;
+import std.conv;
 import std.exception : enforce;
 import std.json;
+import std.traits;
 
 import datalayer.repository.errors;
 
@@ -103,8 +105,13 @@ class RepositoryBase(K, V) : IRepository!(K, V)
 
     @safe const(DataObjectType) getByKey(in KeyType key) const pure
     {
-        auto entity = enforce!NotFoundError(key in m_entities, "not found");
+        auto entity = enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(key) ~ " not found");
         return *entity;
+    }
+
+    @safe bool exists(in KeyType key) const pure
+    {
+        return (key in m_entities) != null;
     }
 
     @safe const(DataObjectType) create(in ValueType value)
@@ -117,7 +124,7 @@ class RepositoryBase(K, V) : IRepository!(K, V)
 
     @safe const(DataObjectType) update(in KeyType key, in ValueType value)
     {
-        enforce!NotFoundError(key in m_entities, "not found");
+        enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(key) ~ " not found");
 
         DataObjectType newDataObject = new DataObject!(K, V)(key, value);
         m_entities[key] = newDataObject;
@@ -126,7 +133,7 @@ class RepositoryBase(K, V) : IRepository!(K, V)
 
     @safe DataObjectType remove(in KeyType key)
     {
-        auto entity = enforce!NotFoundError(key in m_entities, "not found");
+        auto entity = enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(key) ~ " not found");
         m_entities.remove(key);
         return *entity;
     }
