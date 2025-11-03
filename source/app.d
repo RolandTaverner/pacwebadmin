@@ -1,4 +1,7 @@
 import std.stdio;
+import std.path;
+import std.file;
+import std.json : parseJSON, JSONValue;
 
 import vibe.core.args : finalizeCommandLineOptions, printCommandLineHelp, readOption;
 import vibe.vibe;
@@ -28,7 +31,13 @@ int main(string[] args)
 	}
 	finalizeCommandLineOptions();
 
+	auto dataFilePath = buildPath(options.dataDir, "data.local");
+	string dataFileContent = readText(dataFilePath);
+	JSONValue jsonData = parseJSON(dataFileContent);
+
 	Storage storage = new Storage();
+	storage.fromJSON(jsonData);
+
 	Model m = new Model(storage);
 	Service svc = new Service(m);
 

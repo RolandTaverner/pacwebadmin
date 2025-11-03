@@ -1,5 +1,8 @@
 module datalayer.storage;
 
+import std.algorithm.iteration : each;
+import std.algorithm.iteration : map;
+import std.array;
 import core.sync.rwmutex;
 import std.exception;
 import std.json;
@@ -26,7 +29,6 @@ class Storage : ICategoryListener, IHostRuleListener, IPACListener, IProxyListen
 
     @safe override JSONValue toJSON() const pure
     {
-        return JSONValue();
         // return JSONValue([
         //     "category": m_categories.toJSON(),
         //     "hostrule": m_hostRules.toJSON(),
@@ -34,15 +36,19 @@ class Storage : ICategoryListener, IHostRuleListener, IPACListener, IProxyListen
         //     "proxy": m_proxies.toJSON(),
         //     "proxyrule": m_proxyRules.toJSON(),
         // ]);
+        return JSONValue();
     }
 
     override void fromJSON(in JSONValue v)
     {
-        // m_categories.fromJSON(v.object["category"]);
-        // m_hostRules.fromJSON(v.object["hostrule"]);
-        // m_pacs.fromJSON(v.object["pac"]);
-        // m_proxies.fromJSON(v.object["proxy"]);
-        // m_proxyRules.fromJSON(v.object["proxyrule"]);
+        synchronized (m_mutex.writer)
+        {
+            loadCollection!(Category)(v, m_categories);
+            loadCollection!(HostRule)(v, m_hostRules);
+            loadCollection!(PAC)(v, m_pacs);
+            loadCollection!(Proxy)(v, m_proxies);
+            loadCollection!(ProxyRules)(v, m_proxyRules);
+        }
     }
 
     @safe inout(CategoryRepository) categories() inout pure
@@ -97,7 +103,8 @@ class Storage : ICategoryListener, IHostRuleListener, IPACListener, IProxyListen
 
 private:
 
-    @safe void updateStorage(T)(in ListenerEvent e, const ref T dataObject) {
+    @safe void updateStorage(T)(in ListenerEvent e, const ref T dataObject)
+    {
         synchronized (m_mutex.writer)
         {
             if (isPutEvent(e))
@@ -125,7 +132,6 @@ private @safe bool isPutEvent(in ListenerEvent e) pure
 {
     return e == ListenerEvent.CREATE || e == ListenerEvent.UPDATE;
 }
-
 
 void collectionKey(T)(void)
 {
@@ -155,4 +161,25 @@ string collectionKey(T : Proxy)()
 string collectionKey(T : ProxyRules)()
 {
     return "proxyRules";
+}
+
+T parseEntity(T)(in JSONValue v)
+{
+    T d = new T();
+    d.fromJSON(v);
+    return d;
+}
+
+T[] parseCollection(T)(in JSONValue v)
+{
+    return v.array.map!(i => parseEntity!(T)(i)).array;
+}
+
+void loadCollection(T)(in JSONValue v, IDataLoader!(T.KeyType, T.ValueType) loader)
+{
+    const string key = collectionKey!(T)();
+    if (auto collectionValue = key in v)
+    {
+        loader.load(parseCollection!(T)(*collectionValue));
+    }
 }

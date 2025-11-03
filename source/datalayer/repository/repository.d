@@ -94,6 +94,11 @@ interface IRepository(K, V)
     DataObjectType remove(in KeyType key);
 }
 
+interface IDataLoader(K, V)
+{
+    @safe void load(in DataObject!(K, V)[] data);
+}
+
 enum ListenerEvent
 {
     CREATE,
@@ -108,7 +113,7 @@ interface IListener(T)
 
 alias Key = long;
 
-class RepositoryBase(K, V) : IRepository!(K, V)
+class RepositoryBase(K, V) : IRepository!(K, V), IDataLoader!(K, V)
 {
     this(IListener!(DataObjectType) listener)
     {
@@ -182,6 +187,17 @@ class RepositoryBase(K, V) : IRepository!(K, V)
         }
         m_listener.onChange(ListenerEvent.UPDATE, removedDataObject);
         return removedDataObject;
+    }
+
+    @safe override void load(in DataObjectType[] data)
+    {
+        synchronized (m_mutex.writer)
+        {
+            foreach(d; data)
+            {
+                m_entities[d.key()] = new DataObjectType(d);
+            }
+        }
     }
 
     // override JSONValue toJSON()
