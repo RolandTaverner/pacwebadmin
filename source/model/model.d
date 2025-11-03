@@ -9,11 +9,11 @@ import std.exception : enforce;
 import datalayer.storage;
 import re = datalayer.repository.errors;
 
-import dlcategory = datalayer.category;
-import dlhostrule = datalayer.hostrule;
-import dlpac = datalayer.pac;
-import dlproxy = datalayer.proxy;
-import dlproxyrules = datalayer.proxyrules;
+import dlcategory = datalayer.entities.category;
+import dlhostrule = datalayer.entities.hostrule;
+import dlpac = datalayer.entities.pac;
+import dlproxy = datalayer.entities.proxy;
+import dlproxyrules = datalayer.entities.proxyrules;
 
 import model.entities.category;
 import model.entities.hostrule;

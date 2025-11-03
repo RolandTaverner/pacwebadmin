@@ -14,7 +14,7 @@ import datalayer.repository.errors;
 
 interface ISerializable
 {
-    JSONValue toJSON();
+    @safe JSONValue toJSON() const pure;
     void fromJSON(in JSONValue v);
 }
 
@@ -23,9 +23,16 @@ class DataObject(K, V:
 {
     alias KeyType = K;
     alias ValueType = V;
+    alias ThisType = DataObject!(K, V);
 
     @safe this() pure
     {
+    }
+
+    @safe this(in ThisType other) pure
+    {
+        m_key = KeyType(other.m_key);
+        m_value = new ValueType(other.m_value);
     }
 
     @safe this(in KeyType k, in ValueType v) pure
@@ -44,12 +51,12 @@ class DataObject(K, V:
         return m_value;
     }
 
-    JSONValue toJSON() const
+    @safe override JSONValue toJSON() const pure
     {
-        return JSONValue(["id": JSONValue(key()), "value": value().toJSON]);
+        return JSONValue(["id": JSONValue(key()), "value": value().toJSON()]);
     }
 
-    void fromJSON(in JSONValue v)
+    override void fromJSON(in JSONValue v)
     {
         setKey(v.object["id"].integer);
         ValueType value = new ValueType();
@@ -73,11 +80,11 @@ private:
     ValueType m_value;
 }
 
-interface IRepository(K, V) : ISerializable
+interface IRepository(K, V)
 {
     alias KeyType = K;
     alias ValueType = V;
-    alias DataObjectType = DataObject!(K, V);
+    alias DataObjectType = DataObject!(K, V).ThisType;
 
     const(DataObjectType)[] getAll();
     const(DataObjectType) getByKey(in KeyType key);
@@ -87,13 +94,26 @@ interface IRepository(K, V) : ISerializable
     DataObjectType remove(in KeyType key);
 }
 
+enum ListenerEvent
+{
+    CREATE,
+    UPDATE,
+    REMOVE
+}
+
+interface IListener(T)
+{
+    @safe void onChange(in ListenerEvent e, in T object);
+}
+
 alias Key = long;
 
 class RepositoryBase(K, V) : IRepository!(K, V)
 {
-    this()
+    this(IListener!(DataObjectType) listener)
     {
         m_mutex = new ReadWriteMutex();
+        m_listener = listener;
     }
 
     override const(DataObjectType)[] getAll()
@@ -124,62 +144,69 @@ class RepositoryBase(K, V) : IRepository!(K, V)
 
     @safe override const(DataObjectType) create(in ValueType value)
     {
+        DataObjectType newDataObject;
         synchronized (m_mutex.writer)
         {
             immutable KeyType key = getNewKey();
-            DataObjectType newDataObject = new DataObject!(K, V)(key, value);
+            newDataObject = new DataObject!(K, V)(key, value);
             m_entities[key] = newDataObject;
-            return newDataObject;
         }
+        m_listener.onChange(ListenerEvent.CREATE, newDataObject);
+        return newDataObject;
     }
 
     @safe override const(DataObjectType) update(in KeyType key, in ValueType value)
     {
+        DataObjectType updatedDataObject;
         synchronized (m_mutex.writer)
         {
             enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(
                     key) ~ " not found");
 
-            DataObjectType newDataObject = new DataObject!(K, V)(key, value);
-            m_entities[key] = newDataObject;
-            return newDataObject;
+            updatedDataObject = new DataObject!(K, V)(key, value);
+            m_entities[key] = updatedDataObject;
         }
+        m_listener.onChange(ListenerEvent.UPDATE, updatedDataObject);
+        return updatedDataObject;
     }
 
     @safe override DataObjectType remove(in KeyType key)
     {
+        DataObjectType removedDataObject;
         synchronized (m_mutex.writer)
         {
             auto entity = enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(
                     key) ~ " not found");
             m_entities.remove(key);
-            return *entity;
+            removedDataObject = *entity;
         }
+        m_listener.onChange(ListenerEvent.UPDATE, removedDataObject);
+        return removedDataObject;
     }
 
-    override JSONValue toJSON()
-    {
-        synchronized (m_mutex.reader)
-        {
-            return JSONValue(m_entities.values.map!(p => p.toJSON).array);
-        }
-    }
+    // override JSONValue toJSON()
+    // {
+    //     synchronized (m_mutex.reader)
+    //     {
+    //         return JSONValue(m_entities.values.map!(p => p.toJSON).array);
+    //     }
+    // }
 
-    override void fromJSON(in JSONValue v)
-    {
-        synchronized (m_mutex.writer)
-        {
-            m_entities.clear();
+    // override void fromJSON(in JSONValue v)
+    // {
+    //     synchronized (m_mutex.writer)
+    //     {
+    //         m_entities.clear();
 
-            v.array.each!(
-                (ref const JSONValue jv) => () {
-                DataObjectType d = new DataObjectType();
-                d.fromJSON(jv);
-                m_entities[d.key()] = d;
-            }
-            );
-        }
-    }
+    //         v.array.each!(
+    //             (ref const JSONValue jv) => () {
+    //             DataObjectType d = new DataObjectType();
+    //             d.fromJSON(jv);
+    //             m_entities[d.key()] = d;
+    //         }
+    //         );
+    //     }
+    // }
 
 protected:
     @safe KeyType getNewKey() const pure
@@ -195,15 +222,16 @@ protected:
 private:
     DataObjectType[KeyType] m_entities;
     ReadWriteMutex m_mutex;
+    IListener!(DataObjectType) m_listener;
 }
 
-private class TestValue : ISerializable
+private class UnitTestValue : ISerializable
 {
     @safe this() pure
     {
     }
 
-    @safe this(in TestValue v) pure
+    @safe this(in UnitTestValue v) pure
     {
         m_data = v.m_data.dup;
     }
@@ -218,12 +246,12 @@ private class TestValue : ISerializable
         return m_data;
     }
 
-    JSONValue toJSON() const
+    @safe JSONValue toJSON() const
     {
         return JSONValue(["data": JSONValue(data())]);
     }
 
-    void fromJSON(in JSONValue v)
+    override void fromJSON(in JSONValue v)
     {
         m_data = v.object["data"].str;
     }
@@ -234,12 +262,25 @@ protected:
 
 unittest
 {
-    class TestRepository : RepositoryBase!(Key, TestValue)
+    alias UnitTest = DataObject!(Key, UnitTestValue);
+
+    class UnitTestRepository : RepositoryBase!(Key, UnitTestValue)
     {
+        this(IListener!(UnitTest) listener)
+        {
+            super(listener);
+        }
     }
 
-    TestRepository testRepository = new TestRepository();
-    TestValue testValue = new TestValue("test");
+    class StubListener : IListener!(UnitTest)
+    {
+        @safe void onChange(in ListenerEvent e, in UnitTest object)
+        {
+        }
+    }
+
+    UnitTestRepository testRepository = new UnitTestRepository(new StubListener());
+    UnitTestValue testValue = new UnitTestValue("test");
 
     auto dataObjectFromCreate = testRepository.create(testValue);
     assert(dataObjectFromCreate.key() == 1);
@@ -248,5 +289,15 @@ unittest
     assert(dataObjectFromGet is dataObjectFromCreate);
 
     assert(testRepository.getAll().length == 1);
-    //testRepository.getById(-1); // throws
+
+    bool caught = false;
+    try
+    {
+        testRepository.getByKey(-1); // throws
+    }
+    catch (NotFoundError e)
+    {
+        caught = true;
+    }
+    assert(caught);
 }

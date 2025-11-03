@@ -1,4 +1,4 @@
-module datalayer.proxyrules;
+module datalayer.entities.proxyrules;
 
 import std.algorithm.iteration : map;
 import std.array : array;
@@ -48,7 +48,7 @@ class ProxyRulesValue : ISerializable
         return m_hostRuleIds;
     }
 
-    JSONValue toJSON() const pure
+    @safe override JSONValue toJSON() const pure
     {
         return JSONValue([
             "proxyId": JSONValue(proxyId()),
@@ -69,7 +69,7 @@ class ProxyRulesValue : ISerializable
         assert(v.object["hostRuleIds"].array.length == 3);
     }
 
-    void fromJSON(in JSONValue v)
+    override void fromJSON(in JSONValue v)
     {
         m_proxyId = v.object["proxyId"].integer;
         m_enabled = v.object["enabled"].boolean;
@@ -101,20 +101,14 @@ protected:
     long[] m_hostRuleIds;
 }
 
+alias ProxyRules = DataObject!(Key, ProxyRulesValue);
+
+alias IProxyRulesListener = IListener!(ProxyRules);
+
 class ProxyRulesRepository : RepositoryBase!(Key, ProxyRulesValue)
 {
-}
-
-unittest
-{
-    ProxyRulesRepository r = new ProxyRulesRepository();
-    r.create(new ProxyRulesValue());
-}
-
-unittest
-{
-    const ProxyRulesValue v1 = new ProxyRulesValue();
-    ProxyRulesValue v2 = new ProxyRulesValue(v1);
-
-    assert(v1.proxyId() == v2.proxyId());
+    this(IProxyRulesListener listener)
+    {
+        super(listener);
+    }
 }

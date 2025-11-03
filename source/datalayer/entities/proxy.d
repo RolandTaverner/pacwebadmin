@@ -1,4 +1,4 @@
-module datalayer.proxy;
+module datalayer.entities.proxy;
 
 import std.json;
 
@@ -39,7 +39,7 @@ class ProxyValue : ISerializable
         return m_builtIn;
     }
 
-    JSONValue toJSON() const
+    @safe JSONValue toJSON() const
     {
         return JSONValue([
             "hostAddress": JSONValue(hostAddress()),
@@ -58,7 +58,7 @@ class ProxyValue : ISerializable
         assert(v.object["builtIn"].boolean == false);
     }
 
-    void fromJSON(in JSONValue v)
+    override void fromJSON(in JSONValue v)
     {
         m_hostAddress = v.object["hostAddress"].str;
         m_description = v.object["description"].str;
@@ -86,12 +86,14 @@ protected:
     bool m_builtIn;
 }
 
+alias Proxy = DataObject!(Key, ProxyValue);
+
+alias IProxyListener = IListener!(Proxy);
+
 class ProxyRepository : RepositoryBase!(Key, ProxyValue)
 {
-}
-
-unittest
-{
-    ProxyRepository r = new ProxyRepository();
-    r.create(new ProxyValue());
+    this(IProxyListener listener)
+    {
+        super(listener);
+    }    
 }

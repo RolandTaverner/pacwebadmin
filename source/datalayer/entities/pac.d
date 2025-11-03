@@ -1,4 +1,4 @@
-module datalayer.pac;
+module datalayer.entities.pac;
 
 import std.algorithm.iteration : map;
 import std.array : array;
@@ -70,7 +70,7 @@ class PACValue : ISerializable
         return m_saveToFSPath;
     }
 
-    JSONValue toJSON() const
+    @safe override JSONValue toJSON() const pure
     {
         return JSONValue([
             "name": JSONValue(name()),
@@ -97,7 +97,7 @@ class PACValue : ISerializable
         assert(v.object["saveToFSPath"].str == "save");
     }
 
-    void fromJSON(in JSONValue v)
+    override void fromJSON(in JSONValue v)
     {
         m_name = v.object["name"].str;
         m_description = v.object["description"].str;
@@ -141,12 +141,14 @@ protected:
     string m_saveToFSPath;
 }
 
+alias PAC = DataObject!(Key, PACValue);
+
+alias IPACListener = IListener!(PAC);
+
 class PACRepository : RepositoryBase!(Key, PACValue)
 {
-}
-
-unittest
-{
-    PACRepository r = new PACRepository();
-    r.create(new PACValue());
+    this(IPACListener listener)
+    {
+        super(listener);
+    }    
 }
