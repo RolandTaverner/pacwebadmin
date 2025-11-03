@@ -15,7 +15,7 @@ interface ProxyRulesAPI
     @method(HTTPMethod.GET) @path(":id")
     ProxyRulesDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create") @bodyParam("c") 
+    @method(HTTPMethod.POST) @path("/create") @bodyParam("c")
     ProxyRulesDTO create(in ProxyRulesInputDTO c);
 
     @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("c")
@@ -34,12 +34,10 @@ interface ProxyRulesAPI
     HostRuleList removeHostRule(in long _id, in long _hrid);
 }
 
-
 struct ProxyRulesList
 {
     ProxyRulesDTO[] hostRules;
 }
-
 
 struct ProxyRulesInputDTO
 {
@@ -56,7 +54,6 @@ struct ProxyRulesInputDTO
     string name;
     long[] hostRuleIds;
 }
-
 
 struct ProxyRulesDTO
 {
@@ -89,8 +86,8 @@ unittest
 {
     const HostRuleDTO[] hostRules = [];
     const ProxyRulesDTO p1 = ProxyRulesDTO(1, ProxyDTO(), true, "name", hostRules);
-    assert( p1.id == 1 );
+    assert(p1.id == 1);
 
     auto p2 = ProxyRulesDTO(p1);
-    assert( p2.id == p1.id );
+    assert(p2.id == p1.id);
 }

@@ -2,18 +2,17 @@ module datalayer.repository.errors;
 
 import std.exception;
 
-
-class RepositoryError : Exception 
+class RepositoryError : Exception
 {
     mixin basicExceptionCtors;
 }
 
-class NotFoundError : RepositoryError 
+class NotFoundError : RepositoryError
 {
     mixin basicExceptionCtors;
 }
 
-class AlreadyExistsError : RepositoryError 
+class AlreadyExistsError : RepositoryError
 {
     mixin basicExceptionCtors;
 }

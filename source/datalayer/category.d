@@ -34,8 +34,8 @@ class CategoryValue : ISerializable
     {
         CategoryValue value = new CategoryValue("name");
         const JSONValue v = value.toJSON();
-        
-        assert( v.object["name"].str == "name" );
+
+        assert(v.object["name"].str == "name");
     }
 
     void fromJSON(in JSONValue v)
@@ -50,14 +50,13 @@ class CategoryValue : ISerializable
 
         CategoryValue value = new CategoryValue();
         value.fromJSON(v);
-        
-        assert( value.name() == "name" );
+
+        assert(value.name() == "name");
     }
 
 protected:
     string m_name;
 }
-
 
 class CategoryRepository : RepositoryBase!(Key, CategoryValue)
 {

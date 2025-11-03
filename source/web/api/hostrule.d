@@ -5,7 +5,6 @@ import vibe.http.server;
 
 import web.api.category;
 
-
 interface HostRuleAPI
 {
 @safe:
@@ -15,7 +14,7 @@ interface HostRuleAPI
     @method(HTTPMethod.GET) @path(":id")
     HostRuleDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create") @bodyParam("c") 
+    @method(HTTPMethod.POST) @path("/create") @bodyParam("c")
     HostRuleDTO create(in HostRuleInputDTO c);
 
     @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("c")
@@ -25,12 +24,10 @@ interface HostRuleAPI
     HostRuleDTO remove(in long _id);
 }
 
-
 struct HostRuleList
 {
     HostRuleDTO[] hostRules;
 }
-
 
 struct HostRuleInputDTO
 {
@@ -45,7 +42,6 @@ struct HostRuleInputDTO
     bool strict;
     long categoryId;
 }
-
 
 struct HostRuleDTO
 {

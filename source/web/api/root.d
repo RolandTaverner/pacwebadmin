@@ -9,23 +9,21 @@ import web.api.hostrule : HostRuleAPI;
 import web.api.proxyrules : ProxyRulesAPI;
 import web.api.pac : PACAPI;
 
-
 @path("/api/")
 interface APIRoot
 {
-    @path("category/") 
+    @path("category/")
     @property CategoryAPI categories();
-    
-    @path("proxy/") 
+
+    @path("proxy/")
     @property ProxyAPI proxies();
 
-    @path("hostrule/") 
+    @path("hostrule/")
     @property HostRuleAPI hostRules();
 
-    @path("proxyrules/") 
+    @path("proxyrules/")
     @property ProxyRulesAPI proxyRules();
 
-    @path("pac/") 
+    @path("pac/")
     @property PACAPI pacs();
 }
-

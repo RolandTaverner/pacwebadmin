@@ -4,7 +4,6 @@ import model.entities.common;
 import model.entities.proxyrules;
 import model.errors.base;
 
-
 class PAC
 {
     @safe this(in PAC other) pure
@@ -24,24 +23,23 @@ class PAC
         m_saveToFSPath = other.m_saveToFSPath.dup;
     }
 
-    @safe this(in long id, in string name, in string description, in ProxyRules[] proxyRules, 
+    @safe this(in long id, in string name, in string description, in ProxyRules[] proxyRules,
         bool serve, string servePath, bool saveToFS, string saveToFSPath) pure
     {
         m_id = id;
         m_name = name.dup;
         m_description = description.dup;
-        
+
         foreach (pr; proxyRules)
         {
             m_proxyRules ~= new ProxyRules(pr);
         }
-        
+
         m_serve = serve;
         m_servePath = servePath.dup;
         m_saveToFS = saveToFS;
         m_saveToFSPath = saveToFSPath.dup;
     }
-
 
     @safe const(string) name() const pure
     {
@@ -90,7 +88,6 @@ private:
     string m_saveToFSPath;
 }
 
-
 struct PACInput
 {
     string name;
@@ -101,7 +98,6 @@ struct PACInput
     bool saveToFS;
     string saveToFSPath;
 }
-
 
 class PACNotFound : NotFoundBase!(PAC)
 {

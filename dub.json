@@ -1,29 +1,30 @@
 {
-    "authors": [
-        "Alexander Verbitsky"
-    ],
-    "copyright": "Copyright © 2025, Alexander Verbitsky",
-    "dependencies": {
-        "vibe-d": "~>0.9"
-    },
-    "description": "Web admin to manage proxy autoconfiguration (PAC) file",
-    "license": "Unlicense",
-    "name": "pac_web_admin",
-    "targetPath": "$BUILD_TYPE",
-    "buildTypes": {
-        "debug": {
-            "buildOptions": [
-                "debugMode",
-                "debugInfo",
-                "optimize"
-            ]
-        },
-        "release": {
-            "buildOptions": [
-                "releaseMode",
-                "optimize",
-                "inline"
-            ]
-        }
-    }
+	"authors": [
+		"Alexander Verbitsky"
+	],
+	"buildTypes": {
+		"debug": {
+			"buildOptions": [
+				"debugMode",
+				"debugInfo",
+				"optimize"
+			]
+		},
+		"release": {
+			"buildOptions": [
+				"releaseMode",
+				"inline",
+				"optimize"
+			]
+		}
+	},
+	"copyright": "Copyright © 2025, Alexander Verbitsky",
+	"dependencies": {
+		"argsd": "~>1.1.0",
+		"vibe-d": "~>0.9"
+	},
+	"description": "Web admin to manage proxy autoconfiguration (PAC) file",
+	"license": "Unlicense",
+	"name": "pac_web_admin",
+	"targetPath": "$BUILD_TYPE"
 }

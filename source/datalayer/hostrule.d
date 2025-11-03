@@ -4,7 +4,6 @@ import std.json;
 
 import datalayer.repository.repository;
 
-
 class HostRuleValue : ISerializable
 {
     @safe this() pure
@@ -46,17 +45,17 @@ class HostRuleValue : ISerializable
             "hostTemplate": JSONValue(m_hostTemplate),
             "strict": JSONValue(m_strict),
             "categoryId": JSONValue(m_categoryId),
-         ]);
+        ]);
     }
 
     unittest
     {
         HostRuleValue value = new HostRuleValue("example.com", true, 1);
         const JSONValue v = value.toJSON();
-        
-        assert( v.object["hostTemplate"].str == "example.com" );
-        assert( v.object["strict"].boolean == true );
-        assert( v.object["categoryId"].integer == 1 );
+
+        assert(v.object["hostTemplate"].str == "example.com");
+        assert(v.object["strict"].boolean == true);
+        assert(v.object["categoryId"].integer == 1);
     }
 
     void fromJSON(in JSONValue v)
@@ -75,10 +74,10 @@ class HostRuleValue : ISerializable
 
         HostRuleValue value = new HostRuleValue();
         value.fromJSON(v);
-        
-        assert( value.hostTemplate() == "example.com" );
-        assert( value.strict() == true );
-        assert( value.categoryId() == 1L );
+
+        assert(value.hostTemplate() == "example.com");
+        assert(value.strict() == true);
+        assert(value.categoryId() == 1L);
     }
 
 protected:
@@ -86,7 +85,6 @@ protected:
     bool m_strict;
     long m_categoryId;
 }
-
 
 class HostRuleRepository : RepositoryBase!(Key, HostRuleValue)
 {

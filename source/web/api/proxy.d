@@ -3,7 +3,6 @@ module web.api.proxy;
 import vibe.web.rest;
 import vibe.http.server;
 
-
 interface ProxyAPI
 {
 @safe:
@@ -13,7 +12,7 @@ interface ProxyAPI
     @method(HTTPMethod.GET) @path(":id")
     ProxyDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create") @bodyParam("c") 
+    @method(HTTPMethod.POST) @path("/create") @bodyParam("c")
     ProxyDTO create(in ProxyInputDTO c);
 
     @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("p")
@@ -28,7 +27,6 @@ struct ProxyList
     ProxyDTO[] proxies;
 }
 
-
 struct ProxyInputDTO
 {
     @safe this(in string hostAddress, in string description, in bool builtIn) pure
@@ -42,7 +40,6 @@ struct ProxyInputDTO
     string description;
     bool builtIn;
 }
-
 
 struct ProxyDTO
 {

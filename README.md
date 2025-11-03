@@ -1,6 +1,11 @@
 # PAC web admin (work in progress)
 Web admin to manage proxy autoconfiguration (PAC) file
 
+# Dev notes
+
+```
+dub run -- --config "pacwebadmin.conf.local"
+```
 
 ## Categories API requests
 

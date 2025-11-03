@@ -3,7 +3,6 @@ module web.api.category;
 import vibe.web.rest;
 import vibe.http.server;
 
-
 interface CategoryAPI
 {
 @safe:
@@ -13,7 +12,7 @@ interface CategoryAPI
     @method(HTTPMethod.GET) @path(":id")
     CategoryDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create") @bodyParam("c") 
+    @method(HTTPMethod.POST) @path("/create") @bodyParam("c")
     CategoryDTO create(in CategoryInputDTO c);
 
     @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("c")
@@ -23,12 +22,10 @@ interface CategoryAPI
     CategoryDTO remove(in long _id);
 }
 
-
 struct CategoryList
 {
     CategoryDTO[] categories;
 }
-
 
 struct CategoryInputDTO
 {
@@ -39,7 +36,6 @@ struct CategoryInputDTO
 
     string name;
 }
-
 
 struct CategoryDTO
 {

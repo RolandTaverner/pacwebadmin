@@ -3,6 +3,7 @@ release/
 *.bak
 unittest/
 .vscode/
+/pacwebadmin.conf.local
 
 # Compiled Object files
 *.o

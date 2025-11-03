@@ -14,7 +14,7 @@ class ProxyValue : ISerializable
     {
         m_hostAddress = v.m_hostAddress.dup;
         m_description = v.m_description.dup;
-        m_builtIn = v.m_builtIn;        
+        m_builtIn = v.m_builtIn;
     }
 
     @safe this(in string hostAddress, in string description, in bool builtIn) pure
@@ -42,20 +42,20 @@ class ProxyValue : ISerializable
     JSONValue toJSON() const
     {
         return JSONValue([
-                "hostAddress": JSONValue(hostAddress()),
-                "description": JSONValue(description()),
-                "builtIn": JSONValue(builtIn())
-            ]);
+            "hostAddress": JSONValue(hostAddress()),
+            "description": JSONValue(description()),
+            "builtIn": JSONValue(builtIn())
+        ]);
     }
 
     unittest
     {
         ProxyValue value = new ProxyValue("example.com:8080", "test", false);
         const JSONValue v = value.toJSON();
-        
-        assert( v.object["hostAddress"].str == "example.com:8080" );
-        assert( v.object["description"].str == "test" );
-        assert( v.object["builtIn"].boolean == false );
+
+        assert(v.object["hostAddress"].str == "example.com:8080");
+        assert(v.object["description"].str == "test");
+        assert(v.object["builtIn"].boolean == false);
     }
 
     void fromJSON(in JSONValue v)
@@ -74,10 +74,10 @@ class ProxyValue : ISerializable
 
         ProxyValue value = new ProxyValue();
         value.fromJSON(v);
-        
-        assert( value.hostAddress() == "example.com:8080" );
-        assert( value.description() == "test" );
-        assert( value.builtIn() == false );
+
+        assert(value.hostAddress() == "example.com:8080");
+        assert(value.description() == "test");
+        assert(value.builtIn() == false);
     }
 
 protected:
@@ -85,7 +85,6 @@ protected:
     string m_description;
     bool m_builtIn;
 }
-
 
 class ProxyRepository : RepositoryBase!(Key, ProxyValue)
 {

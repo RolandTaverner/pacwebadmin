@@ -4,7 +4,6 @@ import model.entities.category;
 import model.entities.common;
 import model.errors.base;
 
-
 class HostRule
 {
     @safe this(in long id, in string hostTemplate, in bool strict, in Category category) pure
@@ -46,14 +45,12 @@ private:
     Category m_category;
 }
 
-
 struct HostRuleInput
 {
     string hostTemplate;
     bool strict;
     long categoryId;
 }
-
 
 class HostRuleNotFound : NotFoundBase!(HostRule)
 {

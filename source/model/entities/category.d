@@ -3,8 +3,7 @@ module model.entities.category;
 import model.entities.common;
 import model.errors.base;
 
-
-class Category 
+class Category
 {
     @safe this(in long id, in string name) pure
     {
@@ -29,12 +28,10 @@ private:
     string m_name;
 }
 
-
 struct CategoryInput
 {
     string name;
 }
-
 
 class CategoryNotFound : NotFoundBase!(Category)
 {

@@ -6,7 +6,6 @@ import std.json;
 
 import datalayer.repository.repository;
 
-
 class PACValue : ISerializable
 {
     @safe this() pure
@@ -24,7 +23,7 @@ class PACValue : ISerializable
         m_saveToFSPath = v.m_saveToFSPath;
     }
 
-    @safe this(in string name, in string description, in long[] proxyRulesIds, 
+    @safe this(in string name, in string description, in long[] proxyRulesIds,
         bool serve, string servePath, bool saveToFS, string saveToFSPath) pure
     {
         m_name = name;
@@ -74,35 +73,35 @@ class PACValue : ISerializable
     JSONValue toJSON() const
     {
         return JSONValue([
-                "name": JSONValue(name()),
-                "description": JSONValue(description()),
-                "proxyRulesIds": JSONValue(proxyRulesIds()),
-                "serve": JSONValue(serve()),
-                "servePath": JSONValue(servePath()),
-                "saveToFS": JSONValue(saveToFS()),
-                "saveToFSPath": JSONValue(saveToFSPath()),
-            ]);
+            "name": JSONValue(name()),
+            "description": JSONValue(description()),
+            "proxyRulesIds": JSONValue(proxyRulesIds()),
+            "serve": JSONValue(serve()),
+            "servePath": JSONValue(servePath()),
+            "saveToFS": JSONValue(saveToFS()),
+            "saveToFSPath": JSONValue(saveToFSPath()),
+        ]);
     }
 
     unittest
     {
-        PACValue value = new PACValue("name", "description", [1,2,3], true, "serve", true, "save");
+        PACValue value = new PACValue("name", "description", [1, 2, 3], true, "serve", true, "save");
         const JSONValue v = value.toJSON();
-        
-        assert( v.object["name"].str == "name" );
-        assert( v.object["description"].str == "description" );
-        assert( v.object["proxyRulesIds"].array.length == 3 );
-        assert( v.object["serve"].boolean == true );
-        assert( v.object["servePath"].str == "serve" );
-        assert( v.object["saveToFS"].boolean == true );
-        assert( v.object["saveToFSPath"].str == "save" );
+
+        assert(v.object["name"].str == "name");
+        assert(v.object["description"].str == "description");
+        assert(v.object["proxyRulesIds"].array.length == 3);
+        assert(v.object["serve"].boolean == true);
+        assert(v.object["servePath"].str == "serve");
+        assert(v.object["saveToFS"].boolean == true);
+        assert(v.object["saveToFSPath"].str == "save");
     }
 
     void fromJSON(in JSONValue v)
     {
         m_name = v.object["name"].str;
         m_description = v.object["description"].str;
-        m_proxyRulesIds = array(v.object["proxyRulesIds"].array.map!( jv => jv.integer));
+        m_proxyRulesIds = array(v.object["proxyRulesIds"].array.map!(jv => jv.integer));
         m_serve = v.object["serve"].boolean;
         m_servePath = v.object["servePath"].str;
         m_saveToFS = v.object["saveToFS"].boolean;
@@ -114,7 +113,7 @@ class PACValue : ISerializable
         JSONValue v = JSONValue.emptyObject;
         v.object["name"] = JSONValue("name");
         v.object["description"] = JSONValue("description");
-        v.object["proxyRulesIds"] = JSONValue([1,2,3]);
+        v.object["proxyRulesIds"] = JSONValue([1, 2, 3]);
         v.object["serve"] = JSONValue(true);
         v.object["servePath"] = JSONValue("serve");
         v.object["saveToFS"] = JSONValue(true);
@@ -122,14 +121,14 @@ class PACValue : ISerializable
 
         PACValue value = new PACValue();
         value.fromJSON(v);
-        
-        assert( value.name() == "name" );
-        assert( value.description() == "description" );
-        assert( value.proxyRulesIds().length == 3 );
-        assert( value.serve() == true );
-        assert( value.servePath() == "serve" );
-        assert( value.saveToFS() == true );
-        assert( value.saveToFSPath() == "save" );
+
+        assert(value.name() == "name");
+        assert(value.description() == "description");
+        assert(value.proxyRulesIds().length == 3);
+        assert(value.serve() == true);
+        assert(value.servePath() == "serve");
+        assert(value.saveToFS() == true);
+        assert(value.saveToFSPath() == "save");
     }
 
 protected:
@@ -141,7 +140,6 @@ protected:
     bool m_saveToFS;
     string m_saveToFSPath;
 }
-
 
 class PACRepository : RepositoryBase!(Key, PACValue)
 {

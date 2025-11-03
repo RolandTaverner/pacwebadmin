@@ -12,15 +12,14 @@ import std.traits;
 
 import datalayer.repository.errors;
 
-
-interface ISerializable 
+interface ISerializable
 {
     JSONValue toJSON();
     void fromJSON(in JSONValue v);
 }
 
-
-class DataObject(K, V : ISerializable) : ISerializable 
+class DataObject(K, V:
+    ISerializable) : ISerializable
 {
     alias KeyType = K;
     alias ValueType = V;
@@ -45,12 +44,12 @@ class DataObject(K, V : ISerializable) : ISerializable
         return m_value;
     }
 
-    JSONValue toJSON() const 
+    JSONValue toJSON() const
     {
         return JSONValue(["id": JSONValue(key()), "value": value().toJSON]);
     }
-    
-    void fromJSON(in JSONValue v) 
+
+    void fromJSON(in JSONValue v)
     {
         setKey(v.object["id"].integer);
         ValueType value = new ValueType();
@@ -59,12 +58,12 @@ class DataObject(K, V : ISerializable) : ISerializable
     }
 
 protected:
-    void setKey(in KeyType k) 
+    void setKey(in KeyType k)
     {
         m_key = KeyType(k);
     }
 
-    void setValue(in ValueType v) 
+    void setValue(in ValueType v)
     {
         m_value = new ValueType(v);
     }
@@ -74,8 +73,8 @@ private:
     ValueType m_value;
 }
 
-
-interface IRepository(K, V) : ISerializable {
+interface IRepository(K, V) : ISerializable
+{
     alias KeyType = K;
     alias ValueType = V;
     alias DataObjectType = DataObject!(K, V);
@@ -88,11 +87,9 @@ interface IRepository(K, V) : ISerializable {
     DataObjectType remove(in KeyType key);
 }
 
-
 alias Key = long;
 
-
-class RepositoryBase(K, V) : IRepository!(K, V) 
+class RepositoryBase(K, V) : IRepository!(K, V)
 {
     this()
     {
@@ -111,7 +108,8 @@ class RepositoryBase(K, V) : IRepository!(K, V)
     {
         synchronized (m_mutex.reader)
         {
-            auto entity = enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(key) ~ " not found");
+            auto entity = enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(
+                    key) ~ " not found");
             return *entity;
         }
     }
@@ -139,7 +137,8 @@ class RepositoryBase(K, V) : IRepository!(K, V)
     {
         synchronized (m_mutex.writer)
         {
-            enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(key) ~ " not found");
+            enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(
+                    key) ~ " not found");
 
             DataObjectType newDataObject = new DataObject!(K, V)(key, value);
             m_entities[key] = newDataObject;
@@ -150,34 +149,34 @@ class RepositoryBase(K, V) : IRepository!(K, V)
     @safe override DataObjectType remove(in KeyType key)
     {
         synchronized (m_mutex.writer)
-        {        
-            auto entity = enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(key) ~ " not found");
+        {
+            auto entity = enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(
+                    key) ~ " not found");
             m_entities.remove(key);
             return *entity;
         }
     }
 
-    override JSONValue toJSON() 
+    override JSONValue toJSON()
     {
         synchronized (m_mutex.reader)
         {
             return JSONValue(m_entities.values.map!(p => p.toJSON).array);
         }
     }
-    
+
     override void fromJSON(in JSONValue v)
     {
         synchronized (m_mutex.writer)
-        {        
+        {
             m_entities.clear();
 
             v.array.each!(
-                (ref const JSONValue jv) => () 
-                    { 
-                        DataObjectType d = new DataObjectType();
-                        d.fromJSON(jv);
-                        m_entities[d.key()] = d;
-                    }
+                (ref const JSONValue jv) => () {
+                DataObjectType d = new DataObjectType();
+                d.fromJSON(jv);
+                m_entities[d.key()] = d;
+            }
             );
         }
     }
@@ -185,7 +184,8 @@ class RepositoryBase(K, V) : IRepository!(K, V)
 protected:
     @safe KeyType getNewKey() const pure
     {
-        if (!m_entities.length) {
+        if (!m_entities.length)
+        {
             return 1;
         }
 
@@ -196,7 +196,6 @@ private:
     DataObjectType[KeyType] m_entities;
     ReadWriteMutex m_mutex;
 }
-
 
 private class TestValue : ISerializable
 {
@@ -233,7 +232,6 @@ protected:
     string m_data;
 }
 
-
 unittest
 {
     class TestRepository : RepositoryBase!(Key, TestValue)
@@ -242,7 +240,7 @@ unittest
 
     TestRepository testRepository = new TestRepository();
     TestValue testValue = new TestValue("test");
-    
+
     auto dataObjectFromCreate = testRepository.create(testValue);
     assert(dataObjectFromCreate.key() == 1);
 

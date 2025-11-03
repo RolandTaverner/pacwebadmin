@@ -3,15 +3,14 @@ module model.entities.proxy;
 import model.entities.common;
 import model.errors.base;
 
-
-class Proxy 
+class Proxy
 {
     @safe this(in Proxy other) pure
     {
         m_id = other.m_id;
         m_hostAddress = other.m_hostAddress.dup;
         m_description = other.m_description.dup;
-        m_builtIn = other.m_builtIn;        
+        m_builtIn = other.m_builtIn;
     }
 
     @safe this(in long id, in string hostAddress, in string description, in bool builtIn) pure
@@ -45,14 +44,12 @@ private:
     bool m_builtIn;
 }
 
-
 struct ProxyInput
 {
     string hostAddress;
     string description;
     bool builtIn;
 }
-
 
 class ProxyNotFound : NotFoundBase!(Proxy)
 {

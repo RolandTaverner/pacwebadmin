@@ -6,7 +6,6 @@ import std.json;
 
 import datalayer.repository.repository;
 
-
 class ProxyRulesValue : ISerializable
 {
     @safe this() pure
@@ -18,7 +17,7 @@ class ProxyRulesValue : ISerializable
         m_proxyId = v.m_proxyId;
         m_enabled = v.enabled;
         m_name = v.m_name.dup;
-        m_hostRuleIds = v.m_hostRuleIds.dup;        
+        m_hostRuleIds = v.m_hostRuleIds.dup;
     }
 
     @safe this(in long proxyId, in bool enabled, in string name, in long[] hostRuleIds) pure
@@ -52,22 +51,22 @@ class ProxyRulesValue : ISerializable
     JSONValue toJSON() const pure
     {
         return JSONValue([
-                "proxyId": JSONValue(proxyId()),
-                "enabled": JSONValue(enabled()),
-                "name": JSONValue(name()),
-                "hostRuleIds": JSONValue(hostRuleIds())
-            ]);
+            "proxyId": JSONValue(proxyId()),
+            "enabled": JSONValue(enabled()),
+            "name": JSONValue(name()),
+            "hostRuleIds": JSONValue(hostRuleIds())
+        ]);
     }
 
     unittest
     {
-        ProxyRulesValue value = new ProxyRulesValue(1, true, "name", [1,2,3]);
+        ProxyRulesValue value = new ProxyRulesValue(1, true, "name", [1, 2, 3]);
         const JSONValue v = value.toJSON();
-        
-        assert( v.object["proxyId"].integer == 1 );
-        assert( v.object["enabled"].boolean == true );
-        assert( v.object["name"].str == "name" );
-        assert( v.object["hostRuleIds"].array.length == 3 );
+
+        assert(v.object["proxyId"].integer == 1);
+        assert(v.object["enabled"].boolean == true);
+        assert(v.object["name"].str == "name");
+        assert(v.object["hostRuleIds"].array.length == 3);
     }
 
     void fromJSON(in JSONValue v)
@@ -75,7 +74,7 @@ class ProxyRulesValue : ISerializable
         m_proxyId = v.object["proxyId"].integer;
         m_enabled = v.object["enabled"].boolean;
         m_name = v.object["name"].str;
-        m_hostRuleIds = array(v.object["hostRuleIds"].array.map!( jv => jv.integer));
+        m_hostRuleIds = array(v.object["hostRuleIds"].array.map!(jv => jv.integer));
     }
 
     unittest
@@ -84,15 +83,15 @@ class ProxyRulesValue : ISerializable
         v.object["proxyId"] = JSONValue(1);
         v.object["enabled"] = JSONValue(true);
         v.object["name"] = JSONValue("name");
-        v.object["hostRuleIds"] = JSONValue([1,2,3]);
+        v.object["hostRuleIds"] = JSONValue([1, 2, 3]);
 
         ProxyRulesValue value = new ProxyRulesValue();
         value.fromJSON(v);
-        
-        assert( value.proxyId() == 1 );
-        assert( value.enabled() == true );
-        assert( value.name() == "name" );
-        assert( value.hostRuleIds().length == 3 );
+
+        assert(value.proxyId() == 1);
+        assert(value.enabled() == true);
+        assert(value.name() == "name");
+        assert(value.hostRuleIds().length == 3);
     }
 
 protected:
@@ -117,5 +116,5 @@ unittest
     const ProxyRulesValue v1 = new ProxyRulesValue();
     ProxyRulesValue v2 = new ProxyRulesValue(v1);
 
-    assert( v1.proxyId() == v2.proxyId() );
+    assert(v1.proxyId() == v2.proxyId());
 }

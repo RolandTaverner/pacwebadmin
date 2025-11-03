@@ -5,7 +5,6 @@ import vibe.http.server;
 
 import web.api.proxyrules;
 
-
 interface PACAPI
 {
 @safe:
@@ -15,7 +14,7 @@ interface PACAPI
     @method(HTTPMethod.GET) @path(":id")
     PACDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create") @bodyParam("c") 
+    @method(HTTPMethod.POST) @path("/create") @bodyParam("c")
     PACDTO create(in PACInputDTO c);
 
     @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("c")
@@ -34,16 +33,14 @@ interface PACAPI
     ProxyRulesList removeProxyRules(in long _id, in long _prid);
 }
 
-
 struct PACList
 {
     PACDTO[] pacs;
 }
 
-
 struct PACInputDTO
 {
-    @safe this(in string name, in string description, in long[] proxyRulesIds, 
+    @safe this(in string name, in string description, in long[] proxyRulesIds,
         in bool serve, in string servePath, in bool saveToFS, in string saveToFSPath) pure
     {
         this.name = name.dup;
@@ -64,10 +61,9 @@ struct PACInputDTO
     string saveToFSPath;
 }
 
-
 struct PACDTO
 {
-    @safe this(in long id, in string name, in string description, in ProxyRulesDTO[] proxyRules, 
+    @safe this(in long id, in string name, in string description, in ProxyRulesDTO[] proxyRules,
         in bool serve, in string servePath, in bool saveToFS, in string saveToFSPath) pure
     {
         this.id = id;
@@ -117,8 +113,8 @@ struct PACDTO
 unittest
 {
     const ProxyRulesDTO[] proxyRules = [];
-    
+
     auto p = PACDTO(1, "name", "desc", proxyRules, true, "serve", true, "save");
-    
-    assert( p.id == 1 );
+
+    assert(p.id == 1);
 }

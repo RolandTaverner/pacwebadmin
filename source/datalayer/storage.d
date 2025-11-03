@@ -10,7 +10,6 @@ import datalayer.proxy;
 import datalayer.proxyrules;
 import datalayer.repository.repository : ISerializable;
 
-
 class Storage : ISerializable
 {
     this()
@@ -30,9 +29,9 @@ class Storage : ISerializable
             "pac": m_pacs.toJSON(),
             "proxy": m_proxies.toJSON(),
             "proxyrule": m_proxyRules.toJSON(),
-            ]);
+        ]);
     }
-    
+
     override void fromJSON(in JSONValue v)
     {
         m_categories.fromJSON(v.object["category"]);

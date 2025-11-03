@@ -5,7 +5,6 @@ import model.entities.hostrule;
 import model.entities.proxy;
 import model.errors.base;
 
-
 class ProxyRules
 {
     @safe this(in long id, in Proxy proxy, in bool enabled, in string name, in HostRule[] hostRules) pure
@@ -63,7 +62,6 @@ private:
     HostRule[] m_hostRules;
 }
 
-
 struct ProxyRulesInput
 {
     long proxyId;
@@ -71,7 +69,6 @@ struct ProxyRulesInput
     string name;
     long[] hostRuleIds;
 }
-
 
 class ProxyRulesNotFound : NotFoundBase!(ProxyRules)
 {
