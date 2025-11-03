@@ -1,4 +1,4 @@
-module datalayer.hostrule;
+module datalayer.entities.hostrule;
 
 import std.json;
 
@@ -39,7 +39,7 @@ class HostRuleValue : ISerializable
         return m_categoryId;
     }
 
-    JSONValue toJSON() const
+    @safe override JSONValue toJSON() const pure
     {
         return JSONValue([
             "hostTemplate": JSONValue(m_hostTemplate),
@@ -58,7 +58,7 @@ class HostRuleValue : ISerializable
         assert(v.object["categoryId"].integer == 1);
     }
 
-    void fromJSON(in JSONValue v)
+    override void fromJSON(in JSONValue v)
     {
         m_hostTemplate = v.object["hostTemplate"].str;
         m_strict = v.object["strict"].boolean;
@@ -86,12 +86,14 @@ protected:
     long m_categoryId;
 }
 
+alias HostRule = DataObject!(Key, HostRuleValue);
+
+alias IHostRuleListener = IListener!(HostRule);
+
 class HostRuleRepository : RepositoryBase!(Key, HostRuleValue)
 {
-}
-
-unittest
-{
-    HostRuleRepository r = new HostRuleRepository();
-    r.create(new HostRuleValue());
+    this(IHostRuleListener listener)
+    {
+        super(listener);
+    }
 }

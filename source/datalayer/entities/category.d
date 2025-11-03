@@ -1,4 +1,4 @@
-module datalayer.category;
+module datalayer.entities.category;
 
 import std.json;
 
@@ -25,7 +25,7 @@ class CategoryValue : ISerializable
         return m_name;
     }
 
-    JSONValue toJSON() const
+    @safe override JSONValue toJSON() const pure
     {
         return JSONValue(["name": JSONValue(name())]);
     }
@@ -38,7 +38,7 @@ class CategoryValue : ISerializable
         assert(v.object["name"].str == "name");
     }
 
-    void fromJSON(in JSONValue v)
+    override void fromJSON(in JSONValue v)
     {
         m_name = v.object["name"].str;
     }
@@ -58,12 +58,14 @@ protected:
     string m_name;
 }
 
+alias Category = DataObject!(Key, CategoryValue);
+
+alias ICategoryListener = IListener!(Category);
+
 class CategoryRepository : RepositoryBase!(Key, CategoryValue)
 {
-}
-
-unittest
-{
-    CategoryRepository r = new CategoryRepository();
-    r.create(new CategoryValue());
+    this(ICategoryListener listener)
+    {
+        super(listener);
+    }
 }
