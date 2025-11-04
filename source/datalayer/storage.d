@@ -1,6 +1,5 @@
 module datalayer.storage;
 
-import std.algorithm.iteration : each;
 import std.algorithm.iteration : map;
 import std.array;
 import core.sync.rwmutex;
@@ -14,10 +13,16 @@ import datalayer.entities.proxy;
 import datalayer.entities.proxyrules;
 import datalayer.repository.repository;
 
-class Storage : ICategoryListener, IHostRuleListener, IPACListener, IProxyListener, IProxyRulesListener, ISerializable
+interface IStorageSaver
 {
-    this()
+    @trusted void save(ref const JSONValue v);
+}
+
+class Storage : ICategoryListener, IHostRuleListener, IPACListener, IProxyListener, IProxyRulesListener
+{
+    this(IStorageSaver saver)
     {
+        m_saver = saver;
         m_mutex = new ReadWriteMutex();
 
         m_categories = new CategoryRepository(this);
@@ -27,8 +32,18 @@ class Storage : ICategoryListener, IHostRuleListener, IPACListener, IProxyListen
         m_proxyRules = new ProxyRulesRepository(this);
     }
 
-    @safe override JSONValue toJSON() const pure
+    @safe JSONValue dump() 
     {
+        JSONValue v = JSONValue();
+        synchronized (m_mutex.reader)
+        {
+            foreach (ref collection; m_data.byKeyValue) {
+                v[collection.key] = JSONValue(collection.value.byValue.array);
+                
+                //writeln(pair.key, ": ", pair.value);
+            }
+        }
+
         // return JSONValue([
         //     "category": m_categories.toJSON(),
         //     "hostrule": m_hostRules.toJSON(),
@@ -36,10 +51,10 @@ class Storage : ICategoryListener, IHostRuleListener, IPACListener, IProxyListen
         //     "proxy": m_proxies.toJSON(),
         //     "proxyrule": m_proxyRules.toJSON(),
         // ]);
-        return JSONValue();
+        return v;
     }
 
-    override void fromJSON(in JSONValue v)
+    void load(in JSONValue v)
     {
         synchronized (m_mutex.writer)
         {
@@ -116,10 +131,30 @@ private:
                 m_data[collectionKey!(T)()].remove(dataObject.key());
             }
         }
+        
+        auto snapshot = dump();
+        m_saver.save(snapshot);
+    }
+
+    void loadCollection(T)(in JSONValue v, IDataLoader!(T.KeyType, T.ValueType) loader)
+    {
+        const string key = collectionKey!(T)();
+        if (auto collectionValue = key in v)
+        {
+            auto dataObjects = parseCollection!(T)(*collectionValue);
+            // TODO: check key uniqueness
+
+            foreach (d; dataObjects)
+            {
+                m_data[collectionKey!(T)()][d.key()] = d.toJSON();
+            }
+            loader.load(dataObjects);
+        }
     }
 
     ReadWriteMutex m_mutex;
     JSONValue[Key][string] m_data;
+    IStorageSaver m_saver;
 
     CategoryRepository m_categories;
     HostRuleRepository m_hostRules;
@@ -175,11 +210,3 @@ T[] parseCollection(T)(in JSONValue v)
     return v.array.map!(i => parseEntity!(T)(i)).array;
 }
 
-void loadCollection(T)(in JSONValue v, IDataLoader!(T.KeyType, T.ValueType) loader)
-{
-    const string key = collectionKey!(T)();
-    if (auto collectionValue = key in v)
-    {
-        loader.load(parseCollection!(T)(*collectionValue));
-    }
-}

@@ -3,8 +3,11 @@ release/
 *.bak
 unittest/
 .vscode/
+
+# local temporary files
 /pacwebadmin.conf.local
 /data.local
+/data.local.bak
 
 # Compiled Object files
 *.o

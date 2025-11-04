@@ -35,8 +35,8 @@ int main(string[] args)
 	string dataFileContent = readText(dataFilePath);
 	JSONValue jsonData = parseJSON(dataFileContent);
 
-	Storage storage = new Storage();
-	storage.fromJSON(jsonData);
+	Storage storage = new Storage(new SimpleSaver(options.dataDir));
+	storage.load(jsonData);
 
 	Model m = new Model(storage);
 	Service svc = new Service(m);
@@ -78,3 +78,35 @@ void hello(HTTPServerRequest req, HTTPServerResponse res)
 	res.writeBody("Hello, World!");
 }
 
+class SimpleSaver : IStorageSaver
+{
+	this(string dataDir)
+	{
+		m_dataDir = dataDir;
+	}
+
+    @trusted override void save(ref const JSONValue v)
+	{
+		synchronized(this)
+		{
+			auto backupFilePath = buildPath(m_dataDir, "data.local.bak");
+			if (exists(backupFilePath))
+			{
+				remove(backupFilePath);
+			}
+			auto dataFilePath = buildPath(m_dataDir, "data.local");
+
+			if (exists(dataFilePath))
+			{
+				rename(dataFilePath, backupFilePath);
+			}
+
+			File file = File(dataFilePath, "w");
+			file.write(v.toPrettyString());
+			file.close();
+		}
+	}
+
+private:
+	string m_dataDir;
+}

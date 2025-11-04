@@ -193,36 +193,13 @@ class RepositoryBase(K, V) : IRepository!(K, V), IDataLoader!(K, V)
     {
         synchronized (m_mutex.writer)
         {
-            foreach(d; data)
+            m_entities.clear();
+            foreach (d; data)
             {
                 m_entities[d.key()] = new DataObjectType(d);
             }
         }
     }
-
-    // override JSONValue toJSON()
-    // {
-    //     synchronized (m_mutex.reader)
-    //     {
-    //         return JSONValue(m_entities.values.map!(p => p.toJSON).array);
-    //     }
-    // }
-
-    // override void fromJSON(in JSONValue v)
-    // {
-    //     synchronized (m_mutex.writer)
-    //     {
-    //         m_entities.clear();
-
-    //         v.array.each!(
-    //             (ref const JSONValue jv) => () {
-    //             DataObjectType d = new DataObjectType();
-    //             d.fromJSON(jv);
-    //             m_entities[d.key()] = d;
-    //         }
-    //         );
-    //     }
-    // }
 
 protected:
     @safe KeyType getNewKey() const pure
