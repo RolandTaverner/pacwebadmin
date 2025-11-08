@@ -33,6 +33,16 @@ struct CategoryInput
     string name;
 }
 
+struct CategoryFilter
+{
+    @safe this(in string name) pure
+    {
+        this.name = name.dup;
+    }
+    
+    string name;
+}
+
 class CategoryNotFound : NotFoundBase!(Category)
 {
     mixin finalEntityErrorCtors!("not found");

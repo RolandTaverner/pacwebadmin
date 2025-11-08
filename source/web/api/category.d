@@ -9,6 +9,9 @@ interface CategoryAPI
     @method(HTTPMethod.GET) @path("/all")
     CategoryList getAll();
 
+    @method(HTTPMethod.POST) @path("/filter")  @bodyParam("f")
+    CategoryList filter(in CategoryFilterDTO f);
+
     @method(HTTPMethod.GET) @path(":id")
     CategoryDTO getById(in long _id);
 
@@ -34,6 +37,11 @@ struct CategoryInputDTO
         this.name = name.dup;
     }
 
+    string name;
+}
+
+struct CategoryFilterDTO
+{
     string name;
 }
 

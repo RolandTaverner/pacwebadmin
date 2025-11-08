@@ -1,8 +1,7 @@
 module model.model;
 
-import std.algorithm.iteration : filter;
-import std.algorithm.iteration : map;
-import std.algorithm : canFind;
+import std.algorithm.iteration : filter, map;
+import std.algorithm.searching : canFind;
 import std.array;
 import std.exception : enforce;
 
@@ -81,6 +80,17 @@ class Model
         {
             throw new CategoryNotFound(id);
         }
+    }
+
+    @trusted const(Category[]) filterCategories(in CategoryFilter cf)
+    {
+        auto pred = (in dlcategory.Category c) {
+            return canFind(c.value().name(), cf.name);
+        };
+
+        auto filtered = categories.filterBy(pred);
+
+        return filtered.map!(c => makeCategory(c)).array;
     }
 
     // Proxies ======================

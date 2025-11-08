@@ -94,6 +94,21 @@ class CategoryService : CategoryAPI
         return response;
     }
 
+    @safe override CategoryList filter(in CategoryFilterDTO f)
+    {
+        auto filter = CategoryFilter(f.name);
+        CategoryList response =
+        {
+            m_model.filterCategories(filter)
+                .map!(c => toDTO(c))
+                .array
+                .sort!((a, b) => a.id < b.id, SwapStrategy.stable)
+                .array
+        };
+
+        return response;
+    }
+
     @safe override CategoryDTO create(in CategoryInputDTO c)
     {
         const CategoryInput ci = {name: c.name};

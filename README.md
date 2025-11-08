@@ -32,6 +32,29 @@ Response
 }
 ```
 
+### Filter
+
+```bash
+curl -X POST http://127.0.0.1:8080/api/category/filter -H "Content-Type: application/json" -d '{"name": "or"}'
+```
+
+Response
+
+```json
+{
+  "categories": [
+    {
+      "id": 2,
+      "name": "work"
+    },
+    {
+      "id": 3,
+      "name": "new category name"
+    }
+  ]
+}
+```
+
 ### Get by id
 
 ```bash

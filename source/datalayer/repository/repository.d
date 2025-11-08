@@ -1,9 +1,8 @@
 module datalayer.repository.repository;
 
 import core.sync.rwmutex;
-import std.algorithm.iteration : each;
-import std.algorithm.iteration : map;
-import std.algorithm.searching : maxElement;
+import std.algorithm.iteration : each, filter, map;
+import std.algorithm.searching : count, maxElement;
 import std.array;
 import std.conv;
 import std.exception : enforce;
@@ -85,13 +84,17 @@ interface IRepository(K, V)
     alias KeyType = K;
     alias ValueType = V;
     alias DataObjectType = DataObject!(K, V).ThisType;
+    alias Predicate = bool delegate(in DataObjectType d) pure @safe;
 
     const(DataObjectType)[] getAll();
+    ulong countAll();
     const(DataObjectType) getByKey(in KeyType key);
     bool exists(in KeyType key);
     const(DataObjectType) create(in ValueType value);
     const(DataObjectType) update(in KeyType key, in ValueType value);
     DataObjectType remove(in KeyType key);
+    const(DataObjectType)[] filterBy(in Predicate pred);
+    ulong count(in Predicate pred);
 }
 
 interface IDataLoader(K, V)
@@ -126,6 +129,14 @@ class RepositoryBase(K, V) : IRepository!(K, V), IDataLoader!(K, V)
         synchronized (m_mutex.reader)
         {
             return m_entities.values;
+        }
+    }
+
+    override ulong countAll()
+    {
+        synchronized (m_mutex.reader)
+        {
+            return m_entities.length;
         }
     }
 
@@ -189,6 +200,22 @@ class RepositoryBase(K, V) : IRepository!(K, V), IDataLoader!(K, V)
         return removedDataObject;
     }
 
+    override const(DataObjectType)[] filterBy(in Predicate pred)
+    {
+        synchronized (m_mutex.reader)
+        {
+            return m_entities.values.filter!(v => pred(v)).array;
+        }
+    }
+
+    override ulong count(in Predicate pred)
+    {
+        synchronized (m_mutex.reader)
+        {
+            return m_entities.values.count!(v => pred(v))();
+        }
+    }
+    
     @safe override void load(in DataObjectType[] data)
     {
         synchronized (m_mutex.writer)
