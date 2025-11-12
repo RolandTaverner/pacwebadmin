@@ -1,132 +1,217 @@
-// =========================
-// Base Entity Types
-// =========================
+// ============================
+// Enums
+// ============================
+
+export type ProxyType =
+  | "DIRECT"
+  | "PROXY"
+  | "SOCKS"
+  | "SOCKS4"
+  | "SOCKS5"
+  | "HTTP"
+  | "HTTPS";
+
+export type ConditionType =
+  | "host_domain_only"
+  | "host_domain_subdomain"
+  | "host_subdomain_only"
+  | "url_shexp_match"
+  | "url_regexp_match";
+
+
+// ============================
+// Base entities
+// ============================
 
 export interface Category {
   id: number;
   name: string;
 }
 
-export interface Proxy {
+export interface ProxyItem {
   id: number;
-  hostAddress: string;
+  type: ProxyType;
+  address: string;
   description: string;
-  builtIn: boolean;
 }
 
-export interface HostRule {
+export interface Condition {
   id: number;
-  hostTemplate: string;
-  strict: boolean;
+  type: ConditionType;
+  expression: string;
   category: Category;
 }
 
-export interface ProxyRules {
+export interface ProxyRule {
   id: number;
-  proxy: Proxy;
+  proxy: ProxyItem;
   enabled: boolean;
   name: string;
-  hostRules: HostRule[];
+  conditions: Condition[];
 }
 
-export interface Pac {
+export interface ProxyRuleWithPriority {
+  proxyRule: ProxyRule;
+  priority: number;
+}
+
+export interface PAC {
   id: number;
   name: string;
   description: string;
-  proxyRules: ProxyRules[];
+
+  proxyRules: ProxyRuleWithPriority[];
+
+  serve: boolean;
+  servePath: string;
+
+  saveToFS: boolean;
+  saveToFSPath: string;
+
+  fallbackProxy: ProxyItem;
+}
+
+
+// ============================
+// Error response
+// ============================
+
+export interface ErrorResponse {
+  statusMessage: string;
+}
+
+
+// ============================
+// Category API
+// ============================
+
+export interface CategoriesResponse {
+  categories: Category[];
+}
+
+export interface CategoryCreateRequest {
+  name: string;
+}
+
+export interface CategoryUpdateRequest {
+  name: string;
+}
+
+
+// ============================
+// Proxy API
+// ============================
+
+export interface ProxiesResponse {
+  proxies: ProxyItem[];
+}
+
+export interface ProxyFilterRequest {
+  type?: string;
+  address?: string;
+}
+
+export interface ProxyCreateRequest {
+  type: ProxyType;
+  address: string;        // empty if type == DIRECT
+  description?: string;
+}
+
+export interface ProxyUpdateRequest {
+  type?: ProxyType;
+  address?: string;
+  description?: string;
+}
+
+
+// ============================
+// Condition API
+// ============================
+
+export interface ConditionsResponse {
+  conditions: Condition[];
+}
+
+export interface ConditionCreateRequest {
+  type: ConditionType;
+  expression: string;
+  categoryId: number;
+}
+
+export interface ConditionUpdateRequest {
+  type?: ConditionType;
+  expression?: string;
+  categoryId?: number;
+}
+
+
+// ============================
+// Proxy Rule API
+// ============================
+
+export interface ProxyRulesResponse {
+  proxyRules: ProxyRule[];
+}
+
+export interface ProxyRuleConditionsResponse {
+  conditions: Condition[];
+}
+
+export interface ProxyRuleCreateRequest {
+  proxyId: number;
+  enabled: boolean;
+  name: string;
+  conditionIds: number[];
+}
+
+export interface ProxyRuleUpdateRequest {
+  proxyId?: number;
+  enabled?: boolean;
+  name?: string;
+  conditionIds?: number[];
+}
+
+
+// ============================
+// PAC API
+// ============================
+
+export interface PACListResponse {
+  pacs: PAC[];
+}
+
+export interface PACRulesResponse {
+  proxyRules: ProxyRuleWithPriority[];
+}
+
+export interface PACProxyRuleLinkRequest {
+  proxyRuleId: number;
+  priority: number;
+}
+
+export interface PACRuleRef {
+  proxyRuleId: number;
+  priority: number;
+}
+
+export interface PacCreateRequest {
+  name: string;
+  description: string;
+  proxyRules: PACRuleRef[];
+  fallbackProxyId: number;
   serve: boolean;
   servePath: string;
   saveToFS: boolean;
   saveToFSPath: string;
 }
 
-// =========================
-// Category API Responses
-// =========================
-
-export interface CategoryAllResponse {
-  categories: Category[];
+export interface PacUpdateRequest {
+  name?: string;
+  description?: string;
+  proxyRules?: PACRuleRef[];
+  fallbackProxyId?: number;
+  serve?: boolean;
+  servePath?: string;
+  saveToFS?: boolean;
+  saveToFSPath?: string;
 }
-
-export interface CategoryFilterResponse {
-  categories: Category[];
-}
-
-export type CategoryGetByIdResponse = Category;
-export type CategoryCreateResponse = Category;
-export type CategoryUpdateResponse = Category;
-export type CategoryDeleteResponse = Category;
-
-// =========================
-// Proxy API Responses
-// =========================
-
-export interface ProxyAllResponse {
-  proxies: Proxy[];
-}
-
-export interface ProxyFilterResponse {
-  proxies: Proxy[];
-}
-
-export type ProxyGetByIdResponse = Proxy;
-export type ProxyCreateResponse = Proxy;
-export type ProxyUpdateResponse = Proxy;
-export type ProxyDeleteResponse = Proxy;
-
-// =========================
-// Host Rule API Responses
-// =========================
-
-export interface HostRuleAllResponse {
-  hostRules: HostRule[];
-}
-
-export type HostRuleGetByIdResponse = HostRule;
-export type HostRuleCreateResponse = HostRule;
-export type HostRuleUpdateResponse = HostRule;
-export type HostRuleDeleteResponse = HostRule;
-
-// =========================
-// Proxy Rules API Responses
-// =========================
-
-export interface ProxyRulesAllResponse {
-  proxyRules: ProxyRules[];
-}
-
-export type ProxyRulesGetByIdResponse = ProxyRules;
-export type ProxyRulesCreateResponse = ProxyRules;
-export type ProxyRulesUpdateResponse = ProxyRules;
-export type ProxyRulesDeleteResponse = ProxyRules;
-
-export interface ProxyRulesHostRulesResponse {
-  hostRules: HostRule[];
-}
-
-// These two endpoints return updated hostRules after mutation
-export type ProxyRulesAddHostRuleResponse = ProxyRulesHostRulesResponse;
-export type ProxyRulesDeleteHostRuleResponse = ProxyRulesHostRulesResponse;
-
-// =========================
-// PAC API Responses
-// =========================
-
-export interface PacAllResponse {
-  pacs: Pac[];
-}
-
-export type PacGetByIdResponse = Pac;
-export type PacCreateResponse = Pac;
-export type PacUpdateResponse = Pac;
-// Delete response is empty JSON (no content)
-export type PacDeleteResponse = Record<string, never>;
-
-// Linked proxy rules for PAC
-export interface PacProxyRulesResponse {
-  proxyRules: ProxyRules[];
-}
-
-// These return updated proxyRules after mutation
-export type PacAddProxyRulesResponse = PacProxyRulesResponse;
-export type PacDeleteProxyRulesResponse = PacProxyRulesResponse;
