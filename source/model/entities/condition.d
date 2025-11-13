@@ -1,5 +1,8 @@
 module model.entities.condition;
 
+import std.exception : enforce;
+import std.string;
+
 import model.entities.category;
 import model.entities.common;
 import model.errors.base;
@@ -50,6 +53,12 @@ struct ConditionInput
     string type;
     string expression;
     long categoryId;
+
+    @safe void validate() const pure
+    {
+        enforce!bool(type.strip().length != 0, new ConstraintError("type can't be empty"));
+        enforce!bool(expression.strip().length != 0, new ConstraintError("expression can't be empty"));
+    }
 }
 
 class ConditionNotFound : NotFoundBase!(Condition)

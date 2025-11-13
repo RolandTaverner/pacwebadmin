@@ -1,5 +1,8 @@
 module model.entities.proxy;
 
+import std.exception : enforce;
+import std.string;
+
 import model.entities.common;
 import model.errors.base;
 
@@ -49,6 +52,12 @@ struct ProxyInput
     string type;
     string address;
     string description;
+
+    @safe void validate() const pure
+    {
+        enforce!bool(type.strip().length != 0, new ConstraintError("type can't be empty"));
+        enforce!bool(address.strip().length != 0, new ConstraintError("address can't be empty"));
+    }
 }
 
 struct ProxyFilter
@@ -58,7 +67,7 @@ struct ProxyFilter
         this.type = type;
         this.address = address;
     }
-    
+
     string type;
     string address;
 }

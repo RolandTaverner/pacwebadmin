@@ -1,5 +1,8 @@
 module model.entities.category;
 
+import std.exception : enforce;
+import std.string;
+
 import model.entities.common;
 import model.errors.base;
 
@@ -31,6 +34,11 @@ private:
 struct CategoryInput
 {
     string name;
+
+    @safe void validate() const pure
+    {
+        enforce!bool(name.strip().length != 0, new ConstraintError("name can't be empty"));
+    }
 }
 
 struct CategoryFilter
@@ -39,7 +47,7 @@ struct CategoryFilter
     {
         this.name = name;
     }
-    
+
     string name;
 }
 

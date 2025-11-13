@@ -54,6 +54,11 @@ abstract class AlreadyExistsBase(T) : EntityErrorBase!(T)
     mixin entityErrorCtors;
 }
 
+abstract class InvalidArgBase(T) : EntityErrorBase!(T)
+{
+    mixin entityErrorCtors;
+}
+
 private mixin template entityErrorCtors()
 {
     this(long id, string msg, string file = __FILE__, size_t line = __LINE__, Throwable next = null) @nogc @safe pure nothrow

@@ -4,6 +4,7 @@ import std.algorithm.iteration : filter, map;
 import std.algorithm.searching : canFind;
 import std.array;
 import std.exception : enforce;
+import std.string;
 
 import datalayer.storage;
 import re = datalayer.repository.errors;
@@ -47,19 +48,28 @@ class Model
         }
     }
 
-    @trusted const(Category) createCategory(in CategoryInput ci)
+    @trusted const(Category) createCategory(in CategoryInput i)
     {
+        i.validate();
+
+        // auto pred = (in dlcategory.Category c) {
+        //     return canFind(c.value().name(), f.name);
+        // };
+
+        // categories.count()
         // TODO: check name uniqueness
-        const auto created = categories.create(new dlcategory.CategoryValue(ci.name));
+
+        const auto created = categories.create(new dlcategory.CategoryValue(i.name.strip));
         return makeCategory(created);
     }
 
-    @trusted const(Category) updateCategory(in long id, in CategoryInput ci)
+    @trusted const(Category) updateCategory(in long id, in CategoryInput i)
     {
+        i.validate();
         try
         {
             // TODO: check name uniqueness
-            const auto updated = categories.update(id, new dlcategory.CategoryValue(ci.name));
+            const auto updated = categories.update(id, new dlcategory.CategoryValue(i.name.strip));
             return makeCategory(updated);
         }
         catch (re.NotFoundError e)
@@ -112,21 +122,25 @@ class Model
         }
     }
 
-    @trusted const(Proxy) createProxy(in ProxyInput pi)
+    @trusted const(Proxy) createProxy(in ProxyInput i)
     {
+        i.validate();
+
         // TODO: check address uniqueness
         const auto created = proxies.create(
-            new dlproxy.ProxyValue(pi.type, pi.address, pi.description));
+            new dlproxy.ProxyValue(i.type.strip, i.address.strip, i.description));
         return makeProxy(created);
     }
 
-    @trusted const(Proxy) updateProxy(in long id, in ProxyInput pi)
+    @trusted const(Proxy) updateProxy(in long id, in ProxyInput i)
     {
+        i.validate();
+
         try
         {
             // TODO: check address uniqueness
             const auto updated = proxies.update(id,
-                new dlproxy.ProxyValue(pi.type, pi.address, pi.description));
+                new dlproxy.ProxyValue(i.type.strip, i.address.strip, i.description));
             return makeProxy(updated);
         }
         catch (re.NotFoundError e)
@@ -182,23 +196,25 @@ class Model
 
     @trusted const(Condition) createCondition(in ConditionInput i)
     {
+        i.validate();
         enforce!bool(categories.exists(i.categoryId), new CategoryNotFound(i.categoryId));
 
         // TODO: check hostTemplate uniqueness
         const auto created = conditions.create(
-            new dlcondition.ConditionValue(i.type, i.expression, i.categoryId));
+            new dlcondition.ConditionValue(i.type.strip, i.expression.strip, i.categoryId));
         return makeCondition(created);
     }
 
     @trusted const(Condition) updateCondition(in long id, in ConditionInput i)
     {
+        i.validate();
         enforce!bool(categories.exists(i.categoryId), new CategoryNotFound(i.categoryId));
 
         try
         {
             // TODO: check hostTemplate uniqueness
             const auto updated = conditions.update(id,
-                new dlcondition.ConditionValue(i.type, i.expression, i.categoryId));
+                new dlcondition.ConditionValue(i.type.strip, i.expression.strip, i.categoryId));
             return makeCondition(updated);
         }
         catch (re.NotFoundError e)
@@ -242,19 +258,23 @@ class Model
 
     @trusted const(ProxyRule) createProxyRule(in ProxyRuleInput i)
     {
+        i.validate();
         enforce!bool(proxies.exists(i.proxyId), new ProxyNotFound(i.proxyId));
         foreach (hrId; i.conditionIds)
         {
             enforce!bool(conditions.exists(hrId), new ConditionNotFound(hrId));
         }
 
-        const auto created = proxyRules.create(new dlproxyrule.ProxyRuleValue(i.proxyId, i.enabled, i.name, i
-                .conditionIds));
+        const auto created = proxyRules.create(
+            new dlproxyrule.ProxyRuleValue(i.proxyId,
+                i.enabled,
+                i.name.strip, i.conditionIds));
         return makeProxyRule(created);
     }
 
     @trusted const(ProxyRule) updateProxyRule(in long id, in ProxyRuleInput i)
     {
+        i.validate();
         enforce!bool(proxies.exists(i.proxyId), new ProxyNotFound(i.proxyId));
         foreach (hrId; i.conditionIds)
         {
@@ -264,8 +284,11 @@ class Model
         try
         {
             // TODO: check conditionIds uniqueness and existance
-            const auto updated = proxyRules.update(id, new dlproxyrule.ProxyRuleValue(i.proxyId, i.enabled, i
-                    .name, i.conditionIds));
+            const auto updated = proxyRules.update(id,
+                new dlproxyrule.ProxyRuleValue(i.proxyId,
+                    i.enabled,
+                    i.name.strip,
+                    i.conditionIds));
             return makeProxyRule(updated);
         }
         catch (re.NotFoundError e)
@@ -355,29 +378,43 @@ class Model
         }
     }
 
-    @trusted const(PAC) createPAC(in PACInput pi)
+    @trusted const(PAC) createPAC(in PACInput i)
     {
-        foreach (prId; pi.proxyRuleIds)
+        i.validate();
+        foreach (prId; i.proxyRuleIds)
         {
             enforce!bool(proxyRules.exists(prId), new ProxyRuleNotFound(prId));
         }
 
-        const auto created = pacs.create(new dlpac.PACValue(pi.name, pi.description, pi.proxyRuleIds,
-                pi.serve, pi.servePath, pi.saveToFS, pi.saveToFSPath));
+        const auto created = pacs.create(
+            new dlpac.PACValue(i.name.strip,
+                i.description,
+                i.proxyRuleIds,
+                i.serve,
+                i.servePath.strip,
+                i.saveToFS,
+                i.saveToFSPath.strip));
         return makePAC(created);
     }
 
-    @trusted const(PAC) updatePAC(in long id, in PACInput pi)
+    @trusted const(PAC) updatePAC(in long id, in PACInput i)
     {
-        foreach (prId; pi.proxyRuleIds)
+        i.validate();
+        foreach (prId; i.proxyRuleIds)
         {
             enforce!bool(proxyRules.exists(prId), new ProxyRuleNotFound(prId));
         }
 
         try
         {
-            const auto updated = pacs.update(id, new dlpac.PACValue(pi.name, pi.description, pi.proxyRuleIds,
-                    pi.serve, pi.servePath, pi.saveToFS, pi.saveToFSPath));
+            const auto updated = pacs.update(id,
+                new dlpac.PACValue(i.name.strip,
+                    i.description,
+                    i.proxyRuleIds,
+                    i.serve,
+                    i.servePath.strip,
+                    i.saveToFS,
+                    i.saveToFSPath.strip));
             return makePAC(updated);
         }
         catch (re.NotFoundError e)

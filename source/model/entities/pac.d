@@ -1,5 +1,8 @@
 module model.entities.pac;
 
+import std.exception : enforce;
+import std.string;
+
 import model.entities.common;
 import model.entities.proxyrule;
 import model.errors.base;
@@ -97,6 +100,13 @@ struct PACInput
     string servePath;
     bool saveToFS;
     string saveToFSPath;
+
+    @safe void validate() const pure
+    {
+        enforce!bool(name.strip().length != 0, new ConstraintError("name can't be empty"));
+        enforce!bool(servePath.strip().length != 0, new ConstraintError("servePath can't be empty"));
+        enforce!bool(saveToFSPath.strip().length != 0, new ConstraintError("saveToFSPath can't be empty"));
+    }
 }
 
 class PACNotFound : NotFoundBase!(PAC)

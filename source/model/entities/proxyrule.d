@@ -1,5 +1,8 @@
 module model.entities.proxyrule;
 
+import std.exception : enforce;
+import std.string;
+
 import model.entities.common;
 import model.entities.condition;
 import model.entities.proxy;
@@ -68,6 +71,11 @@ struct ProxyRuleInput
     bool enabled;
     string name;
     long[] conditionIds;
+
+    @safe void validate() const pure
+    {
+        enforce!bool(name.strip().length != 0, new ConstraintError("name can't be empty"));
+    }    
 }
 
 class ProxyRuleNotFound : NotFoundBase!(ProxyRule)
