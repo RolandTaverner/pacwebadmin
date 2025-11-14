@@ -25,6 +25,6 @@
 	},
 	"description": "Web admin to manage proxy autoconfiguration (PAC) file",
 	"license": "Unlicense",
-	"name": "pac_web_admin",
+	"name": "pacwebadmin",
 	"targetPath": "$BUILD_TYPE"
 }
