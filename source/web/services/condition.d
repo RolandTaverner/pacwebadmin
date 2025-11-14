@@ -35,40 +35,41 @@ class ConditionService : ConditionAPI
 
     @safe override ConditionDTO create(in ConditionInputDTO p)
     {
-        const ConditionInput ci = {
-            type: p.type, expression: p.expression, categoryId: p.categoryId
-        };
-        const Condition created = m_model.createCondition(ci);
-        return toDTO(created);
+        return remapExceptions!(delegate() {
+            const ConditionInput ci = {
+                type: p.type, expression: p.expression, categoryId: p.categoryId
+            };
+            const Condition created = m_model.createCondition(ci);
+            return toDTO(created);
+        }, ConditionDTO);
     }
 
     @safe override ConditionDTO update(in long id, in ConditionInputDTO p)
     {
         return remapExceptions!(delegate() {
             const ConditionInput ci = {
-                type: p.type, expression: p.expression, categoryId: p.categoryId
-            };
-            const Condition updated = m_model.updateCondition(id, ci);
-            return toDTO(updated);
-        }, ConditionDTO);
-    }
+                type: p.type, expression: p.expression, categoryId: p.categoryId};
+                const Condition updated = m_model.updateCondition(id, ci);
+                return toDTO(updated);
+            }, ConditionDTO);
+        }
 
-    @safe override ConditionDTO getById(in long id)
-    {
-        return remapExceptions!(delegate() {
-            const Condition got = m_model.conditionById(id);
-            return toDTO(got);
-        }, ConditionDTO);
-    }
+        @safe override ConditionDTO getById(in long id)
+        {
+            return remapExceptions!(delegate() {
+                const Condition got = m_model.conditionById(id);
+                return toDTO(got);
+            }, ConditionDTO);
+        }
 
-    @safe override ConditionDTO remove(in long id)
-    {
-        return remapExceptions!(delegate() {
-            const Condition removed = m_model.deleteCondition(id);
-            return toDTO(removed);
-        }, ConditionDTO);
-    }
+        @safe override ConditionDTO remove(in long id)
+        {
+            return remapExceptions!(delegate() {
+                const Condition removed = m_model.deleteCondition(id);
+                return toDTO(removed);
+            }, ConditionDTO);
+        }
 
-private:
-    Model m_model;
-}
+    private:
+        Model m_model;
+    }

@@ -240,11 +240,11 @@ class Model
     @trusted const(Condition) createCondition(in ConditionInput i)
     {
         i.validate();
-        enforce!bool(categories.exists(i.categoryId), new CategoryNotFound(i.categoryId));
 
         synchronized (m_mutex.writer)
         {
-            // TODO: check hostTemplate uniqueness
+            validateConditionModify(i);
+
             const auto created = conditions.create(
                 new dlcondition.ConditionValue(i.type.strip, i.expression.strip, i.categoryId));
             return makeCondition(created);
@@ -254,13 +254,12 @@ class Model
     @trusted const(Condition) updateCondition(in long id, in ConditionInput i)
     {
         i.validate();
-        enforce!bool(categories.exists(i.categoryId), new CategoryNotFound(i.categoryId));
 
         synchronized (m_mutex.writer)
         {
+            validateConditionModify(i);
             try
             {
-                // TODO: check hostTemplate uniqueness
                 const auto updated = conditions.update(id,
                     new dlcondition.ConditionValue(i.type.strip, i.expression.strip, i.categoryId));
                 return makeCondition(updated);
@@ -276,9 +275,9 @@ class Model
     {
         synchronized (m_mutex.writer)
         {
+            validateConditionDelete(id);
             try
             {
-                // TODO: update proxy rules
                 const auto deleted = conditions.remove(id);
                 return makeCondition(deleted);
             }
@@ -607,7 +606,8 @@ protected:
             return c.value().categoryId() == id;
         };
 
-        enforce!bool(conditions.count(pred) == 0, new ConstraintError("there are conditions referenced this category"));
+        enforce!bool(conditions.count(pred) == 0, new ConstraintError(
+                "there are conditions referenced this category"));
     }
 
     @safe Category makeCategory(in dlcategory.CategoryRepository.DataObjectType dto)
@@ -630,7 +630,8 @@ protected:
             return p.value().proxyId() == id;
         };
 
-        enforce!bool(proxyRules.count(pred) == 0, new ConstraintError("there are proxy rules referenced this proxy"));
+        enforce!bool(proxyRules.count(pred) == 0, new ConstraintError(
+                "there are proxy rules referenced this proxy"));
     }
 
     @safe Proxy makeProxy(in dlproxy.ProxyRepository.DataObjectType dto)
@@ -639,6 +640,21 @@ protected:
             dto.value().type(),
             dto.value().address(),
             dto.value().description());
+    }
+
+    void validateConditionModify(in ConditionInput i)
+    {
+        enforce!bool(categories.exists(i.categoryId), new ConstraintError("cantegory not exists"));
+    }
+
+    void validateConditionDelete(in long id)
+    {
+        auto pred = (in dlproxyrule.ProxyRule p) {
+            return p.value().conditionIds().canFind(id);
+        };
+
+        enforce!bool(proxyRules.count(pred) == 0,
+            new ConstraintError("there are proxy rules referenced this condition"));
     }
 
     @safe Condition makeCondition(in dlcondition.ConditionRepository.DataObjectType dto)

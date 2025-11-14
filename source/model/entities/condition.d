@@ -1,11 +1,23 @@
 module model.entities.condition;
 
+import std.algorithm: canFind, map;
+import std.array;
 import std.exception : enforce;
 import std.string;
+import std.traits : EnumMembers;
 
 import model.entities.category;
 import model.entities.common;
 import model.errors.base;
+
+enum ConditionType : string
+{
+    hostDomainOnly = "host_domain_only",
+    hostDomainSubdomain = "host_domain_subdomain",
+    hostSubdomainOnly = "host_subdomain_only",
+    urlShexpMatch = "url_shexp_match",
+    urlRegexpMatch = "url_regexp_match",
+}
 
 class Condition
 {
@@ -57,7 +69,14 @@ struct ConditionInput
     @safe void validate() const pure
     {
         enforce!bool(type.strip().length != 0, new ConstraintError("type can't be empty"));
-        enforce!bool(expression.strip().length != 0, new ConstraintError("expression can't be empty"));
+        enforce!bool(expression.strip().length != 0, new ConstraintError(
+                "expression can't be empty"));
+
+        const auto conditionTypeValues = [EnumMembers!ConditionType]
+            .map!(el => cast(string) el)
+            .array;
+
+        enforce!bool(conditionTypeValues.canFind(type.strip()), new ConstraintError("invalid type"));
     }
 }
 
