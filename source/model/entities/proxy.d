@@ -1,10 +1,24 @@
 module model.entities.proxy;
 
+import std.algorithm: canFind, map;
+import std.array;
 import std.exception : enforce;
 import std.string;
+import std.traits : EnumMembers;
 
 import model.entities.common;
 import model.errors.base;
+
+enum ProxyType : string
+{
+    DIRECT = "DIRECT",
+    PROXY = "PROXY",
+    SOCKS = "SOCKS",
+    SOCKS4 = "SOCKS4",
+    SOCKS5 = "SOCKS5",
+    HTTP = "HTTP",
+    HTTPS = "HTTPS",
+}
 
 class Proxy
 {
@@ -57,6 +71,12 @@ struct ProxyInput
     {
         enforce!bool(type.strip().length != 0, new ConstraintError("type can't be empty"));
         enforce!bool(address.strip().length != 0, new ConstraintError("address can't be empty"));
+
+        const auto proxyTypeValues = [EnumMembers!ProxyType]
+            .map!(el => cast(string) el)
+            .array;
+
+        enforce!bool(proxyTypeValues.canFind(type.strip()), new ConstraintError("invalid type"));
     }
 }
 

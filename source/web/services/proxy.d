@@ -51,40 +51,41 @@ class ProxyService : ProxyAPI
 
     @safe override ProxyDTO create(in ProxyInputDTO p)
     {
-        const ProxyInput pi = {
-            type: p.type, address: p.address, description: p.description,
-        };
-        const Proxy created = m_model.createProxy(pi);
-        return toDTO(created);
+        return remapExceptions!(delegate() {
+            const ProxyInput pi = {
+                type: p.type, address: p.address, description: p.description,
+            };
+            const Proxy created = m_model.createProxy(pi);
+            return toDTO(created);
+        }, ProxyDTO);
     }
 
     @safe override ProxyDTO update(in long id, in ProxyInputDTO p)
     {
         return remapExceptions!(delegate() {
             const ProxyInput pi = {
-                type: p.type, address: p.address, description: p.description,
-            };
-            const Proxy updated = m_model.updateProxy(id, pi);
-            return toDTO(updated);
-        }, ProxyDTO);
-    }
+                type: p.type, address: p.address, description: p.description,};
+                const Proxy updated = m_model.updateProxy(id, pi);
+                return toDTO(updated);
+            }, ProxyDTO);
+        }
 
-    @safe override ProxyDTO getById(in long id)
-    {
-        return remapExceptions!(delegate() {
-            const Proxy got = m_model.proxyById(id);
-            return toDTO(got);
-        }, ProxyDTO);
-    }
+        @safe override ProxyDTO getById(in long id)
+        {
+            return remapExceptions!(delegate() {
+                const Proxy got = m_model.proxyById(id);
+                return toDTO(got);
+            }, ProxyDTO);
+        }
 
-    @safe override ProxyDTO remove(in long id)
-    {
-        return remapExceptions!(delegate() {
-            const Proxy removed = m_model.deleteProxy(id);
-            return toDTO(removed);
-        }, ProxyDTO);
-    }
+        @safe override ProxyDTO remove(in long id)
+        {
+            return remapExceptions!(delegate() {
+                const Proxy removed = m_model.deleteProxy(id);
+                return toDTO(removed);
+            }, ProxyDTO);
+        }
 
-private:
-    Model m_model;
-}
+    private:
+        Model m_model;
+    }

@@ -45,6 +45,6 @@ T remapExceptions(alias fun, T)() @trusted
     }
     catch (ConstraintError e)
     {
-        throw new HTTPStatusException(400, e.toString());
+        throw new HTTPStatusException(400, e.msg);
     }
 }

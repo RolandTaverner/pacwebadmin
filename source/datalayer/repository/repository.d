@@ -239,7 +239,6 @@ protected:
         return m_entities.keys.maxElement + 1;
     }
 
-private:
     DataObjectType[KeyType] m_entities;
     ReadWriteMutex m_mutex;
     IListener!(DataObjectType) m_listener;

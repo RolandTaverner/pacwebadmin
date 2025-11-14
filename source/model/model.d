@@ -62,12 +62,7 @@ class Model
 
         synchronized (m_mutex.writer)
         {
-            // auto pred = (in dlcategory.Category c) {
-            //     return canFind(c.value().name(), f.name);
-            // };
-
-            // categories.count()
-            // TODO: check name uniqueness
+            validateCategoryModify(i);
 
             const auto created = categories.create(new dlcategory.CategoryValue(i.name.strip));
             return makeCategory(created);
@@ -80,11 +75,12 @@ class Model
 
         synchronized (m_mutex.writer)
         {
+            validateCategoryModify(i);
+
             try
             {
-                // TODO: check name uniqueness
-                const auto updated = categories.update(id, new dlcategory.CategoryValue(
-                        i.name.strip));
+                const auto updated = categories.update(id,
+                    new dlcategory.CategoryValue(i.name.strip));
                 return makeCategory(updated);
             }
             catch (re.NotFoundError e)
@@ -155,7 +151,8 @@ class Model
 
         synchronized (m_mutex.writer)
         {
-            // TODO: check address uniqueness
+            validateProxyModify(i);
+
             const auto created = proxies.create(
                 new dlproxy.ProxyValue(i.type.strip, i.address.strip, i.description));
             return makeProxy(created);
@@ -168,9 +165,10 @@ class Model
 
         synchronized (m_mutex.writer)
         {
+            validateProxyModify(i);
+
             try
             {
-                // TODO: check address uniqueness
                 const auto updated = proxies.update(id,
                     new dlproxy.ProxyValue(i.type.strip, i.address.strip, i.description));
                 return makeProxy(updated);
@@ -594,9 +592,27 @@ class Model
     //=======================
 
 protected:
+    void validateCategoryModify(in CategoryInput i)
+    {
+        auto pred = (in dlcategory.Category c) {
+            return c.value().name() == i.name.strip;
+        };
+
+        enforce!bool(categories.count(pred) == 0, new ConstraintError("already exists"));
+    }
+
     @safe Category makeCategory(in dlcategory.CategoryRepository.DataObjectType dto)
     {
         return new Category(dto.key(), dto.value().name());
+    }
+
+    void validateProxyModify(in ProxyInput i)
+    {
+        auto pred = (in dlproxy.Proxy p) {
+            return p.value().type() == i.type.strip && p.value().address() == i.address.strip;
+        };
+
+        enforce!bool(proxies.count(pred) == 0, new ConstraintError("already exists"));
     }
 
     @safe Proxy makeProxy(in dlproxy.ProxyRepository.DataObjectType dto)

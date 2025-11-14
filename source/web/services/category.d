@@ -52,9 +52,11 @@ class CategoryService : CategoryAPI
 
     @safe override CategoryDTO create(in CategoryInputDTO c)
     {
-        const CategoryInput ci = {name: c.name};
-        const Category created = m_model.createCategory(ci);
-        return toDTO(created);
+        return remapExceptions!(delegate() {
+            const CategoryInput ci = {name: c.name};
+            const Category created = m_model.createCategory(ci);
+            return toDTO(created);
+        }, CategoryDTO);
     }
 
     @safe override CategoryDTO update(in long id, in CategoryInputDTO c)
