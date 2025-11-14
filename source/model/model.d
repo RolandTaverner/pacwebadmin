@@ -319,16 +319,13 @@ class Model
 
         synchronized (m_mutex.writer)
         {
-            enforce!bool(proxies.exists(i.proxyId), new ProxyNotFound(i.proxyId));
-            foreach (hrId; i.conditionIds)
-            {
-                enforce!bool(conditions.exists(hrId), new ConditionNotFound(hrId));
-            }
+            validateProxyRuleModify(i);
 
             const auto created = proxyRules.create(
                 new dlproxyrule.ProxyRuleValue(i.proxyId,
                     i.enabled,
-                    i.name.strip, i.conditionIds));
+                    i.name.strip,
+                    i.conditionIds));
             return makeProxyRule(created);
         }
     }
@@ -338,12 +335,7 @@ class Model
         i.validate();
         synchronized (m_mutex.writer)
         {
-            enforce!bool(proxies.exists(i.proxyId), new ProxyNotFound(i.proxyId));
-            foreach (hrId; i.conditionIds)
-            {
-                enforce!bool(conditions.exists(hrId), new ConditionNotFound(hrId));
-            }
-
+            validateProxyRuleModify(i);
             try
             {
                 // TODO: check conditionIds uniqueness and existance
@@ -419,9 +411,9 @@ class Model
     {
         synchronized (m_mutex.writer)
         {
+            validateProxyRuleDelete(id);
             try
             {
-                // TODO: update PAC
                 const auto deleted = proxyRules.remove(id);
                 return makeProxyRule(deleted);
             }
@@ -667,6 +659,31 @@ protected:
         auto category = makeCategory(c);
 
         return new Condition(id, type, expression, category);
+    }
+
+    void validateProxyRuleModify(in ProxyRuleInput i)
+    {
+        auto pred = (in dlproxyrule.ProxyRule p) {
+            return p.value().name().strip == i.name.strip;
+        };
+        enforce!bool(proxyRules.count(pred) == 0, new ConstraintError("already exists"));
+
+        enforce!bool(proxies.exists(i.proxyId), new ConstraintError("proxy not exists"));
+
+        foreach (id; i.conditionIds)
+        {
+            enforce!bool(conditions.exists(id), new ConstraintError("condition not exists"));
+        }
+    }
+
+    void validateProxyRuleDelete(in long id)
+    {
+        auto pred = (in dlpac.PAC p) {
+            return p.value().proxyRuleIds().canFind(id);
+        };
+
+        enforce!bool(pacs.count(pred) == 0,
+            new ConstraintError("there are PAC's referenced this proxy rule"));
     }
 
     @safe ProxyRule makeProxyRule(in dlproxyrule.ProxyRuleRepository.DataObjectType dto)

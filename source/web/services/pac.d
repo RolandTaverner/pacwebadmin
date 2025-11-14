@@ -37,71 +37,83 @@ class PACService : PACAPI
 
     @safe override PACDTO create(in PACInputDTO p)
     {
-        const PACInput pi = {
-            p.name, p.description, p.proxyRuleIds.dup,
-            p.serve, p.servePath, p.saveToFS, p.saveToFSPath
-        };
+        return remapExceptions!(delegate() {
+            const PACInput pi = {
+                p.name,
+                p.description,
+                p.proxyRuleIds,
+                p.serve,
+                p.servePath,
+                p.saveToFS,
+                p.saveToFSPath
+            };
 
-        const PAC created = m_model.createPAC(pi);
-        return toDTO(created);
+            const PAC created = m_model.createPAC(pi);
+            return toDTO(created);
+        }, PACDTO);
     }
 
     @safe override PACDTO update(in long id, in PACInputDTO p)
     {
         return remapExceptions!(delegate() {
             const PACInput pi = {
-                p.name, p.description, p.proxyRuleIds.dup,
-                p.serve, p.servePath, p.saveToFS, p.saveToFSPath
+                p.name,
+                p.description,
+                p.proxyRuleIds,
+                p.serve,
+                p.servePath,
+                p.saveToFS,
+                p.saveToFSPath};
+
+                const PAC updated = m_model.updatePAC(id, pi);
+                return toDTO(updated);
+            }, PACDTO);
+        }
+
+        @safe override PACDTO getById(in long id)
+        {
+            return remapExceptions!(delegate() {
+                const PAC got = m_model.pacById(id);
+                return toDTO(got);
+            }, PACDTO);
+        }
+
+        @safe override PACDTO remove(in long id)
+        {
+            return remapExceptions!(delegate() {
+                const PAC removed = m_model.deletePAC(id);
+                return toDTO(removed);
+            }, PACDTO);
+        }
+
+        @safe override ProxyRuleList getProxyRules(in long id)
+        {
+            return remapExceptions!(delegate() {
+                ProxyRuleList response = {
+                    array(m_model.pacById(id).proxyRules().map!(p => toDTO(p)))
             };
-
-            const PAC updated = m_model.updatePAC(id, pi);
-            return toDTO(updated);
-        }, PACDTO);
+            return response;
+        }, ProxyRuleList);
     }
 
-    @safe override PACDTO getById(in long id)
+    @safe override ProxyRuleList addProxyRule(in long id, in long prid)
     {
         return remapExceptions!(delegate() {
-            const PAC got = m_model.pacById(id);
-            return toDTO(got);
-        }, PACDTO);
+            const auto updated = m_model.pacAddProxyRule(id, prid);
+            ProxyRuleList response = {array(updated.map!(c => toDTO(c)))};
+            return response;
+        }, ProxyRuleList);
     }
 
-    @safe override PACDTO remove(in long id)
+    @safe override ProxyRuleList removeProxyRule(in long id, in long prid)
     {
         return remapExceptions!(delegate() {
-            const PAC removed = m_model.deletePAC(id);
-            return toDTO(removed);
-        }, PACDTO);
+            const auto updated = m_model.pacRemoveProxyRule(id, prid);
+            ProxyRuleList response = {array(updated.map!(c => toDTO(c)))};
+            return response;
+        }, ProxyRuleList);
     }
 
-    @safe override ProxyRuleList getProxyRules(in long id)
-    {
-        return remapExceptions!(delegate() {
-            ProxyRuleList response = {
-                array(m_model.pacById(id).proxyRules().map!(p => toDTO(p)))};
-                return response;
-            }, ProxyRuleList);
-        }
-
-        @safe override ProxyRuleList addProxyRule(in long id, in long prid)
-        {
-            return remapExceptions!(delegate() {
-                const auto updated = m_model.pacAddProxyRule(id, prid);
-                ProxyRuleList response = {array(updated.map!(c => toDTO(c)))};
-                return response;
-            }, ProxyRuleList);
-        }
-
-        @safe override ProxyRuleList removeProxyRule(in long id, in long prid)
-        {
-            return remapExceptions!(delegate() {
-                const auto updated = m_model.pacRemoveProxyRule(id, prid);
-                ProxyRuleList response = {array(updated.map!(c => toDTO(c)))};
-                return response;
-            }, ProxyRuleList);
-        }
-
-    private:
-        Model m_model;
-    }
+private:
+    Model m_model;
+}

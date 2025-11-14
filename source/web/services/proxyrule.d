@@ -37,12 +37,14 @@ class ProxyRuleService : ProxyRuleAPI
 
     @safe override ProxyRuleDTO create(in ProxyRuleInputDTO prs)
     {
-        const ProxyRuleInput prsi = {
-            proxyId: prs.proxyId, enabled: prs.enabled, name: prs.name, conditionIds: prs
-                .conditionIds.dup
-        };
-        const ProxyRule created = m_model.createProxyRule(prsi);
-        return toDTO(created);
+        return remapExceptions!(delegate() {
+            const ProxyRuleInput prsi = {
+                proxyId: prs.proxyId, enabled: prs.enabled, name: prs.name, conditionIds: prs
+                    .conditionIds.dup
+            };
+            const ProxyRule created = m_model.createProxyRule(prsi);
+            return toDTO(created);
+        }, ProxyRuleDTO);
     }
 
     @safe override ProxyRuleDTO update(in long id, in ProxyRuleInputDTO prs)
@@ -50,57 +52,57 @@ class ProxyRuleService : ProxyRuleAPI
         return remapExceptions!(delegate() {
             const ProxyRuleInput prsi = {
                 proxyId: prs.proxyId, enabled: prs.enabled, name: prs.name, conditionIds: prs
-                    .conditionIds.dup
+                    .conditionIds.dup};
+                const ProxyRule updated = m_model.updateProxyRule(id, prsi);
+                return toDTO(updated);
+            }, ProxyRuleDTO);
+        }
+
+        @safe override ProxyRuleDTO getById(in long id)
+        {
+            return remapExceptions!(delegate() {
+                const ProxyRule got = m_model.proxyRuleById(id);
+                return toDTO(got);
+            }, ProxyRuleDTO);
+        }
+
+        @safe override ProxyRuleDTO remove(in long id)
+        {
+            return remapExceptions!(delegate() {
+                const ProxyRule removed = m_model.deleteProxyRule(id);
+                return toDTO(removed);
+            }, ProxyRuleDTO);
+        }
+
+        @safe override ConditionList getConditions(in long id)
+        {
+            return remapExceptions!(delegate() {
+                ConditionList response = {
+                    array(m_model.proxyRuleById(id)
+                        .conditions().map!(c => toDTO(c)))
             };
-            const ProxyRule updated = m_model.updateProxyRule(id, prsi);
-            return toDTO(updated);
-        }, ProxyRuleDTO);
+            return response;
+        }, ConditionList);
     }
 
-    @safe override ProxyRuleDTO getById(in long id)
+    @safe override ConditionList addCondition(in long id, in long hrid)
     {
         return remapExceptions!(delegate() {
-            const ProxyRule got = m_model.proxyRuleById(id);
-            return toDTO(got);
-        }, ProxyRuleDTO);
+            const auto updated = m_model.proxyRuleAddCondition(id, hrid);
+            ConditionList response = {array(updated.map!(c => toDTO(c)))};
+            return response;
+        }, ConditionList);
     }
 
-    @safe override ProxyRuleDTO remove(in long id)
+    @safe override ConditionList removeCondition(in long id, in long hrid)
     {
         return remapExceptions!(delegate() {
-            const ProxyRule removed = m_model.deleteProxyRule(id);
-            return toDTO(removed);
-        }, ProxyRuleDTO);
+            const auto updated = m_model.proxyRuleRemoveCondition(id, hrid);
+            ConditionList response = {array(updated.map!(c => toDTO(c)))};
+            return response;
+        }, ConditionList);
     }
 
-    @safe override ConditionList getConditions(in long id)
-    {
-        return remapExceptions!(delegate() {
-            ConditionList response = {
-                array(m_model.proxyRuleById(id)
-                    .conditions().map!(c => toDTO(c)))};
-                return response;
-            }, ConditionList);
-        }
-
-        @safe override ConditionList addCondition(in long id, in long hrid)
-        {
-            return remapExceptions!(delegate() {
-                const auto updated = m_model.proxyRuleAddCondition(id, hrid);
-                ConditionList response = {array(updated.map!(c => toDTO(c)))};
-                return response;
-            }, ConditionList);
-        }
-
-        @safe override ConditionList removeCondition(in long id, in long hrid)
-        {
-            return remapExceptions!(delegate() {
-                const auto updated = m_model.proxyRuleRemoveCondition(id, hrid);
-                ConditionList response = {array(updated.map!(c => toDTO(c)))};
-                return response;
-            }, ConditionList);
-        }
-
-    private:
-        Model m_model;
-    }
+private:
+    Model m_model;
+}
