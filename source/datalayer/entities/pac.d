@@ -3,8 +3,21 @@ module datalayer.entities.pac;
 import std.algorithm.iteration : map;
 import std.array : array;
 import std.json;
+import std.typecons : tuple, Tuple;
 
 import datalayer.repository.repository;
+
+struct ProxyRulePriority
+{
+    this(long proxyRuleId, long priority)
+    {
+        this.proxyRuleId = proxyRuleId;
+        this.priority = priority;
+    }
+
+    long proxyRuleId;
+    long priority;
+}
 
 class PACValue : ISerializable
 {
@@ -16,19 +29,24 @@ class PACValue : ISerializable
     {
         m_name = v.m_name;
         m_description = v.m_description;
-        m_proxyRuleIds = v.m_proxyRuleIds.dup;
+        m_proxyRules = v.m_proxyRules.dup;
         m_serve = v.m_serve;
         m_servePath = v.m_servePath;
         m_saveToFS = v.m_saveToFS;
         m_saveToFSPath = v.m_saveToFSPath;
     }
 
-    @safe this(in string name, in string description, in long[] proxyRuleIds,
-        bool serve, string servePath, bool saveToFS, string saveToFSPath) pure
+    @safe this(in string name,
+        in string description,
+        in ProxyRulePriority[] proxyRules,
+        in bool serve,
+        in string servePath,
+        in bool saveToFS,
+        in string saveToFSPath) pure
     {
         m_name = name;
         m_description = description;
-        m_proxyRuleIds = proxyRuleIds.dup;
+        m_proxyRules = proxyRules.dup;
         m_serve = serve;
         m_servePath = servePath;
         m_saveToFS = saveToFS;
@@ -45,9 +63,9 @@ class PACValue : ISerializable
         return m_description;
     }
 
-    @safe const(long[]) proxyRuleIds() const pure
+    @safe const(ProxyRulePriority[]) proxyRules() const pure
     {
-        return m_proxyRuleIds;
+        return m_proxyRules;
     }
 
     @safe bool serve() const pure
@@ -75,7 +93,11 @@ class PACValue : ISerializable
         return JSONValue([
             "name": JSONValue(name()),
             "description": JSONValue(description()),
-            "proxyRuleIds": JSONValue(proxyRuleIds()),
+            "proxyRules": JSONValue(m_proxyRules
+                    .map!(i => JSONValue([
+                            "id": JSONValue(i.proxyRuleId),
+                            "priority": JSONValue(i.priority)
+                        ])).array),
             "serve": JSONValue(serve()),
             "servePath": JSONValue(servePath()),
             "saveToFS": JSONValue(saveToFS()),
@@ -85,12 +107,22 @@ class PACValue : ISerializable
 
     unittest
     {
-        PACValue value = new PACValue("name", "description", [1, 2, 3], true, "serve", true, "save");
+        PACValue value = new PACValue("name",
+            "description",
+            [
+                ProxyRulePriority(1, 1),
+                ProxyRulePriority(2, 2),
+                ProxyRulePriority(3, 3)
+            ],
+            true,
+            "serve",
+            true,
+            "save");
         const JSONValue v = value.toJSON();
 
         assert(v.object["name"].str == "name");
         assert(v.object["description"].str == "description");
-        assert(v.object["proxyRuleIds"].array.length == 3);
+        assert(v.object["proxyRules"].array.length == 3);
         assert(v.object["serve"].boolean == true);
         assert(v.object["servePath"].str == "serve");
         assert(v.object["saveToFS"].boolean == true);
@@ -101,7 +133,10 @@ class PACValue : ISerializable
     {
         m_name = v.object["name"].str;
         m_description = v.object["description"].str;
-        m_proxyRuleIds = array(v.object["proxyRuleIds"].array.map!(jv => jv.integer));
+        m_proxyRules = v.object["proxyRules"]
+            .array
+            .map!(jv => ProxyRulePriority(jv.object["id"].integer, jv.object["priority"].integer))
+            .array;
         m_serve = v.object["serve"].boolean;
         m_servePath = v.object["servePath"].str;
         m_saveToFS = v.object["saveToFS"].boolean;
@@ -113,7 +148,11 @@ class PACValue : ISerializable
         JSONValue v = JSONValue.emptyObject;
         v.object["name"] = JSONValue("name");
         v.object["description"] = JSONValue("description");
-        v.object["proxyRuleIds"] = JSONValue([1, 2, 3]);
+        v.object["proxyRules"] = JSONValue([
+            JSONValue(["id": JSONValue(1), "priority": JSONValue(1)]),
+            JSONValue(["id": JSONValue(2), "priority": JSONValue(2)]),
+            JSONValue(["id": JSONValue(3), "priority": JSONValue(3)]),
+        ]);
         v.object["serve"] = JSONValue(true);
         v.object["servePath"] = JSONValue("serve");
         v.object["saveToFS"] = JSONValue(true);
@@ -124,7 +163,7 @@ class PACValue : ISerializable
 
         assert(value.name() == "name");
         assert(value.description() == "description");
-        assert(value.proxyRuleIds().length == 3);
+        assert(value.proxyRules().length == 3);
         assert(value.serve() == true);
         assert(value.servePath() == "serve");
         assert(value.saveToFS() == true);
@@ -134,7 +173,7 @@ class PACValue : ISerializable
 protected:
     string m_name;
     string m_description;
-    long[] m_proxyRuleIds;
+    ProxyRulePriority[] m_proxyRules;
     bool m_serve;
     string m_servePath;
     bool m_saveToFS;
@@ -150,5 +189,5 @@ class PACRepository : RepositoryBase!(Key, PACValue)
     this(IPACListener listener)
     {
         super(listener);
-    }    
+    }
 }

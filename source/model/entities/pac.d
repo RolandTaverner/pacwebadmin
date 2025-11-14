@@ -7,6 +7,36 @@ import model.entities.common;
 import model.entities.proxyrule;
 import model.errors.base;
 
+
+class ProxyRulePriority
+{
+    this(in ProxyRulePriority other) pure @safe
+    {
+        m_proxyRule = new ProxyRule(other.proxyRule());
+        m_priority = other.priority();
+    }
+
+    this(in ProxyRule proxyRule, in long priority) pure @safe
+    {
+        m_proxyRule = new ProxyRule(proxyRule);
+        m_priority = priority;
+    }
+
+    @safe const(ProxyRule) proxyRule() const pure
+    {
+        return m_proxyRule;
+    }
+
+    @safe long priority() const pure
+    {
+        return m_priority;
+    }
+
+private:    
+    ProxyRule m_proxyRule;
+    long m_priority;
+}
+
 class PAC
 {
     @safe this(in PAC other) pure
@@ -17,7 +47,7 @@ class PAC
 
         foreach (pr; other.m_proxyRules)
         {
-            m_proxyRules ~= new ProxyRule(pr);
+            m_proxyRules ~= new ProxyRulePriority(pr);
         }
 
         m_serve = other.m_serve;
@@ -26,8 +56,14 @@ class PAC
         m_saveToFSPath = other.m_saveToFSPath;
     }
 
-    @safe this(in long id, in string name, in string description, in ProxyRule[] proxyRules,
-        bool serve, string servePath, bool saveToFS, string saveToFSPath) pure
+    @safe this(in long id,
+        in string name,
+        in string description,
+        in ProxyRulePriority[] proxyRules,
+        bool serve,
+        string servePath,
+        bool saveToFS,
+        string saveToFSPath) pure
     {
         m_id = id;
         m_name = name;
@@ -35,7 +71,7 @@ class PAC
 
         foreach (pr; proxyRules)
         {
-            m_proxyRules ~= new ProxyRule(pr);
+            m_proxyRules ~= new ProxyRulePriority(pr);
         }
 
         m_serve = serve;
@@ -54,7 +90,7 @@ class PAC
         return m_description;
     }
 
-    @safe const(ProxyRule[]) proxyRules() const pure
+    @safe const(ProxyRulePriority[]) proxyRules() const pure
     {
         return m_proxyRules;
     }
@@ -84,7 +120,7 @@ class PAC
 private:
     string m_name;
     string m_description;
-    ProxyRule[] m_proxyRules;
+    ProxyRulePriority[] m_proxyRules;
     bool m_serve;
     string m_servePath;
     bool m_saveToFS;
@@ -95,7 +131,7 @@ struct PACInput
 {
     string name;
     string description;
-    long[] proxyRuleIds;
+    long[long] proxyRules;
     bool serve;
     string servePath;
     bool saveToFS;
@@ -105,7 +141,8 @@ struct PACInput
     {
         enforce!bool(name.strip().length != 0, new ConstraintError("name can't be empty"));
         enforce!bool(servePath.strip().length != 0, new ConstraintError("servePath can't be empty"));
-        enforce!bool(saveToFSPath.strip().length != 0, new ConstraintError("saveToFSPath can't be empty"));
+        enforce!bool(saveToFSPath.strip().length != 0, new ConstraintError(
+                "saveToFSPath can't be empty"));
     }
 }
 

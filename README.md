@@ -726,26 +726,29 @@ Response
       "description": "PAC for something",
       "proxyRules": [
         {
-          "id": 1,
-          "proxy": {
+          "proxyRule": {
             "id": 1,
-            "type": "HTTP",
-            "address": "127.0.0.1:80",
-            "description": "description"
-          },
-          "enabled": true,
-          "name": "proxy group 1",
-          "conditions": [
-            {
+            "proxy": {
               "id": 1,
-              "type": "host_subdomain",
-              "expression": "example.com",
-              "category": {
+              "type": "HTTP",
+              "address": "127.0.0.1:80",
+              "description": "updated description"
+            },
+            "enabled": true,
+            "name": "proxy group updated",
+            "conditions": [
+              {
                 "id": 2,
-                "name": "work"
+                "type": "host_subdomain",
+                "expression": "example.com",
+                "category": {
+                  "id": 1,
+                  "name": "fun"
+                }
               }
-            }
-          ]
+            ]
+          },
+          "priority": 1
         }
       ],
       "serve": true,
@@ -772,26 +775,29 @@ Response
   "description": "PAC for something",
   "proxyRules": [
     {
-      "id": 1,
-      "proxy": {
+      "proxyRule": {
         "id": 1,
-        "type": "HTTP",
-        "address": "127.0.0.1:80",
-        "description": "description"
-      },
-      "enabled": true,
-      "name": "proxy group 1",
-      "conditions": [
-        {
+        "proxy": {
           "id": 1,
-          "type": "host_subdomain",
-          "expression": "example.com",
-          "category": {
+          "type": "HTTP",
+          "address": "127.0.0.1:80",
+          "description": "updated description"
+        },
+        "enabled": true,
+        "name": "proxy group updated",
+        "conditions": [
+          {
             "id": 2,
-            "name": "work"
+            "type": "host_subdomain",
+            "expression": "example.com",
+            "category": {
+              "id": 1,
+              "name": "fun"
+            }
           }
-        }
-      ]
+        ]
+      },
+      "priority": 1
     }
   ],
   "serve": true,
@@ -804,7 +810,7 @@ Response
 ### Create
 
 ```bash
-curl -X POST http://127.0.0.1:8080/api/pac/create -H "Content-Type: application/json" -d '{"name": "pac 1", "description": "PAC for something", "proxyRuleIds": [1], "serve": true, "servePath": "pac1.pac", "saveToFS": true, "saveToFSPath": "pac1.pac"}'`
+curl -X POST http://127.0.0.1:8080/api/pac/create -H "Content-Type: application/json" -d '{"name": "pac 1", "description": "PAC for something", "proxyRules": [{"proxyRuleId": 1, "priority":1}], "serve": true, "servePath": "pac1.pac", "saveToFS": true, "saveToFSPath": "pac1.pac"}'
 ```
 
 Response
@@ -816,26 +822,29 @@ Response
   "description": "PAC for something",
   "proxyRules": [
     {
-      "id": 1,
-      "proxy": {
+      "proxyRule": {
         "id": 1,
-        "type": "HTTP",
-        "address": "127.0.0.1:80",
-        "description": "updated description"
-      },
-      "enabled": true,
-      "name": "proxy group 1",
-      "conditions": [
-        {
+        "proxy": {
           "id": 1,
-          "type": "host_subdomain",
-          "expression": "example.com",
-          "category": {
+          "type": "HTTP",
+          "address": "127.0.0.1:80",
+          "description": "updated description"
+        },
+        "enabled": true,
+        "name": "proxy group updated",
+        "conditions": [
+          {
             "id": 2,
-            "name": "work"
+            "type": "host_subdomain",
+            "expression": "example.com",
+            "category": {
+              "id": 1,
+              "name": "fun"
+            }
           }
-        }
-      ]
+        ]
+      },
+      "priority": 1
     }
   ],
   "serve": true,
@@ -848,7 +857,7 @@ Response
 ### Update
 
 ```bash
-curl -X PUT http://127.0.0.1:8080/api/pac/1/update -H "Content-Type: application/json" -d '{"name": "updated pac 1", "description": "updated pac 1 desc", "proxyRuleIds": [2], "serve": false, "servePath": "updatedpac1.pac", "saveToFS": false, "saveToFSPath": "updatedpac1.pac"}'`
+curl -X POST http://127.0.0.1:8080/api/pac/1/update -H "Content-Type: application/json" -d '{"name": "pac 1 updated", "description": "updated PAC 1 desc", "proxyRules": [{"proxyRuleId": 1, "priority":1}, {"proxyRuleId": 2, "priority":2}], "serve": false, "servePath": "updatedpac1.pac", "saveToFS": false, "saveToFSPath": "updatedpac1.pac"}'
 ```
 
 Response
@@ -856,39 +865,67 @@ Response
 ```json
 {
   "id": 1,
-  "name": "updated pac 1",
-  "description": "updated pac 1 desc",
+  "name": "pac 1 updated",
+  "description": "updated PAC 1 desc",
   "proxyRules": [
     {
-      "id": 2,
-      "proxy": {
+      "proxyRule": {
         "id": 1,
-        "type": "HTTP",
-        "address": "127.0.0.1:80",
-        "description": "updated description"
-      },
-      "enabled": true,
-      "name": "proxy group 1",
-      "conditions": [
-        {
+        "proxy": {
           "id": 1,
-          "type": "host_subdomain",
-          "expression": "example.com",
-          "category": {
-            "id": 2,
-            "name": "work"
-          }
+          "type": "HTTP",
+          "address": "127.0.0.1:80",
+          "description": "updated description"
         },
-        {
-          "id": 2,
-          "type": "host_domain",
-          "expression": "memes.com",
-          "category": {
-            "id": 1,
-            "name": "fun"
+        "enabled": true,
+        "name": "proxy group updated",
+        "conditions": [
+          {
+            "id": 2,
+            "type": "host_subdomain",
+            "expression": "example.com",
+            "category": {
+              "id": 1,
+              "name": "fun"
+            }
           }
-        }
-      ]
+        ]
+      },
+      "priority": 1
+    },
+    {
+      "proxyRule": {
+        "id": 2,
+        "proxy": {
+          "id": 1,
+          "type": "HTTP",
+          "address": "127.0.0.1:80",
+          "description": "updated description"
+        },
+        "enabled": true,
+        "name": "proxy group 1",
+        "conditions": [
+          {
+            "id": 1,
+            "type": "host_domain",
+            "expression": "google.com",
+            "category": {
+              "id": 2,
+              "name": "work"
+            }
+          },
+          {
+            "id": 3,
+            "type": "host_domain",
+            "expression": "noexample.com",
+            "category": {
+              "id": 2,
+              "name": "work"
+            }
+          }
+        ]
+      },
+      "priority": 2
     }
   ],
   "serve": false,
@@ -907,6 +944,42 @@ curl -X DELETE http://127.0.0.1:8080/api/pac/1
 Response
 
 ```json
+{
+  "id": 1,
+  "name": "pac 1",
+  "description": "PAC for something",
+  "proxyRules": [
+    {
+      "proxyRule": {
+        "id": 1,
+        "proxy": {
+          "id": 1,
+          "type": "HTTP",
+          "address": "127.0.0.1:80",
+          "description": "updated description"
+        },
+        "enabled": true,
+        "name": "proxy group updated",
+        "conditions": [
+          {
+            "id": 2,
+            "type": "host_subdomain",
+            "expression": "example.com",
+            "category": {
+              "id": 1,
+              "name": "fun"
+            }
+          }
+        ]
+      },
+      "priority": 1
+    }
+  ],
+  "serve": true,
+  "servePath": "pac1.pac",
+  "saveToFS": true,
+  "saveToFSPath": "pac1.pac"
+}
 ```
 
 ### Get proxy rules linked to PAC
@@ -921,45 +994,38 @@ Response
 {
   "proxyRules": [
     {
-      "id": 2,
-      "proxy": {
+      "proxyRule": {
         "id": 1,
-        "type": "HTTP",
-        "address": "127.0.0.1:80",
-        "description": "updated description"
-      },
-      "enabled": true,
-      "name": "proxy group 1",
-      "conditions": [
-        {
+        "proxy": {
           "id": 1,
-          "type": "host_domain",
-          "expression": "google.com",
-          "category": {
-            "id": 2,
-            "name": "work"
-          }
+          "type": "HTTP",
+          "address": "127.0.0.1:80",
+          "description": "updated description"
         },
-        {
-          "id": 3,
-          "type": "host_domain",
-          "expression": "noexample.com",
-          "category": {
+        "enabled": true,
+        "name": "proxy group updated",
+        "conditions": [
+          {
             "id": 2,
-            "name": "work"
+            "type": "host_subdomain",
+            "expression": "example.com",
+            "category": {
+              "id": 1,
+              "name": "fun"
+            }
           }
-        }
-      ]
+        ]
+      },
+      "priority": 1
     }
   ]
 }
-
 ```
 
 ### Add proxy rules to PAC
 
 ```bash
-curl -X POST http://127.0.0.1:8080/api/pac/1/proxyrules/2
+ curl -X POST http://127.0.0.1:8080/api/pac/1/proxyrules/2?priority=2
 ```
 
 Returns updated proxy rules for PAC object.
@@ -968,63 +1034,144 @@ Returns updated proxy rules for PAC object.
 {
   "proxyRules": [
     {
-      "id": 3,
-      "proxy": {
+      "proxyRule": {
         "id": 1,
-        "type": "HTTP",
-        "address": "127.0.0.1:80",
-        "description": "updated description"
-      },
-      "enabled": true,
-      "name": "proxy group updated",
-      "conditions": [
-        {
-          "id": 2,
-          "type": "host_subdomain",
-          "expression": "example.com",
-          "category": {
-            "id": 1,
-            "name": "fun"
+        "proxy": {
+          "id": 1,
+          "type": "HTTP",
+          "address": "127.0.0.1:80",
+          "description": "updated description"
+        },
+        "enabled": true,
+        "name": "proxy group updated",
+        "conditions": [
+          {
+            "id": 2,
+            "type": "host_subdomain",
+            "expression": "example.com",
+            "category": {
+              "id": 1,
+              "name": "fun"
+            }
           }
-        }
-      ]
+        ]
+      },
+      "priority": 1
     },
     {
-      "id": 2,
-      "proxy": {
-        "id": 1,
-        "type": "HTTP",
-        "address": "127.0.0.1:80",
-        "description": "updated description"
-      },
-      "enabled": true,
-      "name": "proxy group 1",
-      "conditions": [
-        {
+      "proxyRule": {
+        "id": 2,
+        "proxy": {
           "id": 1,
-          "type": "host_domain",
-          "expression": "google.com",
-          "category": {
-            "id": 2,
-            "name": "work"
-          }
+          "type": "HTTP",
+          "address": "127.0.0.1:80",
+          "description": "updated description"
         },
-        {
-          "id": 3,
-          "type": "host_domain",
-          "expression": "noexample.com",
-          "category": {
-            "id": 2,
-            "name": "work"
+        "enabled": true,
+        "name": "proxy group 1",
+        "conditions": [
+          {
+            "id": 1,
+            "type": "host_domain",
+            "expression": "google.com",
+            "category": {
+              "id": 2,
+              "name": "work"
+            }
+          },
+          {
+            "id": 3,
+            "type": "host_domain",
+            "expression": "noexample.com",
+            "category": {
+              "id": 2,
+              "name": "work"
+            }
           }
-        }
-      ]
+        ]
+      },
+      "priority": 2
     }
   ]
 }
 ```
 
-### Delete proxy rules from PC
+### Set proxy rule priority in PAC
+
+
+```bash
+curl -X PATCH http://127.0.0.1:8080/api/pac/1/proxyrules/2?priority=10
+```
+
+Returns updated proxy rules for PAC object.
+
+```json
+{
+  "proxyRules": [
+    {
+      "proxyRule": {
+        "id": 1,
+        "proxy": {
+          "id": 1,
+          "type": "HTTP",
+          "address": "127.0.0.1:80",
+          "description": "updated description"
+        },
+        "enabled": true,
+        "name": "proxy group updated",
+        "conditions": [
+          {
+            "id": 2,
+            "type": "host_subdomain",
+            "expression": "example.com",
+            "category": {
+              "id": 1,
+              "name": "fun"
+            }
+          }
+        ]
+      },
+      "priority": 1
+    },
+    {
+      "proxyRule": {
+        "id": 2,
+        "proxy": {
+          "id": 1,
+          "type": "HTTP",
+          "address": "127.0.0.1:80",
+          "description": "updated description"
+        },
+        "enabled": true,
+        "name": "proxy group 1",
+        "conditions": [
+          {
+            "id": 1,
+            "type": "host_domain",
+            "expression": "google.com",
+            "category": {
+              "id": 2,
+              "name": "work"
+            }
+          },
+          {
+            "id": 3,
+            "type": "host_domain",
+            "expression": "noexample.com",
+            "category": {
+              "id": 2,
+              "name": "work"
+            }
+          }
+        ]
+      },
+      "priority": 10
+    }
+  ]
+}
+```
+
+### Delete proxy rules from PAC
 
 ```bash
 curl -X DELETE http://127.0.0.1:8080/api/pac/1/proxyrules/2
@@ -1036,26 +1183,29 @@ Returns updated proxy rules for PAC object.
 {
   "proxyRules": [
     {
-      "id": 3,
-      "proxy": {
+      "proxyRule": {
         "id": 1,
-        "type": "HTTP",
-        "address": "127.0.0.1:80",
-        "description": "updated description"
-      },
-      "enabled": true,
-      "name": "proxy group updated",
-      "conditions": [
-        {
-          "id": 2,
-          "type": "host_subdomain",
-          "expression": "example.com",
-          "category": {
-            "id": 1,
-            "name": "fun"
+        "proxy": {
+          "id": 1,
+          "type": "HTTP",
+          "address": "127.0.0.1:80",
+          "description": "updated description"
+        },
+        "enabled": true,
+        "name": "proxy group updated",
+        "conditions": [
+          {
+            "id": 2,
+            "type": "host_subdomain",
+            "expression": "example.com",
+            "category": {
+              "id": 1,
+              "name": "fun"
+            }
           }
-        }
-      ]
+        ]
+      },
+      "priority": 1
     }
   ]
 }

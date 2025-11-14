@@ -8,6 +8,7 @@ static struct Options
 	@Arg("Path to directory where *.pac will be saved", Optional.yes) string saveDir;
 	@Arg("Path where *.pac will be served", Optional.yes) string servePath;
 	@Arg("Base URL for REST API", Optional.yes) string baseURL;
+	@Arg("Path to log dir", Optional.yes) string logDir;
 }
 
 Options getOptions(in string filePath)

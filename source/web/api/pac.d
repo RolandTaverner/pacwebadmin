@@ -24,13 +24,16 @@ interface PACAPI
     PACDTO remove(in long _id);
 
     @method(HTTPMethod.GET) @path("/:id/proxyrules")
-    ProxyRuleList getProxyRules(in long _id);
+    ProxyRulePriorityList getProxyRules(in long _id);
 
     @method(HTTPMethod.POST) @path("/:id/proxyrules/:prid")
-    ProxyRuleList addProxyRule(in long _id, in long _prid);
+    ProxyRulePriorityList addProxyRule(in long _id, in long _prid, @viaQuery("priority") long _priority);
+
+    @method(HTTPMethod.PATCH) @path("/:id/proxyrules/:prid")
+    ProxyRulePriorityList setProxyRulePriority(in long _id, in long _prid, @viaQuery("priority") long _priority);
 
     @method(HTTPMethod.DELETE) @path("/:id/proxyrules/:prid")
-    ProxyRuleList removeProxyRule(in long _id, in long _prid);
+    ProxyRulePriorityList removeProxyRule(in long _id, in long _prid);
 }
 
 struct PACList
@@ -38,14 +41,25 @@ struct PACList
     PACDTO[] pacs;
 }
 
+struct ProxyRulePriorityInput
+{
+    long proxyRuleId;
+    long priority;
+}
+
 struct PACInputDTO
 {
-    @safe this(in string name, in string description, in long[] proxyRuleIds,
-        in bool serve, in string servePath, in bool saveToFS, in string saveToFSPath) pure
+    @safe this(in string name,
+        in string description,
+        in ProxyRulePriorityInput[] proxyRules,
+        in bool serve,
+        in string servePath,
+        in bool saveToFS,
+        in string saveToFSPath) pure
     {
         this.name = name;
         this.description = description;
-        this.proxyRuleIds = proxyRuleIds.dup;
+        this.proxyRules = proxyRules.dup;
         this.serve = serve;
         this.servePath = servePath;
         this.saveToFS = saveToFS;
@@ -54,17 +68,41 @@ struct PACInputDTO
 
     string name;
     string description;
-    long[] proxyRuleIds;
+    ProxyRulePriorityInput[] proxyRules;
     bool serve;
     string servePath;
     bool saveToFS;
     string saveToFSPath;
 }
 
+struct ProxyRulePriorityDTO
+{
+    @safe this(in ProxyRuleDTO proxyRule, in long priority) pure
+    {
+        this.proxyRule = ProxyRuleDTO(proxyRule);
+        this.priority = priority;
+    }
+
+    @safe this(in ProxyRulePriorityDTO other) pure
+    {
+        this.proxyRule = ProxyRuleDTO(other.proxyRule);
+        this.priority = other.priority;
+    }
+
+    ProxyRuleDTO proxyRule;
+    long priority;
+}
+
 struct PACDTO
 {
-    @safe this(in long id, in string name, in string description, in ProxyRuleDTO[] proxyRules,
-        in bool serve, in string servePath, in bool saveToFS, in string saveToFSPath) pure
+    @safe this(in long id,
+        in string name,
+        in string description,
+        in ProxyRulePriorityDTO[] proxyRules,
+        in bool serve,
+        in string servePath,
+        in bool saveToFS,
+        in string saveToFSPath) pure
     {
         this.id = id;
         this.name = name;
@@ -73,7 +111,7 @@ struct PACDTO
         //this.proxyRules = proxyRules.dup;
         foreach (pr; proxyRules)
         {
-            this.proxyRules ~= ProxyRuleDTO(pr);
+            this.proxyRules ~= ProxyRulePriorityDTO(pr);
         }
 
         this.serve = serve;
@@ -91,7 +129,7 @@ struct PACDTO
         //this.proxyRules = other.proxyRules.dup;
         foreach (pr; other.proxyRules)
         {
-            this.proxyRules ~= ProxyRuleDTO(pr);
+            this.proxyRules ~= ProxyRulePriorityDTO(pr);
         }
 
         this.serve = other.serve;
@@ -103,16 +141,21 @@ struct PACDTO
     long id;
     string name;
     string description;
-    ProxyRuleDTO[] proxyRules;
+    ProxyRulePriorityDTO[] proxyRules;
     bool serve;
     string servePath;
     bool saveToFS;
     string saveToFSPath;
 }
 
+struct ProxyRulePriorityList
+{
+    ProxyRulePriorityDTO[] proxyRules;
+}
+
 unittest
 {
-    const ProxyRuleDTO[] proxyRules = [];
+    const ProxyRulePriorityDTO[] proxyRules = [];
 
     auto p = PACDTO(1, "name", "desc", proxyRules, true, "serve", true, "save");
 

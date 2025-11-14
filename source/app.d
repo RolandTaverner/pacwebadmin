@@ -51,6 +51,12 @@ int main(string[] args)
 	auto settings = new HTTPServerSettings;
 	settings.bindAddresses = ["::1", "127.0.0.1"];
 	settings.port = 8080;
+	settings.accessLogToConsole = true;
+
+	// if (options.logDir.length != 0) {
+	// 	settings.accessLogFile = buildPath(options.logDir, "access.log");
+	// }
+
 	// settings.sessionStore = new MemorySessionStore;
 	// settings.errorHandler = (HTTPServerRequest req, HTTPServerResponse res, RestErrorInformation error) @safe {
 	// 		res.writeJsonBody([

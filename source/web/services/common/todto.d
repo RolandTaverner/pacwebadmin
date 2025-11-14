@@ -46,14 +46,25 @@ import web.api.pac;
     return ProxyRuleDTO(prs.id(), toDTO(prs.proxy()), prs.enabled(), prs.name(), conditions);
 }
 
+@safe ProxyRulePriorityDTO toDTO(in ProxyRulePriority prp) pure
+{
+    return ProxyRulePriorityDTO(toDTO(prp.proxyRule()), prp.priority());
+}
+
 @safe PACDTO toDTO(in PAC p) pure
 {
     const auto proxyRules = p.proxyRules()
         .map!(pr => toDTO(pr))
         .array
-        .sort!((a, b) => a.id < b.id, SwapStrategy.stable)
+        .sort!((a, b) => a.priority < b.priority, SwapStrategy.stable)
         .array;
 
-    return PACDTO(p.id(), p.name(), p.description(), proxyRules,
-        p.serve(), p.servePath(), p.saveToFS(), p.saveToFSPath());
+    return PACDTO(p.id(),
+        p.name(),
+        p.description(),
+        proxyRules,
+        p.serve(),
+        p.servePath(),
+        p.saveToFS(),
+        p.saveToFSPath());
 }
