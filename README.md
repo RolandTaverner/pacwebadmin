@@ -11,13 +11,13 @@ dub run -- --config "pacwebadmin.conf.local"
 
 ## Domain
 
-- type = "host_domain"
+- type = "host_domain_only"
 
 Host equals to provided domain.
 
 ## Domain and subdomains
 
-- type = "host_subdomain"
+- type = "host_domain_subdomain"
 
 Host equals to provided domain or is subdomain of provided domain.
 
@@ -37,7 +37,19 @@ Host is subdomain of provided domain.
 
 # API 
 
+## Errors
+
+In case of an error, the service returns the appropriate HTTP status code and a response similar to this:
+
+```json
+{
+  "statusMessage": "error reason here"
+}
+```
+
 ## Categories API requests
+
+`name` should not be empty.
 
 ### Get all
 
@@ -146,6 +158,17 @@ Response
 ```
 
 ## Proxies API requests
+
+`type` must be one of 
+- DIRECT
+- PROXY
+- SOCKS
+- SOCKS4
+- SOCKS5
+- HTTP
+- HTTPS
+
+`address` must not be empty except for `type` == DIRECT
 
 ### Get all
 
@@ -264,6 +287,15 @@ Response
 ```
 
 ## Conditions API requests
+
+`type` must be one of
+- host_domain_only
+- host_domain_subdomain
+- host_subdomain_only
+- url_shexp_match
+- url_regexp_match
+
+`expression` must not be empty.
 
 ### Get all
 
