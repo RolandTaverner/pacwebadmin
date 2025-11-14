@@ -76,7 +76,6 @@ class Model
         synchronized (m_mutex.writer)
         {
             validateCategoryModify(i);
-
             try
             {
                 const auto updated = categories.update(id,
@@ -94,6 +93,7 @@ class Model
     {
         synchronized (m_mutex.writer)
         {
+            validateCategoryDelete(id);
             try
             {
                 const auto deleted = categories.remove(id);
@@ -166,7 +166,6 @@ class Model
         synchronized (m_mutex.writer)
         {
             validateProxyModify(i);
-
             try
             {
                 const auto updated = proxies.update(id,
@@ -184,6 +183,7 @@ class Model
     {
         synchronized (m_mutex.writer)
         {
+            validateProxyDelete(id);
             try
             {
                 // TODO: update proxy rules
@@ -601,6 +601,15 @@ protected:
         enforce!bool(categories.count(pred) == 0, new ConstraintError("already exists"));
     }
 
+    void validateCategoryDelete(in long id)
+    {
+        auto pred = (in dlcondition.Condition c) {
+            return c.value().categoryId() == id;
+        };
+
+        enforce!bool(conditions.count(pred) == 0, new ConstraintError("there are conditions referenced this category"));
+    }
+
     @safe Category makeCategory(in dlcategory.CategoryRepository.DataObjectType dto)
     {
         return new Category(dto.key(), dto.value().name());
@@ -613,6 +622,15 @@ protected:
         };
 
         enforce!bool(proxies.count(pred) == 0, new ConstraintError("already exists"));
+    }
+
+    void validateProxyDelete(in long id)
+    {
+        auto pred = (in dlproxyrule.ProxyRule p) {
+            return p.value().proxyId() == id;
+        };
+
+        enforce!bool(proxyRules.count(pred) == 0, new ConstraintError("there are proxy rules referenced this proxy"));
     }
 
     @safe Proxy makeProxy(in dlproxy.ProxyRepository.DataObjectType dto)
