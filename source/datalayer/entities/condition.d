@@ -39,7 +39,7 @@ class ConditionValue : ISerializable
         return m_categoryId;
     }
 
-    @safe override JSONValue toJSON() const pure
+    @safe override JSONValue toJSON() const
     {
         return JSONValue([
             "type": JSONValue(m_type),

@@ -13,7 +13,7 @@ import datalayer.repository.errors;
 
 interface ISerializable
 {
-    @safe JSONValue toJSON() const pure;
+    @safe JSONValue toJSON() const;
     void fromJSON(in JSONValue v);
 }
 
@@ -50,7 +50,7 @@ class DataObject(K, V:
         return m_value;
     }
 
-    @safe override JSONValue toJSON() const pure
+    @safe override JSONValue toJSON() const
     {
         return JSONValue(["id": JSONValue(key()), "value": value().toJSON()]);
     }

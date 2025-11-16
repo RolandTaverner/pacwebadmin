@@ -4,6 +4,8 @@ import core.sync.rwmutex;
 import std.algorithm.iteration : filter, map;
 import std.algorithm.searching : canFind;
 import std.array;
+import std.datetime.systime : Clock;
+import std.datetime.timezone : UTC;
 import std.exception : enforce;
 import std.string;
 
@@ -465,7 +467,8 @@ class Model
                     i.servePath.strip,
                     i.saveToFS,
                     i.saveToFSPath.strip,
-                    i.fallbackProxyId));
+                    i.fallbackProxyId,
+                    Clock.currTime(UTC())));
             return makePAC(created);
         }
     }
@@ -487,7 +490,8 @@ class Model
                         i.servePath.strip,
                         i.saveToFS,
                         i.saveToFSPath.strip,
-                        i.fallbackProxyId));
+                        i.fallbackProxyId,
+                        Clock.currTime(UTC())));
                 return makePAC(updated);
             }
             catch (re.NotFoundError e)
@@ -523,7 +527,8 @@ class Model
                         pac.value().servePath(),
                         pac.value().saveToFS(),
                         pac.value().saveToFSPath(),
-                        pac.value().fallbackProxyId());
+                        pac.value().fallbackProxyId(),
+                        Clock.currTime(UTC()));
                 const auto updated = pacs.update(id, updatedValue);
 
                 return makePAC(updated).proxyRules();
@@ -561,7 +566,8 @@ class Model
                         pac.value().servePath(),
                         pac.value().saveToFS(),
                         pac.value().saveToFSPath(),
-                        pac.value().fallbackProxyId());
+                        pac.value().fallbackProxyId(),
+                        Clock.currTime(UTC()));
                 const auto updated = pacs.update(id, updatedValue);
 
                 return makePAC(updated).proxyRules();
@@ -598,7 +604,8 @@ class Model
                         pac.value().servePath(),
                         pac.value().saveToFS(),
                         pac.value().saveToFSPath(),
-                        pac.value().fallbackProxyId());
+                        pac.value().fallbackProxyId(),
+                        Clock.currTime(UTC()));
                 const auto updated = pacs.update(id, updatedValue);
 
                 return makePAC(updated).proxyRules();

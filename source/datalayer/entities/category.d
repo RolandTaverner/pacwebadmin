@@ -25,7 +25,7 @@ class CategoryValue : ISerializable
         return m_name;
     }
 
-    @safe override JSONValue toJSON() const pure
+    @safe override JSONValue toJSON() const
     {
         return JSONValue(["name": JSONValue(name())]);
     }

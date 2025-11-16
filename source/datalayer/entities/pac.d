@@ -2,6 +2,8 @@ module datalayer.entities.pac;
 
 import std.algorithm.iteration : map;
 import std.array : array;
+import std.datetime.date : DateTime;
+import std.datetime.systime : SysTime;
 import std.json;
 import std.typecons : tuple, Tuple;
 
@@ -35,6 +37,7 @@ class PACValue : ISerializable
         m_saveToFS = v.m_saveToFS;
         m_saveToFSPath = v.m_saveToFSPath;
         m_fallbackProxyId = v.m_fallbackProxyId;
+        m_updatedAt = v.m_updatedAt;
     }
 
     @safe this(in string name,
@@ -44,7 +47,8 @@ class PACValue : ISerializable
         in string servePath,
         in bool saveToFS,
         in string saveToFSPath,
-        in long fallbackProxyId) pure
+        in long fallbackProxyId,
+        in SysTime updatedAt) pure
     {
         m_name = name;
         m_description = description;
@@ -54,6 +58,7 @@ class PACValue : ISerializable
         m_saveToFS = saveToFS;
         m_saveToFSPath = saveToFSPath;
         m_fallbackProxyId = fallbackProxyId;
+        m_updatedAt = updatedAt;
     }
 
     @safe const(string) name() const pure
@@ -96,7 +101,12 @@ class PACValue : ISerializable
         return m_fallbackProxyId;
     }
 
-    @safe override JSONValue toJSON() const pure
+    @safe SysTime updatedAt() const pure
+    {
+        return m_updatedAt;
+    }
+
+    @safe override JSONValue toJSON() const
     {
         return JSONValue([
             "name": JSONValue(name()),
@@ -111,11 +121,14 @@ class PACValue : ISerializable
             "saveToFS": JSONValue(saveToFS()),
             "saveToFSPath": JSONValue(saveToFSPath()),
             "fallbackProxyId": JSONValue(fallbackProxyId()),
+            "updatedAt": JSONValue(updatedAt().toUTC().toISOExtString()),
         ]);
     }
 
     unittest
     {
+        import std.datetime.timezone : UTC;
+
         PACValue value = new PACValue("name",
             "description",
             [
@@ -127,7 +140,8 @@ class PACValue : ISerializable
             "serve",
             true,
             "save",
-            1);
+            1,
+            SysTime(DateTime(2000, 6, 1, 10, 30, 0), UTC()));
         const JSONValue v = value.toJSON();
 
         assert(v.object["name"].str == "name");
@@ -138,6 +152,7 @@ class PACValue : ISerializable
         assert(v.object["saveToFS"].boolean == true);
         assert(v.object["saveToFSPath"].str == "save");
         assert(v.object["fallbackProxyId"].integer == 1);
+        assert(v.object["updatedAt"].str == "2000-06-01T10:30:00Z");
     }
 
     override void fromJSON(in JSONValue v)
@@ -153,10 +168,13 @@ class PACValue : ISerializable
         m_saveToFS = v.object["saveToFS"].boolean;
         m_saveToFSPath = v.object["saveToFSPath"].str;
         m_fallbackProxyId = v.object["fallbackProxyId"].integer;
+        m_updatedAt = SysTime.fromISOExtString(v.object["updatedAt"].str);
     }
 
     unittest
     {
+        import std.datetime.timezone : UTC;
+
         JSONValue v = JSONValue.emptyObject;
         v.object["name"] = JSONValue("name");
         v.object["description"] = JSONValue("description");
@@ -170,6 +188,7 @@ class PACValue : ISerializable
         v.object["saveToFS"] = JSONValue(true);
         v.object["saveToFSPath"] = JSONValue("save");
         v.object["fallbackProxyId"] = JSONValue(1);
+        v.object["updatedAt"] = JSONValue("2000-06-01T10:30:00Z");
 
         PACValue value = new PACValue();
         value.fromJSON(v);
@@ -182,6 +201,7 @@ class PACValue : ISerializable
         assert(value.saveToFS() == true);
         assert(value.saveToFSPath() == "save");
         assert(value.fallbackProxyId() == 1);
+        assert(value.updatedAt() == SysTime(DateTime(2000, 6, 1, 10, 30, 0), UTC()));
     }
 
 protected:
@@ -193,6 +213,7 @@ protected:
     bool m_saveToFS;
     string m_saveToFSPath;
     long m_fallbackProxyId;
+    SysTime m_updatedAt;
 }
 
 alias PAC = DataObject!(Key, PACValue);

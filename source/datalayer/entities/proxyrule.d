@@ -48,7 +48,7 @@ class ProxyRuleValue : ISerializable
         return m_conditionIds;
     }
 
-    @safe override JSONValue toJSON() const pure
+    @safe override JSONValue toJSON() const
     {
         return JSONValue([
             "proxyId": JSONValue(proxyId()),
