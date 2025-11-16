@@ -1,7 +1,7 @@
 module datalayer.repository.repository;
 
 import core.sync.rwmutex;
-import std.algorithm.iteration : each, filter, map;
+import std.algorithm.iteration : filter, map;
 import std.algorithm.searching : count, maxElement;
 import std.array;
 import std.conv;

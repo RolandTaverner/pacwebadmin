@@ -19,3 +19,8 @@ Options getOptions(in string filePath)
 
 	return options;
 }
+
+void validateOptions(in Options opts)
+{
+	// TODO
+}

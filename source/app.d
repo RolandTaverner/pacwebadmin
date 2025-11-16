@@ -9,8 +9,11 @@ import vibe.http.server;
 
 import datalayer.storage;
 import model.model;
+import model.pacmanager;
+
 import options;
 import web.api.root : APIRoot;
+import web.pachandler;
 import web.service;
 
 int main(string[] args)
@@ -22,6 +25,7 @@ int main(string[] args)
 	try
 	{
 		options = getOptions(configPath);
+		validateOptions(options);
 	}
 	catch (Exception e)
 	{
@@ -38,15 +42,23 @@ int main(string[] args)
 	Storage storage = new Storage(new SimpleSaver(options.dataDir));
 	storage.load(jsonData);
 
-	Model m = new Model(storage);
-	Service svc = new Service(m);
+	Model model = new Model(storage);
+	PACManager pacManager = new PACManager(model);
+
+	Service restService = new Service(model);
+	PACHandler pacHandler = new PACHandler(pacManager, options.servePath);
 
 	auto restSettings = new RestInterfaceSettings;
 	restSettings.baseURL = URL(options.baseURL);
 
 	auto router = new URLRouter;
-	registerRestInterface(router, svc, restSettings);
+	registerRestInterface(router, restService, restSettings);
 	router.get("/myapi.js", serveRestJSClient!APIRoot(restSettings));
+
+	router.match(HTTPMethod.GET, options.servePath ~ "*",
+		(HTTPServerRequest req, HTTPServerResponse res) @safe {
+		pacHandler.handlePACRequest(req, res);
+	});
 
 	auto settings = new HTTPServerSettings;
 	settings.bindAddresses = ["::1", "127.0.0.1"];
@@ -79,11 +91,6 @@ int main(string[] args)
 	return 0;
 }
 
-void hello(HTTPServerRequest req, HTTPServerResponse res)
-{
-	res.writeBody("Hello, World!");
-}
-
 class SimpleSaver : IStorageSaver
 {
 	this(string dataDir)
@@ -91,9 +98,9 @@ class SimpleSaver : IStorageSaver
 		m_dataDir = dataDir;
 	}
 
-    @trusted override void save(ref const JSONValue v)
+	@trusted override void save(ref const JSONValue v)
 	{
-		synchronized(this)
+		synchronized (this)
 		{
 			auto backupFilePath = buildPath(m_dataDir, "data.local.bak");
 			if (exists(backupFilePath))
