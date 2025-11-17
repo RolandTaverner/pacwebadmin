@@ -9,8 +9,11 @@ class PACManager
         m_model = model;
     }
 
-    const(string) getPACfile(in string urlPath)
+    const(string) getPACfilePath(in string urlPath) @trusted
     {
+        import std.stdio;
+        writeln("getPACfilePath(): " ~ urlPath);
+
         return "todo";
     }
 
