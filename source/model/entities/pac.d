@@ -1,5 +1,6 @@
 module model.entities.pac;
 
+import std.datetime.systime : SysTime;
 import std.exception : enforce;
 import std.string;
 
@@ -56,17 +57,19 @@ class PAC
         m_saveToFS = other.m_saveToFS;
         m_saveToFSPath = other.m_saveToFSPath;
         m_fallbackProxy = new Proxy(other.m_fallbackProxy);
+        m_updatedAt = other.m_updatedAt;
     }
 
     @safe this(in long id,
         in string name,
         in string description,
         in ProxyRulePriority[] proxyRules,
-        bool serve,
-        string servePath,
-        bool saveToFS,
-        string saveToFSPath,
-        Proxy fallbackProxy) pure
+        in bool serve,
+        in string servePath,
+        in bool saveToFS,
+        in string saveToFSPath,
+        in Proxy fallbackProxy,
+        in SysTime updatedAt) pure
     {
         m_id = id;
         m_name = name;
@@ -82,6 +85,7 @@ class PAC
         m_saveToFS = saveToFS;
         m_saveToFSPath = saveToFSPath;
         m_fallbackProxy = new Proxy(fallbackProxy);
+        m_updatedAt = updatedAt;
     }
 
     @safe const(string) name() const pure
@@ -124,6 +128,11 @@ class PAC
         return m_fallbackProxy;
     }
 
+    @safe SysTime updatedAt() const pure
+    {
+        return m_updatedAt;
+    }
+
     mixin entityId!();
 
 private:
@@ -135,6 +144,7 @@ private:
     bool m_saveToFS;
     string m_saveToFSPath;
     Proxy m_fallbackProxy;
+    SysTime m_updatedAt;
 }
 
 struct PACInput

@@ -43,7 +43,7 @@ int main(string[] args)
 	storage.load(jsonData);
 
 	Model model = new Model(storage);
-	PACManager pacManager = new PACManager(model);
+	PACManager pacManager = new PACManager(model, options.dataDir);
 
 	Service restService = new Service(model);
 	PACHandler pacHandler = new PACHandler(pacManager, options.servePath);

@@ -2,7 +2,7 @@ module web.pachandler;
 
 import std.file;
 
-import vibe.core.path : GenericPath, InetPathFormat, NativePath, relativeTo;
+import vibe.core.path : InetPath, relativeToWeb;
 import vibe.http.fileserver : HTTPFileServerSettings, sendFile;
 import vibe.http.server;
 
@@ -13,7 +13,7 @@ class PACHandler
     this(PACManager manager, string baseURL)
     {
         m_manager = manager;
-        m_prefix = GenericPath!(InetPathFormat)(baseURL);
+        m_prefix = InetPath(baseURL);
 
         m_settings = new HTTPFileServerSettings();
         m_settings.preWriteCallback =
@@ -31,17 +31,17 @@ class PACHandler
             throw new HTTPStatusException(404, "invalid PAC URL");
         }
 
-        auto fileToServe = m_manager.getPACfilePath(path.relativeTo(m_prefix).toString());
-        if (!exists(fileToServe))
+        auto fileToServe = m_manager.getPACfilePath(path.relativeToWeb(m_prefix).toString());
+        if (!exists(fileToServe.toString()))
         {
             throw new HTTPStatusException(500, "internal error: file not exists");
         }
 
-        sendFile(request, response, NativePath(fileToServe), m_settings);
+        sendFile(request, response, fileToServe, m_settings);
     }
 
 private:
     PACManager m_manager;
-    GenericPath!(InetPathFormat) m_prefix;
+    InetPath m_prefix;
     HTTPFileServerSettings m_settings;
 }

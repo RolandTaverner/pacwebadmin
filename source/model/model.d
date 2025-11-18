@@ -451,6 +451,28 @@ class Model
         }
     }
 
+    @trusted const(PAC) pacByServePath(in string servePath)
+    {
+        synchronized (m_mutex.reader)
+        {
+            auto pred = (in dlpac.PAC p) {
+                return p.value().servePath() == servePath;
+            };
+            auto found = pacs.filterBy(pred);
+            if (found.length == 0)
+            {
+                throw new ConstraintError("PAC with specified servePath not found");
+            }
+            else if (found.length > 1)
+            {
+                // Should not happen
+                // TODO: throw exception indicating internal error, model is broken
+                throw new ConstraintError("multiple PACs with specified servePath found"); 
+            }
+            return makePAC(found[0]);
+        }
+    }
+
     @trusted const(PAC) createPAC(in PACInput i)
     {
         i.validate();
@@ -767,7 +789,7 @@ protected:
         auto nameEq = (in dlpac.PAC p) {
             return (!update || p.key() != id) && p.value().name() == i.name.strip;
         };
-        enforce!bool(pacs.count(nameEq) == 0, new ConstraintError("PAC with the same already exists"));
+        enforce!bool(pacs.count(nameEq) == 0, new ConstraintError("PAC with the same name already exists"));
 
         auto servePathEq = (in dlpac.PAC p) {
             return (!update || p.key() != id) && p.value().servePath() == i.servePath.strip;
@@ -789,12 +811,6 @@ protected:
     @safe PAC makePAC(in dlpac.PAC dto)
     {
         auto id = dto.key();
-        auto name = dto.value().name();
-        auto description = dto.value().description();
-        auto serve = dto.value().serve();
-        auto servePath = dto.value().servePath();
-        auto saveToFS = dto.value().saveToFS();
-        auto saveToFSPath = dto.value().saveToFSPath();
 
         auto prs = dto.value().proxyRules()
             .map!(
@@ -805,7 +821,17 @@ protected:
 
         auto fallBackProxy = makeProxy(proxies.getByKey(dto.value().fallbackProxyId()));
 
-        return new PAC(id, name, description, prs, serve, servePath, saveToFS, saveToFSPath, fallBackProxy);
+        return new PAC(id,
+            dto.value().name(),
+            dto.value().description(),
+            prs,
+            dto.value().serve(),
+            dto.value().servePath(),
+            dto.value().saveToFS(),
+            dto.value().saveToFSPath(),
+            fallBackProxy,
+            dto.value().updatedAt()
+        );
     }
 
     @property @safe inout(dlcategory.CategoryRepository) categories() inout pure
