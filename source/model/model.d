@@ -64,7 +64,7 @@ class Model
 
         synchronized (m_mutex.writer)
         {
-            validateCategoryModify(i);
+            validateCategoryModify(-1, i, false);
 
             const auto created = categories.create(new dlcategory.CategoryValue(i.name.strip));
             return makeCategory(created);
@@ -77,7 +77,7 @@ class Model
 
         synchronized (m_mutex.writer)
         {
-            validateCategoryModify(i);
+            validateCategoryModify(id, i, true);
             try
             {
                 const auto updated = categories.update(id,
@@ -153,7 +153,7 @@ class Model
 
         synchronized (m_mutex.writer)
         {
-            validateProxyModify(i);
+            validateProxyModify(-1, i, false);
 
             const auto created = proxies.create(
                 new dlproxy.ProxyValue(i.type.strip, i.address.strip, i.description));
@@ -167,7 +167,7 @@ class Model
 
         synchronized (m_mutex.writer)
         {
-            validateProxyModify(i);
+            validateProxyModify(id, i, true);
             try
             {
                 const auto updated = proxies.update(id,
@@ -245,7 +245,7 @@ class Model
 
         synchronized (m_mutex.writer)
         {
-            validateConditionModify(i);
+            validateConditionModify(-1, i, false);
 
             const auto created = conditions.create(
                 new dlcondition.ConditionValue(i.type.strip, i.expression.strip, i.categoryId));
@@ -259,7 +259,7 @@ class Model
 
         synchronized (m_mutex.writer)
         {
-            validateConditionModify(i);
+            validateConditionModify(id, i, true);
             try
             {
                 const auto updated = conditions.update(id,
@@ -321,7 +321,7 @@ class Model
 
         synchronized (m_mutex.writer)
         {
-            validateProxyRuleModify(i);
+            validateProxyRuleModify(-1, i, false);
 
             const auto created = proxyRules.create(
                 new dlproxyrule.ProxyRuleValue(i.proxyId,
@@ -337,7 +337,7 @@ class Model
         i.validate();
         synchronized (m_mutex.writer)
         {
-            validateProxyRuleModify(i);
+            validateProxyRuleModify(id, i, true);
             try
             {
                 // TODO: check conditionIds uniqueness and existance
@@ -457,7 +457,7 @@ class Model
 
         synchronized (m_mutex.writer)
         {
-            validatePACModify(i);
+            validatePACModify(-1, i, false);
 
             const auto created = pacs.create(
                 new dlpac.PACValue(i.name.strip,
@@ -479,7 +479,7 @@ class Model
 
         synchronized (m_mutex.writer)
         {
-            validatePACModify(i);
+            validatePACModify(id, i, true);
             try
             {
                 const auto updated = pacs.update(id,
@@ -637,13 +637,13 @@ class Model
     //=======================
 
 protected:
-    void validateCategoryModify(in CategoryInput i)
+    void validateCategoryModify(in long id, in CategoryInput i, in bool update)
     {
         auto pred = (in dlcategory.Category c) {
-            return c.value().name() == i.name.strip;
+            return (!update || c.key() != id) && c.value().name() == i.name.strip;
         };
 
-        enforce!bool(categories.count(pred) == 0, new ConstraintError("already exists 1111"));
+        enforce!bool(categories.count(pred) == 0, new ConstraintError("already exists"));
     }
 
     void validateCategoryDelete(in long id)
@@ -661,10 +661,10 @@ protected:
         return new Category(dto.key(), dto.value().name());
     }
 
-    void validateProxyModify(in ProxyInput i)
+    void validateProxyModify(in long id, in ProxyInput i, in bool update)
     {
         auto pred = (in dlproxy.Proxy p) {
-            return p.value().type() == i.type.strip && p.value().address() == i.address.strip;
+            return (!update || p.key() != id) && p.value().type() == i.type.strip && p.value().address() == i.address.strip;
         };
 
         enforce!bool(proxies.count(pred) == 0, new ConstraintError("already exists"));
@@ -688,9 +688,15 @@ protected:
             dto.value().description());
     }
 
-    void validateConditionModify(in ConditionInput i)
+    void validateConditionModify(in long id, in ConditionInput i, in bool update)
     {
-        enforce!bool(categories.exists(i.categoryId), new ConstraintError("cantegory not exists"));
+        enforce!bool(categories.exists(i.categoryId), new ConstraintError("category not exists"));
+
+        auto pred = (in dlcondition.Condition c) {
+            return (!update || c.key() != id) && (c.value().type() == i.type.strip() && c.value().expression() == i.expression.strip());
+        };
+
+        enforce!bool(conditions.count(pred) == 0, new ConstraintError("already exists"));
     }
 
     void validateConditionDelete(in long id)
@@ -715,18 +721,18 @@ protected:
         return new Condition(id, type, expression, category);
     }
 
-    void validateProxyRuleModify(in ProxyRuleInput i)
+    void validateProxyRuleModify(in long id, in ProxyRuleInput i, in bool update)
     {
         auto pred = (in dlproxyrule.ProxyRule p) {
-            return p.value().name().strip == i.name.strip;
+            return (!update || p.key() != id) && p.value().name().strip == i.name.strip;
         };
         enforce!bool(proxyRules.count(pred) == 0, new ConstraintError("already exists"));
 
         enforce!bool(proxies.exists(i.proxyId), new ConstraintError("proxy not exists"));
 
-        foreach (id; i.conditionIds)
+        foreach (conditionId; i.conditionIds)
         {
-            enforce!bool(conditions.exists(id), new ConstraintError("condition not exists"));
+            enforce!bool(conditions.exists(conditionId), new ConstraintError("condition not exists"));
         }
     }
 
@@ -756,8 +762,23 @@ protected:
         return new ProxyRule(id, proxy, enabled, name, conditions);
     }
 
-    void validatePACModify(in PACInput i)
+    void validatePACModify(in long id, in PACInput i, in bool update)
     {
+        auto nameEq = (in dlpac.PAC p) {
+            return (!update || p.key() != id) && p.value().name() == i.name.strip;
+        };
+        enforce!bool(pacs.count(nameEq) == 0, new ConstraintError("PAC with the same already exists"));
+
+        auto servePathEq = (in dlpac.PAC p) {
+            return (!update || p.key() != id) && p.value().servePath() == i.servePath.strip;
+        };
+        enforce!bool(pacs.count(servePathEq) == 0, new ConstraintError("PAC with the same servePath already exists"));
+
+        auto savePathEq = (in dlpac.PAC p) {
+            return (!update || p.key() != id) && p.value().saveToFSPath() == i.saveToFSPath.strip;
+        };
+        enforce!bool(pacs.count(savePathEq) == 0, new ConstraintError("PAC with the same saveToFSPath already exists"));
+
         foreach (prId; i.proxyRules.byKey())
         {
             enforce!bool(proxyRules.exists(prId), new ProxyRuleNotFound(prId));

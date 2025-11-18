@@ -76,7 +76,7 @@ struct ProxyInput
             .map!(el => cast(string) el)
             .array;
 
-        enforce!bool(proxyTypeValues.canFind(type.strip()), new ConstraintError("invalid type"));
+        enforce!bool(proxyTypeValues.canFind(type), new ConstraintError("invalid type"));
     }
 }
 
