@@ -4,6 +4,7 @@ import core.sync.rwmutex;
 import std.array : replace;
 import std.conv;
 import std.datetime.systime : SysTime;
+import std.stdio : File;
 
 import vibe.core.path : NativePath, relativeTo;
 

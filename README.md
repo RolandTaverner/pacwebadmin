@@ -35,7 +35,7 @@ Host is subdomain of provided domain.
 
 - type = "url_regexp_match"
 
-# API 
+# API
 
 ## Errors
 
@@ -159,7 +159,7 @@ Response
 
 ## Proxies API requests
 
-`type` must be one of 
+`type` must be one of
 - DIRECT
 - PROXY
 - SOCKS
@@ -772,7 +772,7 @@ Response
 {
   "id": 1,
   "name": "pac 1",
-  "description": "PAC for something",
+  "description": "some PAC",
   "proxyRules": [
     {
       "proxyRule": {
@@ -788,102 +788,8 @@ Response
         "conditions": [
           {
             "id": 2,
-            "type": "host_subdomain",
-            "expression": "example.com",
-            "category": {
-              "id": 1,
-              "name": "fun"
-            }
-          }
-        ]
-      },
-      "priority": 1
-    }
-  ],
-  "serve": true,
-  "servePath": "pac1.pac",
-  "saveToFS": true,
-  "saveToFSPath": "pac1.pac"
-}
-```
-
-### Create
-
-```bash
-curl -X POST http://127.0.0.1:8080/api/pac/create -H "Content-Type: application/json" -d '{"name": "pac 1", "description": "PAC for something", "proxyRules": [{"proxyRuleId": 1, "priority":1}], "serve": true, "servePath": "pac1.pac", "saveToFS": true, "saveToFSPath": "pac1.pac"}'
-```
-
-Response
-
-```json
-{
-  "id": 1,
-  "name": "pac 1",
-  "description": "PAC for something",
-  "proxyRules": [
-    {
-      "proxyRule": {
-        "id": 1,
-        "proxy": {
-          "id": 1,
-          "type": "HTTP",
-          "address": "127.0.0.1:80",
-          "description": "updated description"
-        },
-        "enabled": true,
-        "name": "proxy group updated",
-        "conditions": [
-          {
-            "id": 2,
-            "type": "host_subdomain",
-            "expression": "example.com",
-            "category": {
-              "id": 1,
-              "name": "fun"
-            }
-          }
-        ]
-      },
-      "priority": 1
-    }
-  ],
-  "serve": true,
-  "servePath": "pac1.pac",
-  "saveToFS": true,
-  "saveToFSPath": "pac1.pac"
-}
-```
-
-### Update
-
-```bash
-curl -X POST http://127.0.0.1:8080/api/pac/1/update -H "Content-Type: application/json" -d '{"name": "pac 1 updated", "description": "updated PAC 1 desc", "proxyRules": [{"proxyRuleId": 1, "priority":1}, {"proxyRuleId": 2, "priority":2}], "serve": false, "servePath": "updatedpac1.pac", "saveToFS": false, "saveToFSPath": "updatedpac1.pac"}'
-```
-
-Response
-
-```json
-{
-  "id": 1,
-  "name": "pac 1 updated",
-  "description": "updated PAC 1 desc",
-  "proxyRules": [
-    {
-      "proxyRule": {
-        "id": 1,
-        "proxy": {
-          "id": 1,
-          "type": "HTTP",
-          "address": "127.0.0.1:80",
-          "description": "updated description"
-        },
-        "enabled": true,
-        "name": "proxy group updated",
-        "conditions": [
-          {
-            "id": 2,
-            "type": "host_subdomain",
-            "expression": "example.com",
+            "type": "host_domain_subdomain",
+            "expression": "memes.com",
             "category": {
               "id": 1,
               "name": "fun"
@@ -893,6 +799,87 @@ Response
       },
       "priority": 1
     },
+  ],
+  "serve": true,
+  "servePath": "pac1.pac",
+  "saveToFS": false,
+  "saveToFSPath": "pac1.pac",
+  "fallbackProxy": {
+    "id": 4,
+    "type": "DIRECT",
+    "address": "-",
+    "description": "no proxy"
+  }
+}
+```
+
+### Create
+
+```bash
+curl -X POST http://127.0.0.1:8080/api/pac/create -H "Content-Type: application/json" -d '{"name": "pac 2", "description": "PAC for something else", "proxyRules": [{"proxyRuleId": 1, "priority":1}], "fallbackProxyId": 3, "serve": true, "servePath": "pac2.pac", "saveToFS": true, "saveToFSPath": "pac2.pac"}'
+```
+
+Response
+
+```json
+{
+  "id": 3,
+  "name": "pac 2",
+  "description": "PAC for something else",
+  "proxyRules": [
+    {
+      "proxyRule": {
+        "id": 1,
+        "proxy": {
+          "id": 1,
+          "type": "HTTP",
+          "address": "127.0.0.1:80",
+          "description": "Proxy description"
+        },
+        "enabled": true,
+        "name": "proxy group",
+        "conditions": [
+          {
+            "id": 2,
+            "type": "host_domain_subdomain",
+            "expression": "memes.com",
+            "category": {
+              "id": 1,
+              "name": "fun"
+            }
+          }
+        ]
+      },
+      "priority": 1
+    }
+  ],
+  "serve": true,
+  "servePath": "pac2.pac",
+  "saveToFS": true,
+  "saveToFSPath": "pac2.pac",
+  "fallbackProxy": {
+    "id": 3,
+    "type": "PROXY",
+    "address": "127.0.0.1:1080",
+    "description": "Proxy description"
+  }
+}
+```
+
+### Update
+
+```bash
+curl -X PUT http://127.0.0.1:8080/api/pac/3/update -H "Content-Type: application/json" -d '{"name": "pac 2 updated", "description": "PAC for something else updated", "proxyRules": [{"proxyRuleId": 2, "priority":1}], "fallbackProxyId": 2, "serve": false, "servePath": "pac2updated.pac", "saveToFS": false, "saveToFSPath": "pac2updated.pac"}'
+```
+
+Response
+
+```json
+{
+  "id": 3,
+  "name": "pac 2 updated",
+  "description": "PAC for something else updated",
+  "proxyRules": [
     {
       "proxyRule": {
         "id": 2,
@@ -907,7 +894,7 @@ Response
         "conditions": [
           {
             "id": 1,
-            "type": "host_domain",
+            "type": "host_domain_only",
             "expression": "google.com",
             "category": {
               "id": 2,
@@ -916,8 +903,8 @@ Response
           },
           {
             "id": 3,
-            "type": "host_domain",
-            "expression": "noexample.com",
+            "type": "host_subdomain_only",
+            "expression": "ya.ru",
             "category": {
               "id": 2,
               "name": "work"
@@ -925,33 +912,39 @@ Response
           }
         ]
       },
-      "priority": 2
+      "priority": 1
     }
   ],
   "serve": false,
-  "servePath": "updatedpac1.pac",
+  "servePath": "pac2updated.pac",
   "saveToFS": false,
-  "saveToFSPath": "updatedpac1.pac"
+  "saveToFSPath": "pac2updated.pac",
+  "fallbackProxy": {
+    "id": 2,
+    "type": "SOCKS",
+    "address": "10.10.0.10:8080",
+    "description": "dante"
+  }
 }
 ```
 
 ### Delete
 
 ```bash
-curl -X DELETE http://127.0.0.1:8080/api/pac/1
+curl -X DELETE http://127.0.0.1:8080/api/pac/3
 ```
 
 Response
 
 ```json
 {
-  "id": 1,
-  "name": "pac 1",
-  "description": "PAC for something",
+  "id": 3,
+  "name": "pac 2 updated",
+  "description": "PAC for something else updated",
   "proxyRules": [
     {
       "proxyRule": {
-        "id": 1,
+        "id": 2,
         "proxy": {
           "id": 1,
           "type": "HTTP",
@@ -959,15 +952,24 @@ Response
           "description": "updated description"
         },
         "enabled": true,
-        "name": "proxy group updated",
+        "name": "proxy group 1",
         "conditions": [
           {
-            "id": 2,
-            "type": "host_subdomain",
-            "expression": "example.com",
+            "id": 1,
+            "type": "host_domain_only",
+            "expression": "google.com",
             "category": {
-              "id": 1,
-              "name": "fun"
+              "id": 2,
+              "name": "work"
+            }
+          },
+          {
+            "id": 3,
+            "type": "host_subdomain_only",
+            "expression": "ya.ru",
+            "category": {
+              "id": 2,
+              "name": "work"
             }
           }
         ]
@@ -975,10 +977,16 @@ Response
       "priority": 1
     }
   ],
-  "serve": true,
-  "servePath": "pac1.pac",
-  "saveToFS": true,
-  "saveToFSPath": "pac1.pac"
+  "serve": false,
+  "servePath": "pac2updated.pac",
+  "saveToFS": false,
+  "saveToFSPath": "pac2updated.pac",
+  "fallbackProxy": {
+    "id": 2,
+    "type": "SOCKS",
+    "address": "10.10.0.10:8080",
+    "description": "dante"
+  }
 }
 ```
 
