@@ -196,7 +196,7 @@ class RepositoryBase(K, V) : IRepository!(K, V), IDataLoader!(K, V)
             m_entities.remove(key);
             removedDataObject = *entity;
         }
-        m_listener.onChange(ListenerEvent.UPDATE, removedDataObject);
+        m_listener.onChange(ListenerEvent.REMOVE, removedDataObject);
         return removedDataObject;
     }
 
