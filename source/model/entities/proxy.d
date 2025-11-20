@@ -67,16 +67,19 @@ struct ProxyInput
     string address;
     string description;
 
-    @safe void validate() const pure
+    @safe void validate(bool update) const pure
     {
-        enforce!bool(type.strip().length != 0, new ConstraintError("type can't be empty"));
-        enforce!bool(address.strip().length != 0, new ConstraintError("address can't be empty"));
+        enforce!bool(update || type.strip().length != 0, new ConstraintError("type can't be empty"));
+        enforce!bool(update || address.strip().length != 0, new ConstraintError("address can't be empty"));
 
-        const auto proxyTypeValues = [EnumMembers!ProxyType]
-            .map!(el => cast(string) el)
-            .array;
+        if (type.strip().length != 0)
+        {
+            const auto proxyTypeValues = [EnumMembers!ProxyType]
+                .map!(el => cast(string) el)
+                .array;
 
-        enforce!bool(proxyTypeValues.canFind(type), new ConstraintError("invalid type"));
+            enforce!bool(proxyTypeValues.canFind(type), new ConstraintError("invalid type"));
+        }
     }
 }
 
@@ -90,6 +93,11 @@ struct ProxyFilter
 
     string type;
     string address;
+
+    @safe void validate() const pure
+    {
+        enforce!bool(type.strip().length != 0 || address.strip().length, new ConstraintError("empty filter values"));
+    }
 }
 
 class ProxyNotFound : NotFoundBase!(Proxy)

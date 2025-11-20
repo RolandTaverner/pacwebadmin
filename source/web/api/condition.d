@@ -1,7 +1,8 @@
 module web.api.condition;
 
-import vibe.web.rest;
+import vibe.data.serialization : optional;
 import vibe.http.server;
+import vibe.web.rest;
 
 import web.api.category;
 
@@ -15,13 +16,13 @@ interface ConditionAPI
     ConditionDTO getById(in long _id);
 
     @method(HTTPMethod.POST) @path("/create") @bodyParam("c")
-    ConditionDTO create(in ConditionInputDTO c);
+    ConditionDTO create(in ConditionCreateDTO c);
 
     @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("c")
-    ConditionDTO update(in long _id, in ConditionInputDTO c);
+    ConditionDTO update(in long _id, in ConditionUpdateDTO c);
 
     @method(HTTPMethod.DELETE) @path(":id")
-    ConditionDTO remove(in long _id);
+    void remove(in long _id);
 }
 
 struct ConditionList
@@ -29,7 +30,7 @@ struct ConditionList
     ConditionDTO[] conditions;
 }
 
-struct ConditionInputDTO
+struct ConditionCreateDTO
 {
     @safe this(in string type, in string expression, in long categoryId) pure
     {
@@ -41,6 +42,20 @@ struct ConditionInputDTO
     string type;
     string expression;
     long categoryId;
+}
+
+struct ConditionUpdateDTO
+{
+    @safe this(in string type, in string expression, in long categoryId) pure
+    {
+        this.type = type;
+        this.expression = expression;
+        this.categoryId = categoryId;
+    }
+
+    @optional string type;
+    @optional string expression;
+    @optional long categoryId;
 }
 
 struct ConditionDTO

@@ -129,10 +129,10 @@ protected:
                 app.put("(host_lc == \"" ~ expressionLC ~ "\")");
                 break;
             case ConditionType.hostDomainSubdomain:
-                app.put("/^(?:.*\\.)?" ~ expressionLC.replace("\\.", ".") ~ "$/.test(host_lc)");
+                app.put("/^(?:.*\\.)?" ~ expressionLC.replace(".", "\\.") ~ "$/.test(host_lc)");
                 break;
             case ConditionType.hostSubdomainOnly:
-                app.put("/^.*\\." ~ expressionLC.replace("\\.", ".") ~ "$/.test(host_lc)");
+                app.put("/^.*\\." ~ expressionLC.replace(".", "\\.") ~ "$/.test(host_lc)");
                 break;
             default:
                 app.put("false /* ERROR: unknown condition type " ~ c.type() ~ " */");

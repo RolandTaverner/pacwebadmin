@@ -49,7 +49,7 @@ class ProxyService : ProxyAPI
         return response;
     }
 
-    @safe override ProxyDTO create(in ProxyInputDTO p)
+    @safe override ProxyDTO create(in ProxyCreateDTO p)
     {
         return remapExceptions!(delegate() {
             const ProxyInput pi = {
@@ -60,31 +60,31 @@ class ProxyService : ProxyAPI
         }, ProxyDTO);
     }
 
-    @safe override ProxyDTO update(in long id, in ProxyInputDTO p)
+    @safe override ProxyDTO update(in long id, in ProxyUpdateDTO p)
     {
         return remapExceptions!(delegate() {
             const ProxyInput pi = {
-                type: p.type, address: p.address, description: p.description,};
-                const Proxy updated = m_model.updateProxy(id, pi);
-                return toDTO(updated);
-            }, ProxyDTO);
-        }
+                type: p.type, address: p.address, description: p.description
+            };
+            const Proxy updated = m_model.updateProxy(id, pi);
+            return toDTO(updated);
+        }, ProxyDTO);
+    }
 
-        @safe override ProxyDTO getById(in long id)
-        {
-            return remapExceptions!(delegate() {
-                const Proxy got = m_model.proxyById(id);
-                return toDTO(got);
-            }, ProxyDTO);
-        }
+    @safe override ProxyDTO getById(in long id)
+    {
+        return remapExceptions!(delegate() {
+            const Proxy got = m_model.proxyById(id);
+            return toDTO(got);
+        }, ProxyDTO);
+    }
 
-        @safe override ProxyDTO remove(in long id)
-        {
-            return remapExceptions!(delegate() {
-                const Proxy removed = m_model.deleteProxy(id);
-                return toDTO(removed);
-            }, ProxyDTO);
-        }
+    @safe override void remove(in long id)
+    {
+        return remapExceptions!(delegate() {
+            m_model.deleteProxy(id);
+        }, void);
+    }
 
     private:
         Model m_model;

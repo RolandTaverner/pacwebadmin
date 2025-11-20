@@ -66,17 +66,20 @@ struct ConditionInput
     string expression;
     long categoryId;
 
-    @safe void validate() const pure
+    @safe void validate(bool update) const pure
     {
-        enforce!bool(type.strip().length != 0, new ConstraintError("type can't be empty"));
-        enforce!bool(expression.strip().length != 0, new ConstraintError(
+        enforce!bool(update || type.strip().length != 0, new ConstraintError("type can't be empty"));
+        enforce!bool(update || expression.strip().length != 0, new ConstraintError(
                 "expression can't be empty"));
 
-        const auto conditionTypeValues = [EnumMembers!ConditionType]
-            .map!(el => cast(string) el)
-            .array;
+        if (type.strip().length != 0)
+        {
+            const auto conditionTypeValues = [EnumMembers!ConditionType]
+                .map!(el => cast(string) el)
+                .array;
 
-        enforce!bool(conditionTypeValues.canFind(type.strip()), new ConstraintError("invalid type"));
+            enforce!bool(conditionTypeValues.canFind(type), new ConstraintError("invalid type"));
+        }
     }
 }
 

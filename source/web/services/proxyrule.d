@@ -66,12 +66,11 @@ class ProxyRuleService : ProxyRuleAPI
             }, ProxyRuleDTO);
         }
 
-        @safe override ProxyRuleDTO remove(in long id)
+        @safe override void remove(in long id)
         {
             return remapExceptions!(delegate() {
-                const ProxyRule removed = m_model.deleteProxyRule(id);
-                return toDTO(removed);
-            }, ProxyRuleDTO);
+                m_model.deleteProxyRule(id);
+            }, void);
         }
 
         @safe override ConditionList getConditions(in long id)
@@ -94,13 +93,11 @@ class ProxyRuleService : ProxyRuleAPI
         }, ConditionList);
     }
 
-    @safe override ConditionList removeCondition(in long id, in long hrid)
+    @safe override void removeCondition(in long id, in long hrid)
     {
         return remapExceptions!(delegate() {
-            const auto updated = m_model.proxyRuleRemoveCondition(id, hrid);
-            ConditionList response = {array(updated.map!(c => toDTO(c)))};
-            return response;
-        }, ConditionList);
+            m_model.proxyRuleRemoveCondition(id, hrid);
+        }, void);
     }
 
 private:

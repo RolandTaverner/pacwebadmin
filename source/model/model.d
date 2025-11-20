@@ -149,7 +149,7 @@ class Model
 
     @trusted const(Proxy) createProxy(in ProxyInput i)
     {
-        i.validate();
+        i.validate(false);
 
         synchronized (m_mutex.writer)
         {
@@ -163,15 +163,20 @@ class Model
 
     @trusted const(Proxy) updateProxy(in long id, in ProxyInput i)
     {
-        i.validate();
+        i.validate(true);
 
         synchronized (m_mutex.writer)
         {
             validateProxyModify(id, i, true);
             try
             {
+                auto old = proxies.getByKey(id).value();
+                auto newType = valueOrDefault(i.type, old.type());
+                auto newAddress = valueOrDefault(i.address, old.address());
+                auto newDescription = valueOrDefault(i.description, old.description());
+
                 const auto updated = proxies.update(id,
-                    new dlproxy.ProxyValue(i.type.strip, i.address.strip, i.description));
+                    new dlproxy.ProxyValue(newType, newAddress, newDescription));
                 return makeProxy(updated);
             }
             catch (re.NotFoundError e)
@@ -201,6 +206,8 @@ class Model
 
     @trusted const(Proxy[]) filterProxies(in ProxyFilter f)
     {
+        f.validate();
+
         synchronized (m_mutex.reader)
         {
             auto pred = (in dlproxy.Proxy p) {
@@ -241,7 +248,7 @@ class Model
 
     @trusted const(Condition) createCondition(in ConditionInput i)
     {
-        i.validate();
+        i.validate(false);
 
         synchronized (m_mutex.writer)
         {
@@ -255,15 +262,20 @@ class Model
 
     @trusted const(Condition) updateCondition(in long id, in ConditionInput i)
     {
-        i.validate();
+        i.validate(true);
 
         synchronized (m_mutex.writer)
         {
             validateConditionModify(id, i, true);
             try
             {
+                auto old = conditions.getByKey(id).value();
+                auto newType = valueOrDefault(i.type, old.type());
+                auto newExpression = valueOrDefault(i.expression, old.expression());
+                auto newCategoryId = valueOrDefault(i.categoryId, old.categoryId());
+
                 const auto updated = conditions.update(id,
-                    new dlcondition.ConditionValue(i.type.strip, i.expression.strip, i.categoryId));
+                    new dlcondition.ConditionValue(newType, newExpression, newCategoryId));
                 return makeCondition(updated);
             }
             catch (re.NotFoundError e)
@@ -862,4 +874,15 @@ protected:
 private:
     Storage m_storage;
     ReadWriteMutex m_mutex;
+}
+
+private string valueOrDefault(in string s1, in string s2) pure @safe
+{
+    auto s = s1.strip;
+    return s.length != 0 ? s : s2;
+}
+
+private long valueOrDefault(in long v1, in long v2) pure @safe
+{
+    return v1 > 0 ? v1 : v2;
 }

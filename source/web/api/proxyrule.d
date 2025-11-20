@@ -22,7 +22,7 @@ interface ProxyRuleAPI
     ProxyRuleDTO update(in long _id, in ProxyRuleInputDTO c);
 
     @method(HTTPMethod.DELETE) @path(":id")
-    ProxyRuleDTO remove(in long _id);
+    void remove(in long _id);
 
     @method(HTTPMethod.GET) @path("/:id/conditions")
     ConditionList getConditions(in long _id);
@@ -31,7 +31,7 @@ interface ProxyRuleAPI
     ConditionList addCondition(in long _id, in long _hrid);
 
     @method(HTTPMethod.DELETE) @path("/:id/conditions/:hrid")
-    ConditionList removeCondition(in long _id, in long _hrid);
+    void removeCondition(in long _id, in long _hrid);
 }
 
 struct ProxyRuleList

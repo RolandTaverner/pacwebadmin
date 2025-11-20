@@ -93,12 +93,11 @@ class PACService : PACAPI
         }, PACDTO);
     }
 
-    @safe override PACDTO remove(in long id)
+    @safe override void remove(in long id)
     {
         return remapExceptions!(delegate() {
-            const PAC removed = m_model.deletePAC(id);
-            return toDTO(removed);
-        }, PACDTO);
+            m_model.deletePAC(id);
+        }, void);
     }
 
     @safe override ProxyRulePriorityList getProxyRules(in long id)
@@ -129,13 +128,11 @@ class PACService : PACAPI
         }, ProxyRulePriorityList);
     }
 
-    @safe override ProxyRulePriorityList removeProxyRule(in long id, in long prid)
+    @safe override void removeProxyRule(in long id, in long prid)
     {
         return remapExceptions!(delegate() {
-            const auto updated = m_model.pacRemoveProxyRule(id, prid);
-            ProxyRulePriorityList response = {array(updated.map!(c => toDTO(c)))};
-            return response;
-        }, ProxyRulePriorityList);
+            m_model.pacRemoveProxyRule(id, prid);
+        }, void);
     }
 
 private:

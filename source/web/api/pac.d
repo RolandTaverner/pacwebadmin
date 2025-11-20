@@ -22,7 +22,7 @@ interface PACAPI
     PACDTO update(in long _id, in PACInputDTO c);
 
     @method(HTTPMethod.DELETE) @path(":id")
-    PACDTO remove(in long _id);
+    void remove(in long _id);
 
     @method(HTTPMethod.GET) @path("/:id/proxyrules")
     ProxyRulePriorityList getProxyRules(in long _id);
@@ -34,7 +34,7 @@ interface PACAPI
     ProxyRulePriorityList setProxyRulePriority(in long _id, in long _prid, @viaQuery("priority") long _priority);
 
     @method(HTTPMethod.DELETE) @path("/:id/proxyrules/:prid")
-    ProxyRulePriorityList removeProxyRule(in long _id, in long _prid);
+    void removeProxyRule(in long _id, in long _prid);
 }
 
 struct PACList

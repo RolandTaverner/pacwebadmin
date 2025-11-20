@@ -33,7 +33,7 @@ class ConditionService : ConditionAPI
         return response;
     }
 
-    @safe override ConditionDTO create(in ConditionInputDTO p)
+    @safe override ConditionDTO create(in ConditionCreateDTO p)
     {
         return remapExceptions!(delegate() {
             const ConditionInput ci = {
@@ -44,7 +44,7 @@ class ConditionService : ConditionAPI
         }, ConditionDTO);
     }
 
-    @safe override ConditionDTO update(in long id, in ConditionInputDTO p)
+    @safe override ConditionDTO update(in long id, in ConditionUpdateDTO p)
     {
         return remapExceptions!(delegate() {
             const ConditionInput ci = {
@@ -62,12 +62,11 @@ class ConditionService : ConditionAPI
             }, ConditionDTO);
         }
 
-        @safe override ConditionDTO remove(in long id)
+        @safe override void remove(in long id)
         {
             return remapExceptions!(delegate() {
-                const Condition removed = m_model.deleteCondition(id);
-                return toDTO(removed);
-            }, ConditionDTO);
+                m_model.deleteCondition(id);
+            }, void);
         }
 
     private:

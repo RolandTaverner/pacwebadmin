@@ -76,12 +76,11 @@ class CategoryService : CategoryAPI
         }, CategoryDTO);
     }
 
-    @safe override CategoryDTO remove(in long id)
+    @safe override void remove(in long id)
     {
         return remapExceptions!(delegate() {
-            const Category removed = m_model.deleteCategory(id);
-            return toDTO(removed);
-        }, CategoryDTO);
+            m_model.deleteCategory(id);
+        }, void);
     }
 
 private:

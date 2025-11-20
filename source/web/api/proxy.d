@@ -1,5 +1,7 @@
 module web.api.proxy;
 
+import vibe.data.serialization : optional;
+
 import vibe.web.rest;
 import vibe.http.server;
 
@@ -16,13 +18,13 @@ interface ProxyAPI
     ProxyDTO getById(in long _id);
 
     @method(HTTPMethod.POST) @path("/create") @bodyParam("c")
-    ProxyDTO create(in ProxyInputDTO c);
+    ProxyDTO create(in ProxyCreateDTO c);
 
     @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("p")
-    ProxyDTO update(in long _id, in ProxyInputDTO p);
+    ProxyDTO update(in long _id, in ProxyUpdateDTO p);
 
     @method(HTTPMethod.DELETE) @path(":id")
-    ProxyDTO remove(in long _id);
+    void remove(in long _id);
 }
 
 struct ProxyList
@@ -30,7 +32,7 @@ struct ProxyList
     ProxyDTO[] proxies;
 }
 
-struct ProxyInputDTO
+struct ProxyCreateDTO
 {
     @safe this(in string type, in string address, in string description) pure
     {
@@ -44,10 +46,24 @@ struct ProxyInputDTO
     string description;
 }
 
+struct ProxyUpdateDTO
+{
+    @safe this(in string type, in string address, in string description) pure
+    {
+        this.type = type;
+        this.address = address;
+        this.description = description;
+    }
+
+    @optional string type;
+    @optional string address;
+    @optional string description;
+}
+
 struct ProxyFilterDTO
 {
-    string type;
-    string address;
+    @optional string type;
+    @optional string address;
 }
 
 struct ProxyDTO

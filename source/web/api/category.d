@@ -22,7 +22,7 @@ interface CategoryAPI
     CategoryDTO update(in long _id, in CategoryInputDTO c);
 
     @method(HTTPMethod.DELETE) @path(":id")
-    CategoryDTO remove(in long _id);
+    void remove(in long _id);
 }
 
 struct CategoryList
