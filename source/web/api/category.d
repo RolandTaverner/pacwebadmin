@@ -9,17 +9,17 @@ interface CategoryAPI
     @method(HTTPMethod.GET) @path("/all")
     CategoryList getAll();
 
-    @method(HTTPMethod.POST) @path("/filter")  @bodyParam("f")
-    CategoryList filter(in CategoryFilterDTO f);
+    @method(HTTPMethod.POST) @path("/filter")
+    CategoryList filter(@viaBody() in CategoryFilterDTO f);
 
     @method(HTTPMethod.GET) @path(":id")
     CategoryDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create") @bodyParam("c")
-    CategoryDTO create(in CategoryInputDTO c);
+    @method(HTTPMethod.POST) @path("/create")
+    CategoryDTO create(@viaBody() in CategoryInputDTO c);
 
-    @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("c")
-    CategoryDTO update(in long _id, in CategoryInputDTO c);
+    @method(HTTPMethod.PUT) @path("/:id/update")
+    CategoryDTO update(in long _id, @viaBody() in CategoryInputDTO c);
 
     @method(HTTPMethod.DELETE) @path(":id")
     void remove(in long _id);

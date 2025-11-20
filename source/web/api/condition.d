@@ -15,11 +15,11 @@ interface ConditionAPI
     @method(HTTPMethod.GET) @path(":id")
     ConditionDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create") @bodyParam("c")
-    ConditionDTO create(in ConditionCreateDTO c);
+    @method(HTTPMethod.POST) @path("/create")
+    ConditionDTO create(@viaBody() in ConditionCreateDTO c);
 
-    @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("c")
-    ConditionDTO update(in long _id, in ConditionUpdateDTO c);
+    @method(HTTPMethod.PUT) @path("/:id/update")
+    ConditionDTO update(in long _id, @viaBody() in ConditionUpdateDTO c);
 
     @method(HTTPMethod.DELETE) @path(":id")
     void remove(in long _id);

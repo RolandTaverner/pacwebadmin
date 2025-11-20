@@ -148,14 +148,7 @@ Response
 curl -X DELETE http://127.0.0.1:8080/api/category/1
 ```
 
-Response
-
-```json
-{
-  "id": 1,
-  "name": "category name"
-}
-```
+Response: HTTP 200 with empty body
 
 ## Proxies API requests
 
@@ -275,16 +268,7 @@ Response
 curl -X DELETE http://127.0.0.1:8080/api/proxy/1
 ```
 
-Response
-
-```json
-{
-  "id": 1,
-  "type": "HTTP",
-  "address": "127.0.0.1:80",
-  "description": "updated description"
-}
-```
+Response: HTTP 200 with empty body
 
 ## Conditions API requests
 
@@ -405,19 +389,7 @@ Response
 curl -X DELETE http://127.0.0.1:8080/api/condition/1
 ```
 
-Response
-
-```json
-{
-  "id": 1,
-  "type": "host_subdomain",
-  "expression": "example.com",
-  "category": {
-    "id": 1,
-    "name": "fun"
-  }
-}
-```
+Response: HTTP 200 with empty body
 
 ## Proxy rules API requests
 
@@ -572,32 +544,7 @@ Response
 curl -X DELETE http://127.0.0.1:8080/api/proxyrule/1
 ```
 
-Response
-
-```json
-{
-  "id": 1,
-  "proxy": {
-    "id": 1,
-    "type": "HTTP",
-    "address": "127.0.0.1:80",
-    "description": "updated description"
-  },
-  "enabled": true,
-  "name": "proxy group updated",
-  "conditions": [
-    {
-      "id": 2,
-      "type": "host_subdomain",
-      "expression": "example.com",
-      "category": {
-        "id": 1,
-        "name": "fun"
-      }
-    }
-  ]
-}
-```
+Response: HTTP 200 with empty body
 
 ### Get conditions linked to proxy rules
 
@@ -680,32 +627,7 @@ Returns updated conditions for proxy rules object.
 curl -X DELETE http://127.0.0.1:8080/api/proxyrule/1/conditions/2
 ```
 
-Returns updated conditions for proxy rules object.
-
-```json
-{
-  "conditions": [
-    {
-      "id": 1,
-      "type": "host_domain",
-      "expression": "google.com",
-      "category": {
-        "id": 2,
-        "name": "work"
-      }
-    },
-    {
-      "id": 3,
-      "type": "host_domain",
-      "expression": "noexample.com",
-      "category": {
-        "id": 2,
-        "name": "work"
-      }
-    }
-  ]
-}
-```
+Response: HTTP 200 with empty body
 
 ## PAC API requests
 
@@ -934,61 +856,7 @@ Response
 curl -X DELETE http://127.0.0.1:8080/api/pac/3
 ```
 
-Response
-
-```json
-{
-  "id": 3,
-  "name": "pac 2 updated",
-  "description": "PAC for something else updated",
-  "proxyRules": [
-    {
-      "proxyRule": {
-        "id": 2,
-        "proxy": {
-          "id": 1,
-          "type": "HTTP",
-          "address": "127.0.0.1:80",
-          "description": "updated description"
-        },
-        "enabled": true,
-        "name": "proxy group 1",
-        "conditions": [
-          {
-            "id": 1,
-            "type": "host_domain_only",
-            "expression": "google.com",
-            "category": {
-              "id": 2,
-              "name": "work"
-            }
-          },
-          {
-            "id": 3,
-            "type": "host_subdomain_only",
-            "expression": "ya.ru",
-            "category": {
-              "id": 2,
-              "name": "work"
-            }
-          }
-        ]
-      },
-      "priority": 1
-    }
-  ],
-  "serve": false,
-  "servePath": "pac2updated.pac",
-  "saveToFS": false,
-  "saveToFSPath": "pac2updated.pac",
-  "fallbackProxy": {
-    "id": 2,
-    "type": "SOCKS",
-    "address": "10.10.0.10:8080",
-    "description": "dante"
-  }
-}
-```
+Response: HTTP 200 with empty body
 
 ### Get proxy rules linked to PAC
 
@@ -1185,36 +1053,4 @@ Returns updated proxy rules for PAC object.
 curl -X DELETE http://127.0.0.1:8080/api/pac/1/proxyrules/2
 ```
 
-Returns updated proxy rules for PAC object.
-
-```json
-{
-  "proxyRules": [
-    {
-      "proxyRule": {
-        "id": 1,
-        "proxy": {
-          "id": 1,
-          "type": "HTTP",
-          "address": "127.0.0.1:80",
-          "description": "updated description"
-        },
-        "enabled": true,
-        "name": "proxy group updated",
-        "conditions": [
-          {
-            "id": 2,
-            "type": "host_subdomain",
-            "expression": "example.com",
-            "category": {
-              "id": 1,
-              "name": "fun"
-            }
-          }
-        ]
-      },
-      "priority": 1
-    }
-  ]
-}
-```
+Response: HTTP 200 with empty body

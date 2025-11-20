@@ -11,17 +11,17 @@ interface ProxyAPI
     @method(HTTPMethod.GET) @path("/all")
     ProxyList getAll();
 
-    @method(HTTPMethod.POST) @path("/filter")  @bodyParam("f")
-    ProxyList filter(in ProxyFilterDTO f);
+    @method(HTTPMethod.POST) @path("/filter")
+    ProxyList filter(@viaBody() in ProxyFilterDTO f);
 
     @method(HTTPMethod.GET) @path(":id")
     ProxyDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create") @bodyParam("c")
-    ProxyDTO create(in ProxyCreateDTO c);
+    @method(HTTPMethod.POST) @path("/create")
+    ProxyDTO create(@viaBody() in ProxyCreateDTO c);
 
-    @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("p")
-    ProxyDTO update(in long _id, in ProxyUpdateDTO p);
+    @method(HTTPMethod.PUT) @path("/:id/update")
+    ProxyDTO update(in long _id, @viaBody() in ProxyUpdateDTO p);
 
     @method(HTTPMethod.DELETE) @path(":id")
     void remove(in long _id);

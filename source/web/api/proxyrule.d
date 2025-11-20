@@ -15,11 +15,11 @@ interface ProxyRuleAPI
     @method(HTTPMethod.GET) @path(":id")
     ProxyRuleDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create") @bodyParam("c")
-    ProxyRuleDTO create(in ProxyRuleInputDTO c);
+    @method(HTTPMethod.POST) @path("/create")
+    ProxyRuleDTO create(@viaBody() in ProxyRuleInputDTO c);
 
-    @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("c")
-    ProxyRuleDTO update(in long _id, in ProxyRuleInputDTO c);
+    @method(HTTPMethod.PUT) @path("/:id/update")
+    ProxyRuleDTO update(in long _id, @viaBody() in ProxyRuleInputDTO c);
 
     @method(HTTPMethod.DELETE) @path(":id")
     void remove(in long _id);

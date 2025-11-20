@@ -15,11 +15,11 @@ interface PACAPI
     @method(HTTPMethod.GET) @path(":id")
     PACDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create") @bodyParam("c")
-    PACDTO create(in PACInputDTO c);
+    @method(HTTPMethod.POST) @path("/create")
+    PACDTO create(@viaBody() in PACInputDTO c);
 
-    @method(HTTPMethod.PUT) @path("/:id/update") @bodyParam("c")
-    PACDTO update(in long _id, in PACInputDTO c);
+    @method(HTTPMethod.PUT) @path("/:id/update")
+    PACDTO update(in long _id, @viaBody() in PACInputDTO c);
 
     @method(HTTPMethod.DELETE) @path(":id")
     void remove(in long _id);
