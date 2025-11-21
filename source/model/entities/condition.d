@@ -72,7 +72,7 @@ struct ConditionInput
         enforce!bool(update || expression.strip().length != 0, new ConstraintError(
                 "expression can't be empty"));
 
-        if (type.strip().length != 0)
+        if (type.length != 0)
         {
             const auto conditionTypeValues = [EnumMembers!ConditionType]
                 .map!(el => cast(string) el)

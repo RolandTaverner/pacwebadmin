@@ -175,6 +175,11 @@ class Model
                 auto newAddress = valueOrDefault(i.address, old.address());
                 auto newDescription = valueOrDefault(i.description, old.description());
 
+                if (old.type() == ProxyType.DIRECT)
+                {
+                    enforce!bool(newAddress.length == 0, new ConstraintError("address must be empty for proxy with type == DIRECT"));
+                }
+
                 const auto updated = proxies.update(id,
                     new dlproxy.ProxyValue(newType, newAddress, newDescription));
                 return makeProxy(updated);
@@ -479,7 +484,7 @@ class Model
             {
                 // Should not happen
                 // TODO: throw exception indicating internal error, model is broken
-                throw new ConstraintError("multiple PACs with specified servePath found"); 
+                throw new ConstraintError("multiple PACs with specified servePath found");
             }
             return makePAC(found[0]);
         }

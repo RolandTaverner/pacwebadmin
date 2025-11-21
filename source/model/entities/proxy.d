@@ -70,7 +70,18 @@ struct ProxyInput
     @safe void validate(bool update) const pure
     {
         enforce!bool(update || type.strip().length != 0, new ConstraintError("type can't be empty"));
-        enforce!bool(update || address.strip().length != 0, new ConstraintError("address can't be empty"));
+
+        if (!update)
+        {
+            if (type.strip() == ProxyType.DIRECT)
+            {
+                enforce!bool(address.strip().length == 0, new ConstraintError("address must be empty for proxy with type == DIRECT"));
+            }
+            else
+            {
+                enforce!bool(address.strip().length != 0, new ConstraintError("address can't be empty"));
+            }
+        }
 
         if (type.strip().length != 0)
         {
