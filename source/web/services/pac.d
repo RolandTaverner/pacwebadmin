@@ -35,7 +35,7 @@ class PACService : PACAPI
         return response;
     }
 
-    @safe override PACDTO create(in PACInputDTO p)
+    @safe override PACDTO create(in PACCreateDTO p)
     {
         return remapExceptions!(delegate() {
             long[long] proxyRules;
@@ -60,7 +60,7 @@ class PACService : PACAPI
         }, PACDTO);
     }
 
-    @safe override PACDTO update(in long id, in PACInputDTO p)
+    @safe override PACDTO update(in long id, in PACUpdateDTO p)
     {
         return remapExceptions!(delegate() {
             long[long] proxyRules;

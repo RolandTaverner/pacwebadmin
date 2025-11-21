@@ -1,9 +1,8 @@
 module web.api.proxy;
 
 import vibe.data.serialization : optional;
-
-import vibe.web.rest;
 import vibe.http.server;
+import vibe.web.rest;
 
 interface ProxyAPI
 {

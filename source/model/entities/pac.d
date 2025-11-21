@@ -3,6 +3,7 @@ module model.entities.pac;
 import std.datetime.systime : SysTime;
 import std.exception : enforce;
 import std.string;
+import std.typecons : Nullable;
 
 import model.entities.common;
 import model.entities.proxy;
@@ -149,21 +150,53 @@ private:
 
 struct PACInput
 {
-    string name;
-    string description;
+    Nullable!string name;
+    Nullable!string description;
     long[long] proxyRules;
-    bool serve;
-    string servePath;
-    bool saveToFS;
-    string saveToFSPath;
-    long fallbackProxyId;
+    Nullable!bool serve;
+    Nullable!string servePath;
+    Nullable!bool saveToFS;
+    Nullable!string saveToFSPath;
+    Nullable!long fallbackProxyId;
 
-    @safe void validate() const pure
+    @safe void validate(bool update) const pure
     {
-        enforce!bool(name.strip().length != 0, new ConstraintError("name can't be empty"));
-        enforce!bool(servePath.strip().length != 0, new ConstraintError("servePath can't be empty"));
-        enforce!bool(saveToFSPath.strip().length != 0, new ConstraintError(
-                "saveToFSPath can't be empty"));
+        if (!update)
+        {
+            enforce!bool(!name.isNull, new ConstraintError("name can't be null"));
+            enforce!bool(name.get.strip().length != 0, new ConstraintError("name can't be empty"));
+
+            enforce!bool(!serve.isNull, new ConstraintError("serve can't be null"));
+    
+            if (serve.get)
+            {
+                enforce!bool(!servePath.isNull, new ConstraintError("servePath can't be null"));
+                enforce!bool(servePath.get.strip().length != 0, new ConstraintError("servePath can't be empty"));
+            }
+
+            enforce!bool(!saveToFS.isNull, new ConstraintError("saveToFS can't be null"));
+    
+            if (saveToFS.get)
+            {
+                enforce!bool(!saveToFSPath.isNull, new ConstraintError("saveToFSPath can't be null"));
+                enforce!bool(saveToFSPath.get.strip().length != 0, new ConstraintError("saveToFSPath can't be empty"));
+            }
+
+            enforce!bool(!fallbackProxyId.isNull, new ConstraintError("fallbackProxyId can't be null"));
+        } 
+        else
+        {
+            enforce!bool(name.isNull || name.get.strip().length != 0, new ConstraintError("name can't be empty"));
+            
+            if (!serve.isNull && serve.get && !servePath.isNull)
+            {
+                enforce!bool(servePath.get.strip().length != 0, new ConstraintError("servePath can't be empty"));
+            }
+            if (!saveToFS.isNull && saveToFS.get && !saveToFSPath.isNull)
+            {
+                enforce!bool(saveToFSPath.get.strip().length != 0, new ConstraintError("saveToFSPath can't be empty"));
+            }
+        }
     }
 }
 

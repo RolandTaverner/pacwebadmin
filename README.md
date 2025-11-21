@@ -49,7 +49,7 @@ In case of an error, the service returns the appropriate HTTP status code and a 
 
 ## Categories API requests
 
-`name` should not be empty.
+`name` must be unique.
 
 ### Get all
 
@@ -114,6 +114,8 @@ Response
 
 ### Create
 
+`name` must not be empty.
+
 ```bash
 curl -X POST http://127.0.0.1:8080/api/category/create -H "Content-Type: application/json" -d '{"name": "category name"}'
 ```
@@ -128,6 +130,8 @@ Response
 ```
 
 ### Update
+
+`name` must not be empty.
 
 ```bash
 curl -X PUT http://127.0.0.1:8080/api/category/1/update -H "Content-Type: application/json" -d '{"name": "new category name"}'
@@ -230,6 +234,10 @@ Response
 
 ### Create
 
+If `type` != DIRECT address must not be empty.
+
+If `type` == DIRECT address must be empty.
+
 ```bash
 curl -X POST http://127.0.0.1:8080/api/proxy/create -H "Content-Type: application/json" -d '{"type": "HTTP", "address": "127.0.0.1:1080", "description": "Proxy description"}'
 ```
@@ -246,6 +254,10 @@ Response
 ```
 
 ### Update
+
+If `type` != DIRECT provided or existing address must not be empty.
+
+If any of `type`, `address` or `description` fields are not provided in request, corresponding values remain unchanged.
 
 ```bash
 curl -X PUT http://127.0.0.1:8080/api/proxy/1/update -H "Content-Type: application/json" -d '{"type": "HTTP", "address": "127.0.0.1:80", "description": "updated description"}'
@@ -294,7 +306,7 @@ Response
   "conditions": [
     {
       "id": 1,
-      "type": "host_domain",
+      "type": "host_domain_subdomain",
       "expression": "google.com",
       "category": {
         "id": 2,
@@ -303,7 +315,7 @@ Response
     },
     {
       "id": 2,
-      "type": "host_domain",
+      "type": "host_domain_only",
       "expression": "memes.com",
       "category": {
         "id": 1,
@@ -312,7 +324,7 @@ Response
     },
     {
       "id": 3,
-      "type": "host_domain",
+      "type": "host_subdomain_only",
       "expression": "noexample.com",
       "category": {
         "id": 2,
@@ -334,7 +346,7 @@ Response
 ```json
 {
   "id": 1,
-  "type": "host_domain",
+  "type": "host_domain_subdomain",
   "expression": "google.com",
   "category": {
     "id": 2,
@@ -346,7 +358,7 @@ Response
 ### Create
 
 ```bash
-curl -X POST http://127.0.0.1:8080/api/condition/create -H "Content-Type: application/json" -d '{"type": "host_subdomain", "expression": "example.com", "categoryId": 1}'
+curl -X POST http://127.0.0.1:8080/api/condition/create -H "Content-Type: application/json" -d '{"type": "host_domain_only", "expression": "example.com", "categoryId": 1}'
 ```
 
 Response
@@ -354,7 +366,7 @@ Response
 ```json
 {
   "id": 4,
-  "type": "host_subdomain",
+  "type": "host_domain_only",
   "expression": "example.com",
   "category": {
     "id": 1,
@@ -365,8 +377,10 @@ Response
 
 ### Update
 
+If any of `type`, `expression` or `categoryId` fields are not provided in request, corresponding values remain unchanged.
+
 ```bash
- curl -X PUT http://127.0.0.1:8080/api/condition/1/update -H "Content-Type: application/json" -d '{"type": "host_subdomain", "expression": "example.com", "categoryId": 1}'
+ curl -X PUT http://127.0.0.1:8080/api/condition/1/update -H "Content-Type: application/json" -d '{"type": "host_domain_subdomain", "expression": "example.com", "categoryId": 1}'
 ```
 
 Response
@@ -374,7 +388,7 @@ Response
 ```json
 {
   "id": 1,
-  "type": "host_subdomain",
+  "type": "host_domain_subdomain",
   "expression": "example.com",
   "category": {
     "id": 1,
@@ -417,7 +431,7 @@ Response
       "conditions": [
         {
           "id": 1,
-          "type": "host_domain",
+          "type": "host_domain_subdomain",
           "expression": "google.com",
           "category": {
             "id": 2,
@@ -452,7 +466,7 @@ Response
   "conditions": [
     {
       "id": 1,
-      "type": "host_domain",
+      "type": "host_domain_subdomain",
       "expression": "google.com",
       "category": {
         "id": 2,
@@ -485,7 +499,7 @@ Response
   "conditions": [
     {
       "id": 1,
-      "type": "host_domain",
+      "type": "host_domain_subdomain",
       "expression": "google.com",
       "category": {
         "id": 2,
@@ -494,7 +508,7 @@ Response
     },
     {
       "id": 2,
-      "type": "host_subdomain",
+      "type": "host_domain_only",
       "expression": "example.com",
       "category": {
         "id": 1,
@@ -506,6 +520,8 @@ Response
 ```
 
 ### Update
+
+If any of `proxyId`, `enabled`, `name` or `conditionIds` fields are not provided in request, corresponding values remain unchanged.
 
 ```bash
 curl -X PUT http://127.0.0.1:8080/api/proxyrule/1/update -H "Content-Type: application/json" -d '{"proxyId": 1, "enabled": true, "name": "proxy group updated", "conditionIds": [2]}'
@@ -527,7 +543,7 @@ Response
   "conditions": [
     {
       "id": 2,
-      "type": "host_subdomain",
+      "type": "host_domain_only",
       "expression": "example.com",
       "category": {
         "id": 1,
@@ -559,7 +575,7 @@ Response
   "conditions": [
     {
       "id": 1,
-      "type": "host_domain",
+      "type": "host_domain_subdomain",
       "expression": "google.com",
       "category": {
         "id": 2,
@@ -568,7 +584,7 @@ Response
     },
     {
       "id": 2,
-      "type": "host_subdomain",
+      "type": "host_domain_only",
       "expression": "example.com",
       "category": {
         "id": 1,
@@ -592,7 +608,7 @@ Returns updated conditions for proxy rules object.
   "conditions": [
     {
       "id": 1,
-      "type": "host_domain",
+      "type": "host_domain_subdomain",
       "expression": "google.com",
       "category": {
         "id": 2,
@@ -601,7 +617,7 @@ Returns updated conditions for proxy rules object.
     },
     {
       "id": 2,
-      "type": "host_subdomain",
+      "type": "host_domain_only",
       "expression": "example.com",
       "category": {
         "id": 1,
@@ -610,7 +626,7 @@ Returns updated conditions for proxy rules object.
     },
     {
       "id": 3,
-      "type": "host_domain",
+      "type": "host_domain_only",
       "expression": "noexample.com",
       "category": {
         "id": 2,
@@ -624,7 +640,7 @@ Returns updated conditions for proxy rules object.
 ### Delete condition from proxy rules
 
 ```bash
-curl -X DELETE http://127.0.0.1:8080/api/proxyrule/1/conditions/2
+curl -X DELETE http://127.0.0.1:8080/api/proxyrule/1/conditions/3
 ```
 
 Response: HTTP 200 with empty body
@@ -645,7 +661,7 @@ Response
     {
       "id": 1,
       "name": "pac 1",
-      "description": "PAC for something",
+      "description": "some PAC",
       "proxyRules": [
         {
           "proxyRule": {
@@ -653,16 +669,25 @@ Response
             "proxy": {
               "id": 1,
               "type": "HTTP",
-              "address": "127.0.0.1:80",
-              "description": "updated description"
+              "address": "127.0.0.1:8080",
+              "description": "local proxy"
             },
             "enabled": true,
-            "name": "proxy group updated",
+            "name": "some proxy group",
             "conditions": [
               {
+                "id": 1,
+                "type": "host_domain_only",
+                "expression": "google.com",
+                "category": {
+                  "id": 2,
+                  "name": "work"
+                }
+              },
+              {
                 "id": 2,
-                "type": "host_subdomain",
-                "expression": "example.com",
+                "type": "host_domain_subdomain",
+                "expression": "memes.com",
                 "category": {
                   "id": 1,
                   "name": "fun"
@@ -675,8 +700,14 @@ Response
       ],
       "serve": true,
       "servePath": "pac1.pac",
-      "saveToFS": true,
-      "saveToFSPath": "pac1.pac"
+      "saveToFS": false,
+      "saveToFSPath": "pac1.pac",
+      "fallbackProxy": {
+        "id": 4,
+        "type": "DIRECT",
+        "address": "",
+        "description": "no proxy"
+      }
     }
   ]
 }
@@ -702,12 +733,21 @@ Response
         "proxy": {
           "id": 1,
           "type": "HTTP",
-          "address": "127.0.0.1:80",
-          "description": "updated description"
+          "address": "127.0.0.1:8080",
+          "description": "local proxy"
         },
         "enabled": true,
-        "name": "proxy group updated",
+        "name": "some proxy group",
         "conditions": [
+          {
+            "id": 1,
+            "type": "host_domain_only",
+            "expression": "google.com",
+            "category": {
+              "id": 2,
+              "name": "work"
+            }
+          },
           {
             "id": 2,
             "type": "host_domain_subdomain",
@@ -720,7 +760,7 @@ Response
         ]
       },
       "priority": 1
-    },
+    }
   ],
   "serve": true,
   "servePath": "pac1.pac",
@@ -729,7 +769,7 @@ Response
   "fallbackProxy": {
     "id": 4,
     "type": "DIRECT",
-    "address": "-",
+    "address": "",
     "description": "no proxy"
   }
 }
@@ -745,7 +785,7 @@ Response
 
 ```json
 {
-  "id": 3,
+  "id": 2,
   "name": "pac 2",
   "description": "PAC for something else",
   "proxyRules": [
@@ -755,12 +795,21 @@ Response
         "proxy": {
           "id": 1,
           "type": "HTTP",
-          "address": "127.0.0.1:80",
-          "description": "Proxy description"
+          "address": "127.0.0.1:8080",
+          "description": "local proxy"
         },
         "enabled": true,
-        "name": "proxy group",
+        "name": "some proxy group",
         "conditions": [
+          {
+            "id": 1,
+            "type": "host_domain_only",
+            "expression": "google.com",
+            "category": {
+              "id": 2,
+              "name": "work"
+            }
+          },
           {
             "id": 2,
             "type": "host_domain_subdomain",
@@ -791,14 +840,14 @@ Response
 ### Update
 
 ```bash
-curl -X PUT http://127.0.0.1:8080/api/pac/3/update -H "Content-Type: application/json" -d '{"name": "pac 2 updated", "description": "PAC for something else updated", "proxyRules": [{"proxyRuleId": 2, "priority":1}], "fallbackProxyId": 2, "serve": false, "servePath": "pac2updated.pac", "saveToFS": false, "saveToFSPath": "pac2updated.pac"}'
+curl -X PUT http://127.0.0.1:8080/api/pac/2/update -H "Content-Type: application/json" -d '{"name": "pac 2 updated", "description": "PAC for something else updated", "proxyRules": [{"proxyRuleId": 2, "priority":1}], "fallbackProxyId": 2, "serve": false, "servePath": "pac2updated.pac", "saveToFS": false, "saveToFSPath": "pac2updated.pac"}'
 ```
 
 Response
 
 ```json
 {
-  "id": 3,
+  "id": 2,
   "name": "pac 2 updated",
   "description": "PAC for something else updated",
   "proxyRules": [
@@ -808,8 +857,8 @@ Response
         "proxy": {
           "id": 1,
           "type": "HTTP",
-          "address": "127.0.0.1:80",
-          "description": "updated description"
+          "address": "127.0.0.1:8080",
+          "description": "local proxy"
         },
         "enabled": true,
         "name": "proxy group 1",
@@ -853,7 +902,7 @@ Response
 ### Delete
 
 ```bash
-curl -X DELETE http://127.0.0.1:8080/api/pac/3
+curl -X DELETE http://127.0.0.1:8080/api/pac/2
 ```
 
 Response: HTTP 200 with empty body
@@ -875,16 +924,25 @@ Response
         "proxy": {
           "id": 1,
           "type": "HTTP",
-          "address": "127.0.0.1:80",
-          "description": "updated description"
+          "address": "127.0.0.1:8080",
+          "description": "local proxy"
         },
         "enabled": true,
-        "name": "proxy group updated",
+        "name": "some proxy group",
         "conditions": [
           {
+            "id": 1,
+            "type": "host_domain_only",
+            "expression": "google.com",
+            "category": {
+              "id": 2,
+              "name": "work"
+            }
+          },
+          {
             "id": 2,
-            "type": "host_subdomain",
-            "expression": "example.com",
+            "type": "host_domain_subdomain",
+            "expression": "memes.com",
             "category": {
               "id": 1,
               "name": "fun"
@@ -901,7 +959,7 @@ Response
 ### Add proxy rules to PAC
 
 ```bash
- curl -X POST http://127.0.0.1:8080/api/pac/1/proxyrules/2?priority=2
+curl -X POST http://127.0.0.1:8080/api/pac/1/proxyrules/2?priority=2
 ```
 
 Returns updated proxy rules for PAC object.
@@ -915,16 +973,25 @@ Returns updated proxy rules for PAC object.
         "proxy": {
           "id": 1,
           "type": "HTTP",
-          "address": "127.0.0.1:80",
-          "description": "updated description"
+          "address": "127.0.0.1:8080",
+          "description": "local proxy"
         },
         "enabled": true,
-        "name": "proxy group updated",
+        "name": "some proxy group",
         "conditions": [
           {
+            "id": 1,
+            "type": "host_domain_only",
+            "expression": "google.com",
+            "category": {
+              "id": 2,
+              "name": "work"
+            }
+          },
+          {
             "id": 2,
-            "type": "host_subdomain",
-            "expression": "example.com",
+            "type": "host_domain_subdomain",
+            "expression": "memes.com",
             "category": {
               "id": 1,
               "name": "fun"
@@ -940,15 +1007,15 @@ Returns updated proxy rules for PAC object.
         "proxy": {
           "id": 1,
           "type": "HTTP",
-          "address": "127.0.0.1:80",
-          "description": "updated description"
+          "address": "127.0.0.1:8080",
+          "description": "local proxy"
         },
         "enabled": true,
         "name": "proxy group 1",
         "conditions": [
           {
             "id": 1,
-            "type": "host_domain",
+            "type": "host_domain_only",
             "expression": "google.com",
             "category": {
               "id": 2,
@@ -957,8 +1024,8 @@ Returns updated proxy rules for PAC object.
           },
           {
             "id": 3,
-            "type": "host_domain",
-            "expression": "noexample.com",
+            "type": "host_subdomain_only",
+            "expression": "ya.ru",
             "category": {
               "id": 2,
               "name": "work"
@@ -990,16 +1057,25 @@ Returns updated proxy rules for PAC object.
         "proxy": {
           "id": 1,
           "type": "HTTP",
-          "address": "127.0.0.1:80",
-          "description": "updated description"
+          "address": "127.0.0.1:8080",
+          "description": "local proxy"
         },
         "enabled": true,
-        "name": "proxy group updated",
+        "name": "some proxy group",
         "conditions": [
           {
+            "id": 1,
+            "type": "host_domain_only",
+            "expression": "google.com",
+            "category": {
+              "id": 2,
+              "name": "work"
+            }
+          },
+          {
             "id": 2,
-            "type": "host_subdomain",
-            "expression": "example.com",
+            "type": "host_domain_subdomain",
+            "expression": "memes.com",
             "category": {
               "id": 1,
               "name": "fun"
@@ -1015,15 +1091,15 @@ Returns updated proxy rules for PAC object.
         "proxy": {
           "id": 1,
           "type": "HTTP",
-          "address": "127.0.0.1:80",
-          "description": "updated description"
+          "address": "127.0.0.1:8080",
+          "description": "local proxy"
         },
         "enabled": true,
         "name": "proxy group 1",
         "conditions": [
           {
             "id": 1,
-            "type": "host_domain",
+            "type": "host_domain_only",
             "expression": "google.com",
             "category": {
               "id": 2,
@@ -1032,8 +1108,8 @@ Returns updated proxy rules for PAC object.
           },
           {
             "id": 3,
-            "type": "host_domain",
-            "expression": "noexample.com",
+            "type": "host_subdomain_only",
+            "expression": "ya.ru",
             "category": {
               "id": 2,
               "name": "work"

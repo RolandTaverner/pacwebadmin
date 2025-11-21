@@ -1,7 +1,7 @@
 module web.api.category;
 
-import vibe.web.rest;
 import vibe.http.server;
+import vibe.web.rest;
 
 interface CategoryAPI
 {

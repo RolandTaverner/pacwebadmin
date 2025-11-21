@@ -175,9 +175,9 @@ class Model
                 auto newAddress = valueOrDefault(i.address, old.address());
                 auto newDescription = valueOrDefault(i.description, old.description());
 
-                if (old.type() == ProxyType.DIRECT)
+                if (newType == ProxyType.DIRECT)
                 {
-                    enforce!bool(newAddress.length == 0, new ConstraintError("address must be empty for proxy with type == DIRECT"));
+                    newAddress = "";
                 }
 
                 const auto updated = proxies.update(id,
@@ -497,21 +497,21 @@ class Model
 
     @trusted const(PAC) createPAC(in PACInput i)
     {
-        i.validate();
+        i.validate(false);
 
         synchronized (m_mutex.writer)
         {
             validatePACModify(-1, i, false);
 
             const auto created = pacs.create(
-                new dlpac.PACValue(i.name.strip,
-                    i.description,
+                new dlpac.PACValue(i.name.get().strip(),
+                    i.description.get().strip(),
                     i.proxyRules.byKeyValue.map!(e => dlpac.ProxyRulePriority(e.key, e.value)).array,
-                    i.serve,
-                    i.servePath.strip,
-                    i.saveToFS,
-                    i.saveToFSPath.strip,
-                    i.fallbackProxyId,
+                    i.serve.get(),
+                    i.servePath.get().strip(),
+                    i.saveToFS.get(),
+                    i.saveToFSPath.get().strip(),
+                    i.fallbackProxyId.get(),
                     Clock.currTime(UTC())));
             return makePAC(created);
         }
@@ -519,22 +519,33 @@ class Model
 
     @trusted const(PAC) updatePAC(in long id, in PACInput i)
     {
-        i.validate();
+        i.validate(true);
 
         synchronized (m_mutex.writer)
         {
             validatePACModify(id, i, true);
             try
             {
+                auto old = pacs.getByKey(id).value();
+
+                auto newName = i.name ? i.name.get().strip() : old.name();
+                auto newDescription = i.description ? i.description.get().strip() : old.description();
+                auto newProxyRules = i.proxyRules.length != 0 ? i.proxyRules.byKeyValue.map!(e => dlpac.ProxyRulePriority(e.key, e.value)).array : old.proxyRules();
+                auto newServe = i.serve ? i.serve.get : old.serve();
+                auto newServePath = i.servePath ? i.servePath.get().strip() : old.servePath();
+                auto newSaveToFS = i.saveToFS ? i.saveToFS.get : old.saveToFS();
+                auto newSaveToFSPath = i.saveToFSPath ? i.saveToFSPath.get().strip() : old.saveToFSPath();
+                auto newFallbackProxyId = i.fallbackProxyId ? i.fallbackProxyId.get : old.fallbackProxyId();
+
                 const auto updated = pacs.update(id,
-                    new dlpac.PACValue(i.name.strip,
-                        i.description,
-                        i.proxyRules.byKeyValue.map!(e => dlpac.ProxyRulePriority(e.key, e.value)).array,
-                        i.serve,
-                        i.servePath.strip,
-                        i.saveToFS,
-                        i.saveToFSPath.strip,
-                        i.fallbackProxyId,
+                    new dlpac.PACValue(newName,
+                        newDescription,
+                        newProxyRules,
+                        newServe,
+                        newServePath,
+                        newSaveToFS,
+                        newSaveToFSPath,
+                        newFallbackProxyId,
                         Clock.currTime(UTC())));
                 return makePAC(updated);
             }
@@ -712,6 +723,18 @@ protected:
         };
 
         enforce!bool(proxies.count(pred) == 0, new ConstraintError("already exists"));
+
+        if (update)
+        {
+            auto old = proxies.getByKey(id).value();
+            auto newType = valueOrDefault(i.type, old.type());
+            auto newAddress = valueOrDefault(i.address, old.address());
+
+            if (newType != ProxyType.DIRECT)
+            {
+                enforce!bool(newAddress.strip().length != 0, new ConstraintError("address can't be empty"));
+            }
+        }
     }
 
     void validateProxyDelete(in long id)
@@ -811,26 +834,84 @@ protected:
 
     void validatePACModify(in long id, in PACInput i, in bool update)
     {
-        auto nameEq = (in dlpac.PAC p) {
-            return (!update || p.key() != id) && p.value().name() == i.name.strip;
-        };
-        enforce!bool(pacs.count(nameEq) == 0, new ConstraintError("PAC with the same name already exists"));
+        if (!i.name.isNull)
+        {
+            auto name = i.name.get().strip();
+            auto nameEq = (in dlpac.PAC p) {
+                return (!update || p.key() != id) && p.value().name() == name;
+            };
+            enforce!bool(pacs.count(nameEq) == 0, new ConstraintError("PAC with the same name already exists"));
+        }
 
-        auto servePathEq = (in dlpac.PAC p) {
-            return (!update || p.key() != id) && p.value().servePath() == i.servePath.strip;
-        };
-        enforce!bool(pacs.count(servePathEq) == 0, new ConstraintError("PAC with the same servePath already exists"));
+        if (!update)
+        {
+            if (i.serve.get())
+            {
+                enforce!bool(!i.servePath.isNull, new ConstraintError("servePath can't be null"));
+                enforce!bool(i.servePath.get.strip().length != 0, new ConstraintError("servePath can't be empty"));
+                auto servePath = i.servePath.get().strip();
 
-        auto savePathEq = (in dlpac.PAC p) {
-            return (!update || p.key() != id) && p.value().saveToFSPath() == i.saveToFSPath.strip;
-        };
-        enforce!bool(pacs.count(savePathEq) == 0, new ConstraintError("PAC with the same saveToFSPath already exists"));
+                auto servePathEq = (in dlpac.PAC p) {
+                    return (!update || p.key() != id) && p.value().servePath() == servePath;
+                };
+                enforce!bool(pacs.count(servePathEq) == 0, new ConstraintError("PAC with the same servePath already exists"));
+            }
 
+            if (i.saveToFS.get())
+            {
+                enforce!bool(!i.saveToFSPath.isNull, new ConstraintError("saveToFSPath can't be null"));
+                enforce!bool(i.saveToFSPath.get.strip().length != 0, new ConstraintError("saveToFSPath can't be empty"));
+                auto saveToFSPath = i.saveToFSPath.get().strip();
+
+                auto saveToFSPathEq = (in dlpac.PAC p) {
+                    return (!update || p.key() != id) && p.value().saveToFSPath() == saveToFSPath;
+                };
+                enforce!bool(pacs.count(saveToFSPathEq) == 0, new ConstraintError("PAC with the same saveToFSPath already exists"));
+            }
+        }
+        else
+        {
+            auto old = pacs.getByKey(id).value();
+
+            if (!i.serve.isNull && i.serve.get())
+            {
+                if (!i.servePath.isNull)
+                {
+                    auto newServePath = i.servePath.get().strip();
+                    auto servePathEq = (in dlpac.PAC p) {
+                        return p.key() != id && p.value().servePath() == newServePath;
+                    };
+                    enforce!bool(pacs.count(servePathEq) == 0, new ConstraintError("PAC with the same servePath already exists"));
+                }
+                else 
+                {
+                    enforce!bool(old.servePath().length != 0, new ConstraintError("servePath can't be empty"));
+                }
+            }
+
+            if (!i.saveToFS.isNull && i.saveToFS.get())
+            {
+                if (!i.saveToFSPath.isNull)
+                {
+                    auto newSaveToFSPath = i.saveToFSPath.get().strip();
+                    auto saveToFSPathEq = (in dlpac.PAC p) {
+                        return p.key() != id && p.value().saveToFSPath() == newSaveToFSPath;
+                    };
+                    enforce!bool(pacs.count(saveToFSPathEq) == 0, new ConstraintError("PAC with the same saveToFSPath already exists"));
+                }
+                else 
+                {
+                    enforce!bool(old.saveToFSPath().length != 0, new ConstraintError("saveToFSPath can't be empty"));
+                }
+            }           
+        }
+        
         foreach (prId; i.proxyRules.byKey())
         {
             enforce!bool(proxyRules.exists(prId), new ProxyRuleNotFound(prId));
         }
-        enforce!bool(proxies.exists(i.fallbackProxyId), new ProxyNotFound(i.fallbackProxyId));
+
+        enforce!bool(i.fallbackProxyId.isNull || proxies.exists(i.fallbackProxyId.get()), new ProxyNotFound(i.fallbackProxyId.get()));
     }
 
     @safe PAC makePAC(in dlpac.PAC dto)

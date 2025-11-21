@@ -79,8 +79,8 @@ struct ProxyRuleInput
 
         if (!update)
         {
-            enforce!bool(!proxyId.isNull, new ConstraintError("name can't be empty"));
-            enforce!bool(!enabled.isNull, new ConstraintError("name can't be empty"));
+            enforce!bool(!proxyId.isNull, new ConstraintError("proxyId can't be null"));
+            enforce!bool(!enabled.isNull, new ConstraintError("enabled can't be null"));
         }
     }    
 }

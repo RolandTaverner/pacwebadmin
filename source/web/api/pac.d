@@ -1,7 +1,10 @@
 module web.api.pac;
 
-import vibe.web.rest;
+import std.typecons : Nullable;
+
+import vibe.data.serialization : optional;
 import vibe.http.server;
+import vibe.web.rest;
 
 import web.api.proxy;
 import web.api.proxyrule;
@@ -16,10 +19,10 @@ interface PACAPI
     PACDTO getById(in long _id);
 
     @method(HTTPMethod.POST) @path("/create")
-    PACDTO create(@viaBody() in PACInputDTO c);
+    PACDTO create(@viaBody() in PACCreateDTO c);
 
     @method(HTTPMethod.PUT) @path("/:id/update")
-    PACDTO update(in long _id, @viaBody() in PACInputDTO c);
+    PACDTO update(in long _id, @viaBody() in PACUpdateDTO c);
 
     @method(HTTPMethod.DELETE) @path(":id")
     void remove(in long _id);
@@ -48,25 +51,8 @@ struct ProxyRulePriorityInput
     long priority;
 }
 
-struct PACInputDTO
+struct PACCreateDTO
 {
-    @safe this(in string name,
-        in string description,
-        in ProxyRulePriorityInput[] proxyRules,
-        in bool serve,
-        in string servePath,
-        in bool saveToFS,
-        in string saveToFSPath) pure
-    {
-        this.name = name;
-        this.description = description;
-        this.proxyRules = proxyRules.dup;
-        this.serve = serve;
-        this.servePath = servePath;
-        this.saveToFS = saveToFS;
-        this.saveToFSPath = saveToFSPath;
-    }
-
     string name;
     string description;
     ProxyRulePriorityInput[] proxyRules;
@@ -75,6 +61,18 @@ struct PACInputDTO
     bool saveToFS;
     string saveToFSPath;
     long fallbackProxyId;
+}
+
+struct PACUpdateDTO
+{
+    @optional Nullable!string name;
+    @optional Nullable!string description;
+    @optional ProxyRulePriorityInput[] proxyRules;
+    @optional Nullable!bool serve;
+    @optional Nullable!string servePath;
+    @optional Nullable!bool saveToFS;
+    @optional Nullable!string saveToFSPath;
+    @optional Nullable!long fallbackProxyId;
 }
 
 struct ProxyRulePriorityDTO
