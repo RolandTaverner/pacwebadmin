@@ -2,6 +2,7 @@ module model.entities.proxyrule;
 
 import std.exception : enforce;
 import std.string;
+import std.typecons : Nullable;
 
 import model.entities.common;
 import model.entities.condition;
@@ -67,14 +68,20 @@ private:
 
 struct ProxyRuleInput
 {
-    long proxyId;
-    bool enabled;
+    Nullable!long proxyId;
+    Nullable!bool enabled;
     string name;
     long[] conditionIds;
 
-    @safe void validate() const pure
+    @safe void validate(bool update) const pure
     {
-        enforce!bool(name.strip().length != 0, new ConstraintError("name can't be empty"));
+        enforce!bool(update || name.strip().length != 0, new ConstraintError("name can't be empty"));
+
+        if (!update)
+        {
+            enforce!bool(!proxyId.isNull, new ConstraintError("name can't be empty"));
+            enforce!bool(!enabled.isNull, new ConstraintError("name can't be empty"));
+        }
     }    
 }
 

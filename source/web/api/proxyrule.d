@@ -1,7 +1,10 @@
 module web.api.proxyrule;
 
-import vibe.web.rest;
+import std.typecons : Nullable;
+
+import vibe.data.serialization : optional;
 import vibe.http.server;
+import vibe.web.rest;
 
 import web.api.condition;
 import web.api.proxy;
@@ -16,10 +19,10 @@ interface ProxyRuleAPI
     ProxyRuleDTO getById(in long _id);
 
     @method(HTTPMethod.POST) @path("/create")
-    ProxyRuleDTO create(@viaBody() in ProxyRuleInputDTO c);
+    ProxyRuleDTO create(@viaBody() in ProxyRuleCreateDTO c);
 
     @method(HTTPMethod.PUT) @path("/:id/update")
-    ProxyRuleDTO update(in long _id, @viaBody() in ProxyRuleInputDTO c);
+    ProxyRuleDTO update(in long _id, @viaBody() in ProxyRuleUpdateDTO c);
 
     @method(HTTPMethod.DELETE) @path(":id")
     void remove(in long _id);
@@ -39,20 +42,20 @@ struct ProxyRuleList
     ProxyRuleDTO[] proxyRules;
 }
 
-struct ProxyRuleInputDTO
+struct ProxyRuleCreateDTO
 {
-    @safe this(in long proxyId, in bool enabled, in string name, in long[] conditionIds) pure
-    {
-        this.proxyId = proxyId;
-        this.enabled = enabled;
-        this.name = name;
-        this.conditionIds = conditionIds.dup;
-    }
-
     long proxyId;
     bool enabled;
     string name;
     long[] conditionIds;
+}
+
+struct ProxyRuleUpdateDTO
+{
+    @optional Nullable!long proxyId;
+    @optional Nullable!bool enabled;
+    @optional string name;
+    @optional long[] conditionIds;
 }
 
 struct ProxyRuleDTO

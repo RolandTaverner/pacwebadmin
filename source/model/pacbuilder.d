@@ -34,6 +34,11 @@ class PACBuilder
         foreach(ref const ProxyRulePriority prp; pacModel.proxyRules())
         {
             auto pr = prp.proxyRule();
+            if (!pr.enabled())
+            {
+                continue;
+            }
+
             addProxyRule(app, pr);
             app.put("\n\n");
         }

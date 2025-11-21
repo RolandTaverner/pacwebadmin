@@ -334,15 +334,15 @@ class Model
 
     @trusted const(ProxyRule) createProxyRule(in ProxyRuleInput i)
     {
-        i.validate();
+        i.validate(false);
 
         synchronized (m_mutex.writer)
         {
             validateProxyRuleModify(-1, i, false);
 
             const auto created = proxyRules.create(
-                new dlproxyrule.ProxyRuleValue(i.proxyId,
-                    i.enabled,
+                new dlproxyrule.ProxyRuleValue(i.proxyId.get,
+                    i.enabled.get,
                     i.name.strip,
                     i.conditionIds));
             return makeProxyRule(created);
@@ -351,18 +351,23 @@ class Model
 
     @trusted const(ProxyRule) updateProxyRule(in long id, in ProxyRuleInput i)
     {
-        i.validate();
+        i.validate(true);
         synchronized (m_mutex.writer)
         {
             validateProxyRuleModify(id, i, true);
             try
             {
-                // TODO: check conditionIds uniqueness and existance
+                auto old = proxyRules.getByKey(id).value();
+                auto newProxyId = i.proxyId ? i.proxyId.get : old.proxyId();
+                auto newEnabled = i.enabled ? i.enabled.get : old.enabled();
+                auto newName = valueOrDefault(i.name, old.name());
+                auto newConditionIds = i.conditionIds.length != 0 ? i.conditionIds : old.conditionIds();
+
                 const auto updated = proxyRules.update(id,
-                    new dlproxyrule.ProxyRuleValue(i.proxyId,
-                        i.enabled,
-                        i.name.strip,
-                        i.conditionIds));
+                    new dlproxyrule.ProxyRuleValue(newProxyId,
+                        newEnabled,
+                        newName,
+                        newConditionIds));
                 return makeProxyRule(updated);
             }
             catch (re.NotFoundError e)
@@ -767,7 +772,10 @@ protected:
         };
         enforce!bool(proxyRules.count(pred) == 0, new ConstraintError("already exists"));
 
-        enforce!bool(proxies.exists(i.proxyId), new ConstraintError("proxy not exists"));
+        if (update && !i.proxyId.isNull)
+        {
+            enforce!bool(proxies.exists(i.proxyId.get), new ConstraintError("proxy not exists"));
+        }
 
         foreach (conditionId; i.conditionIds)
         {
