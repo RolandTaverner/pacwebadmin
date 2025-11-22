@@ -85,8 +85,8 @@ export interface ErrorResponse {
 // Category API
 // ============================
 
-export interface CategoriesResponse {
-  categories: Category[];
+export interface CategoryFilterRequest {
+  name: string;
 }
 
 export interface CategoryCreateRequest {
@@ -96,6 +96,14 @@ export interface CategoryCreateRequest {
 export interface CategoryUpdateRequest {
   name: string;
 }
+
+export interface CategoriesResponse {
+  categories: Category[];
+}
+
+export type CategoryGetByIdResponse = Category;
+export type CategoryCreateResponse = Category;
+export type CategoryUpdateResponse = Category;
 
 
 // ============================
