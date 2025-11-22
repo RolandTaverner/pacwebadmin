@@ -54,7 +54,7 @@ In case of an error, the service returns the appropriate HTTP status code and a 
 ### Get all
 
 ```bash
-curl http://127.0.0.1:8080/api/category/all
+curl http://127.0.0.1:8080/api/category/list
 ```
 
 Response
@@ -100,7 +100,7 @@ Response
 ### Get by id
 
 ```bash
-curl http://127.0.0.1:8080/api/category/1
+curl http://127.0.0.1:8080/api/category/list/1
 ```
 
 Response
@@ -117,7 +117,7 @@ Response
 `name` must not be empty.
 
 ```bash
-curl -X POST http://127.0.0.1:8080/api/category/create -H "Content-Type: application/json" -d '{"name": "category name"}'
+curl -X POST http://127.0.0.1:8080/api/category/list -H "Content-Type: application/json" -d '{"name": "category name"}'
 ```
 
 Response
@@ -134,7 +134,7 @@ Response
 `name` must not be empty.
 
 ```bash
-curl -X PUT http://127.0.0.1:8080/api/category/1/update -H "Content-Type: application/json" -d '{"name": "new category name"}'
+curl -X PUT http://127.0.0.1:8080/api/category/list/1 -H "Content-Type: application/json" -d '{"name": "new category name"}'
 ```
 
 Response
@@ -149,7 +149,7 @@ Response
 ### Delete
 
 ```bash
-curl -X DELETE http://127.0.0.1:8080/api/category/1
+curl -X DELETE http://127.0.0.1:8080/api/category/list/1
 ```
 
 Response: HTTP 200 with empty body

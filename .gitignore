@@ -33,7 +33,3 @@ docs/
 
 # Code coverage
 *.lst
-
-# node
-/web-admin/node_modules
-npm-debug.log*

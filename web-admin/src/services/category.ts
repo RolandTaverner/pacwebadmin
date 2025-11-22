@@ -12,7 +12,7 @@ const categoryApi = api.injectEndpoints({
     endpoints: (builder) => ({
         all: builder.query<Category[], void>(
             {
-                query: () => ({ url: '/category/all' }),
+                query: () => ({ url: '/category/list' }),
                 transformResponse: (response: CategoriesResponse): Category[] => response.categories,
                 providesTags: (result, error) => result
                     ? [
@@ -34,25 +34,25 @@ const categoryApi = api.injectEndpoints({
         ),
         byId: builder.query<Category, number>(
             {
-                query: (id) => ({ url: `/category/${id}` }),
+                query: (id) => ({ url: `/category/list/${id}` }),
                 transformResponse: (response: CategoryGetByIdResponse): Category => response,
                 providesTags: (result, error, id) => [{ type: 'Category' as const, id }],
             }
         ),
         create: builder.mutation<Category, CategoryCreateRequest>({
-            query: (createRequest) => ({ url: '/category/create', method: 'POST', body: createRequest }),
+            query: (createRequest) => ({ url: '/category/list', method: 'POST', body: createRequest }),
             transformResponse: (response: CategoryCreateResponse): Category => response,
             invalidatesTags: [{ type: 'Category', id: 'LIST' }],
         }),
         update: builder.mutation<Category, { id: number, body: CategoryUpdateRequest }>({
-            query: (updateRequest) => ({ url: `/category/${updateRequest.id}/update`, method: 'PUT', body: updateRequest.body }),
+            query: (updateRequest) => ({ url: `/category/list/${updateRequest.id}`, method: 'PUT', body: updateRequest.body }),
             transformResponse: (response: CategoryUpdateResponse): Category => response,
             invalidatesTags: (result, error, updateRequest) => result ? [
                 { type: 'Category' as const, id: result.id }, { type: 'Category', id: 'LIST' }]
                 : [{ type: 'Category', id: 'LIST' }],
         }),
         delete: builder.mutation<void, number>({
-            query: (id) => ({ url: `/category/${id}`, method: 'DELETE' }),
+            query: (id) => ({ url: `/category/list/${id}`, method: 'DELETE' }),
             invalidatesTags: (result, error, id) => error ? [
             ]
                 : [{ type: 'Category' as const, id: id },

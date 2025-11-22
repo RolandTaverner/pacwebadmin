@@ -6,22 +6,22 @@ import vibe.web.rest;
 interface CategoryAPI
 {
 @safe:
-    @method(HTTPMethod.GET) @path("/all")
+    @method(HTTPMethod.GET) @path("/list")
     CategoryList getAll();
 
     @method(HTTPMethod.POST) @path("/filter")
     CategoryList filter(@viaBody() in CategoryFilterDTO f);
 
-    @method(HTTPMethod.GET) @path(":id")
+    @method(HTTPMethod.GET) @path("/list/:id")
     CategoryDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create")
+    @method(HTTPMethod.POST) @path("/list")
     CategoryDTO create(@viaBody() in CategoryInputDTO c);
 
-    @method(HTTPMethod.PUT) @path("/:id/update")
+    @method(HTTPMethod.PUT) @path("/list/:id")
     CategoryDTO update(in long _id, @viaBody() in CategoryInputDTO c);
 
-    @method(HTTPMethod.DELETE) @path(":id")
+    @method(HTTPMethod.DELETE) @path("/list/:id")
     void remove(in long _id);
 }
 
