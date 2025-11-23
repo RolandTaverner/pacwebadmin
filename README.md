@@ -170,7 +170,7 @@ Response: HTTP 200 with empty body
 ### Get all
 
 ```bash
-curl http://127.0.0.1:8080/api/proxy/all
+curl http://127.0.0.1:8080/api/proxy/list
 ```
 
 Response
@@ -218,7 +218,7 @@ Response
 ### Get by id
 
 ```bash
-curl http://127.0.0.1:8080/api/proxy/1
+curl http://127.0.0.1:8080/api/proxy/list/1
 ```
 
 Response
@@ -239,7 +239,7 @@ If `type` != DIRECT address must not be empty.
 If `type` == DIRECT address must be empty.
 
 ```bash
-curl -X POST http://127.0.0.1:8080/api/proxy/create -H "Content-Type: application/json" -d '{"type": "HTTP", "address": "127.0.0.1:1080", "description": "Proxy description"}'
+curl -X POST http://127.0.0.1:8080/api/proxy/list -H "Content-Type: application/json" -d '{"type": "HTTP", "address": "127.0.0.1:1080", "description": "Proxy description"}'
 ```
 
 Response
@@ -260,7 +260,7 @@ If `type` != DIRECT provided or existing address must not be empty.
 If any of `type`, `address` or `description` fields are not provided in request, corresponding values remain unchanged.
 
 ```bash
-curl -X PUT http://127.0.0.1:8080/api/proxy/1/update -H "Content-Type: application/json" -d '{"type": "HTTP", "address": "127.0.0.1:80", "description": "updated description"}'
+curl -X PUT http://127.0.0.1:8080/api/proxy/list/1 -H "Content-Type: application/json" -d '{"type": "HTTP", "address": "127.0.0.1:80", "description": "updated description"}'
 ```
 
 Response
@@ -277,7 +277,7 @@ Response
 ### Delete
 
 ```bash
-curl -X DELETE http://127.0.0.1:8080/api/proxy/1
+curl -X DELETE http://127.0.0.1:8080/api/proxy/list/1
 ```
 
 Response: HTTP 200 with empty body

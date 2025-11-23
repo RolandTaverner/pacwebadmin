@@ -1,5 +1,7 @@
 module web.api.proxy;
 
+import std.typecons : Nullable;
+
 import vibe.data.serialization : optional;
 import vibe.http.server;
 import vibe.web.rest;
@@ -33,30 +35,16 @@ struct ProxyList
 
 struct ProxyCreateDTO
 {
-    @safe this(in string type, in string address, in string description) pure
-    {
-        this.type = type;
-        this.address = address;
-        this.description = description;
-    }
-
     string type;
-    string address;
-    string description;
+    @optional string address;
+    @optional string description;
 }
 
 struct ProxyUpdateDTO
 {
-    @safe this(in string type, in string address, in string description) pure
-    {
-        this.type = type;
-        this.address = address;
-        this.description = description;
-    }
-
-    string type;
-    string address;
-    string description;
+    @optional Nullable!string type;
+    @optional Nullable!string address;
+    @optional Nullable!string description;
 }
 
 struct ProxyFilterDTO

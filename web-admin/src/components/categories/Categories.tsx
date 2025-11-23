@@ -68,7 +68,7 @@ function Categories() {
         },
       },
     ],
-    [ /*validationErrors */],
+    [ validationErrors ],
   );
 
   // CREATE action
@@ -115,7 +115,7 @@ function Categories() {
     await updateCategory(updateRequest).unwrap()
       .then((value: Category) => {
         // TODO: use value to update row
-        table.setCreatingRow(null); // exit creating mode
+        table.setEditingRow(null); // exit editing mode
         setMutationError(undefined);
       })
       .catch((error) => {

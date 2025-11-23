@@ -1,10 +1,11 @@
 module model.entities.proxy;
 
-import std.algorithm: canFind, map;
+import std.algorithm : canFind, map;
 import std.array;
 import std.exception : enforce;
 import std.string;
 import std.traits : EnumMembers;
+import std.typecons : Nullable;
 
 import model.entities.common;
 import model.errors.base;
@@ -63,33 +64,51 @@ private:
 
 struct ProxyInput
 {
-    string type;
-    string address;
-    string description;
+    Nullable!string type;
+    Nullable!string address;
+    Nullable!string description;
 
     @safe void validate(bool update) const pure
     {
-        enforce!bool(update || type.strip().length != 0, new ConstraintError("type can't be empty"));
-
         if (!update)
         {
-            if (type.strip() == ProxyType.DIRECT)
+            enforce!bool(!type.isNull, new ConstraintError("type can't be null"));
+            enforce!bool(type.get().strip().length != 0, new ConstraintError("type can't be empty"));
+
+            if (type.get().strip() == ProxyType.DIRECT)
             {
-                enforce!bool(address.strip().length == 0, new ConstraintError("address must be empty for proxy with type == DIRECT"));
+                enforce!bool(address.isNull || address.get().strip().length == 0, 
+                    new ConstraintError("address must be empty for proxy with type == DIRECT"));
             }
             else
             {
-                enforce!bool(address.strip().length != 0, new ConstraintError("address can't be empty"));
+                enforce!bool(!address.isNull && address.get().strip().length != 0,
+                    new ConstraintError("address can't be empty"));
+            }
+        }
+        else
+        {
+            if (!type.isNull)
+            {
+                if (type.get().strip() == ProxyType.DIRECT)
+                {
+                    enforce!bool(address.isNull || address.get().strip().length == 0, 
+                        new ConstraintError("address must be empty for proxy with type == DIRECT"));
+                }
+                else
+                {
+                    enforce!bool(address.isNull || address.get().strip().length != 0,
+                        new ConstraintError("address can't be empty"));
+                }
             }
         }
 
-        if (type.strip().length != 0)
+        if (!type.isNull)
         {
             const auto proxyTypeValues = [EnumMembers!ProxyType]
                 .map!(el => cast(string) el)
                 .array;
-
-            enforce!bool(proxyTypeValues.canFind(type), new ConstraintError("invalid type"));
+            enforce!bool(proxyTypeValues.canFind(type.get()), new ConstraintError("invalid type"));
         }
     }
 }
@@ -107,7 +126,8 @@ struct ProxyFilter
 
     @safe void validate() const pure
     {
-        enforce!bool(type.strip().length != 0 || address.strip().length, new ConstraintError("empty filter values"));
+        enforce!bool(type.strip().length != 0 || address.strip().length,
+            new ConstraintError("empty filter values"));
     }
 }
 

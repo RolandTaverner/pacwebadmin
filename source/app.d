@@ -50,6 +50,7 @@ int main(string[] args)
 
 	auto restSettings = new RestInterfaceSettings;
 	restSettings.baseURL = URL(options.baseURL);
+	restSettings.allowedOrigins = ["*", "localhost:5173", "127.0.0.1:5173", "http://localhost:5173"];
 
 	auto router = new URLRouter;
 	registerRestInterface(router, restService, restSettings);

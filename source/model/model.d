@@ -156,7 +156,9 @@ class Model
             validateProxyModify(-1, i, false);
 
             const auto created = proxies.create(
-                new dlproxy.ProxyValue(i.type.strip, i.address.strip, i.description));
+                new dlproxy.ProxyValue(i.type.get().strip(), 
+                    i.address.get().strip(), 
+                    i.description ? i.description.get() : ""));
             return makeProxy(created);
         }
     }
@@ -171,9 +173,9 @@ class Model
             try
             {
                 auto old = proxies.getByKey(id).value();
-                auto newType = valueOrDefault(i.type, old.type());
-                auto newAddress = valueOrDefault(i.address, old.address());
-                auto newDescription = valueOrDefault(i.description, old.description());
+                auto newType = i.type ? i.type.get().strip() : old.type();
+                string newAddress = i.address ? i.address.get().strip() : old.address();
+                auto newDescription = i.description ? i.description.get() : old.description();
 
                 if (newType == ProxyType.DIRECT)
                 {
@@ -718,21 +720,15 @@ protected:
 
     void validateProxyModify(in long id, in ProxyInput i, in bool update)
     {
-        auto pred = (in dlproxy.Proxy p) {
-            return (!update || p.key() != id) && p.value().type() == i.type.strip && p.value().address() == i.address.strip;
-        };
-
-        enforce!bool(proxies.count(pred) == 0, new ConstraintError("already exists"));
-
         if (update)
         {
             auto old = proxies.getByKey(id).value();
-            auto newType = valueOrDefault(i.type, old.type());
-            auto newAddress = valueOrDefault(i.address, old.address());
+            auto newType = i.type ? i.type.get().strip() : old.type();
+            auto newAddress = i.address ? i.address.get().strip() : old.address();
 
             if (newType != ProxyType.DIRECT)
             {
-                enforce!bool(newAddress.strip().length != 0, new ConstraintError("address can't be empty"));
+                enforce!bool(newAddress.length != 0, new ConstraintError("address can't be empty"));
             }
         }
     }

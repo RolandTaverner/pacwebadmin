@@ -10,7 +10,7 @@ import type {
 
 const categoryApi = api.injectEndpoints({
     endpoints: (builder) => ({
-        all: builder.query<Category[], void>(
+        allCategories: builder.query<Category[], void>(
             {
                 query: () => ({ url: '/category/list' }),
                 transformResponse: (response: CategoriesResponse): Category[] => response.categories,
@@ -23,7 +23,7 @@ const categoryApi = api.injectEndpoints({
 
             }
         ),
-        filter: builder.query<Category[], CategoryFilterRequest>(
+        filterCategories: builder.query<Category[], CategoryFilterRequest>(
             {
                 query: (filter) => ({ url: '/category/filter', method: 'POST', body: filter }),
                 transformResponse: (response: CategoriesResponse): Category[] => response.categories,
@@ -32,26 +32,26 @@ const categoryApi = api.injectEndpoints({
                     : [{ type: 'Category' as const, id: 'LIST' }],
             }
         ),
-        byId: builder.query<Category, number>(
+        byIdCategory: builder.query<Category, number>(
             {
                 query: (id) => ({ url: `/category/list/${id}` }),
                 transformResponse: (response: CategoryGetByIdResponse): Category => response,
                 providesTags: (result, error, id) => [{ type: 'Category' as const, id }],
             }
         ),
-        create: builder.mutation<Category, CategoryCreateRequest>({
+        createCategory: builder.mutation<Category, CategoryCreateRequest>({
             query: (createRequest) => ({ url: '/category/list', method: 'POST', body: createRequest }),
             transformResponse: (response: CategoryCreateResponse): Category => response,
             invalidatesTags: [{ type: 'Category' as const, id: 'LIST' }],
         }),
-        update: builder.mutation<Category, { id: number, body: CategoryUpdateRequest }>({
+        updateCategory: builder.mutation<Category, { id: number, body: CategoryUpdateRequest }>({
             query: (updateRequest) => ({ url: `/category/list/${updateRequest.id}`, method: 'PUT', body: updateRequest.body }),
             transformResponse: (response: CategoryUpdateResponse): Category => response,
             invalidatesTags: (result, error, updateRequest) => result ? [
                 { type: 'Category' as const, id: result.id }, { type: 'Category' as const, id: 'LIST' }]
                 : [{ type: 'Category' as const, id: 'LIST' }],
         }),
-        delete: builder.mutation<void, number>({
+        deleteCategory: builder.mutation<void, number>({
             query: (id) => ({ url: `/category/list/${id}`, method: 'DELETE' }),
             invalidatesTags: (result, error, id) => error ? [
             ]
@@ -62,4 +62,4 @@ const categoryApi = api.injectEndpoints({
     overrideExisting: false,
 })
 
-export const { useAllQuery, useFilterQuery, useByIdQuery, useCreateMutation, useUpdateMutation, useDeleteMutation } = categoryApi
+export const { useAllCategoriesQuery, useFilterCategoriesQuery, useByIdCategoryQuery, useCreateCategoryMutation, useUpdateCategoryMutation, useDeleteCategoryMutation } = categoryApi

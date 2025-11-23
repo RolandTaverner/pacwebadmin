@@ -31,6 +31,24 @@ import { useAllProxiesQuery, useCreateProxyMutation, useUpdateProxyMutation, use
 import type { Proxy, ProxyCreateRequest, ProxyUpdateRequest } from "../../services/types";
 import { MutationError, getErrorMessage } from '../errors/errors';
 
+class RowData {
+  id: number;
+  type: string;
+  address?: string;
+  description?: string;
+
+  constructor(id: number, type: string, address?: string, description?: string) {
+    this.id = id;
+    this.type = type;
+    this.address = address;
+    this.description = description;
+  }
+}
+
+function RowDataFromProxy(p: Proxy): RowData {
+  return new RowData(p.id, p.type, p.address, p.description);
+}
+
 function Proxies() {
   const { data: proxies = [], isLoading, isFetching: isFetchingProxies, isError: isFetchingProxiesError } = useAllProxiesQuery();
   const [validationErrors, setValidationErrors] = useState<Record<string, string | undefined>>({});
@@ -43,7 +61,17 @@ function Proxies() {
   // call DELETE hook
   const [deleteProxy, deleteProxyResult] = useDeleteProxyMutation()
 
-  const columns = useMemo<MRT_ColumnDef<Proxy>[]>(
+  const proxyTypes = [
+    'DIRECT',
+    'PROXY',
+    'SOCKS',
+    'SOCKS4',
+    'SOCKS5',
+    'HTTP',
+    'HTTPS'
+  ]
+
+  const columns = useMemo<MRT_ColumnDef<RowData>[]>(
     () => [
       {
         accessorKey: 'id',
@@ -54,6 +82,8 @@ function Proxies() {
       {
         accessorKey: 'type',
         header: 'Type',
+        editVariant: 'select',
+        editSelectOptions: proxyTypes,
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.type,
@@ -71,7 +101,7 @@ function Proxies() {
         accessorKey: 'address',
         header: 'Address',
         muiEditTextFieldProps: {
-          required: true,
+          required: false,
           error: !!validationErrors?.address,
           helperText: validationErrors?.address,
           // remove any previous validation errors when user focuses on the input
@@ -83,12 +113,19 @@ function Proxies() {
           //optionally add validation checking for onBlur or onChange
         },
       },
+      {
+        accessorKey: 'description',
+        header: 'Description',
+        muiEditTextFieldProps: {
+          required: false,
+        },
+      },
     ],
-    [ /*validationErrors */],
+    [validationErrors],
   );
 
   // CREATE action
-  const handleCreateProxy: MRT_TableOptions<Proxy>['onCreatingRowSave'] = async ({
+  const handleCreateProxy: MRT_TableOptions<RowData>['onCreatingRowSave'] = async ({
     values,
     table,
   }) => {
@@ -99,7 +136,7 @@ function Proxies() {
     }
     setValidationErrors({});
 
-    const createRequest: ProxyCreateRequest = { type: values.type, address: values.address, description: '' };
+    const createRequest: ProxyCreateRequest = { type: values.type, address: values.address, description: values.description };
 
     await createProxy(createRequest).unwrap()
       .then((value: Proxy) => {
@@ -114,7 +151,7 @@ function Proxies() {
   };
 
   // UPDATE action
-  const handleSaveProxy: MRT_TableOptions<Proxy>['onEditingRowSave'] = async ({
+  const handleSaveProxy: MRT_TableOptions<RowData>['onEditingRowSave'] = async ({
     values,
     table,
   }) => {
@@ -125,13 +162,13 @@ function Proxies() {
     }
     setValidationErrors({});
 
-    const updateRequestBody: ProxyUpdateRequest = { type: values.type, address: values.address }
+    const updateRequestBody: ProxyUpdateRequest = { type: values.type, address: values.address, description: values.description }
     const updateRequest = { id: values.id, body: updateRequestBody }
 
     await updateProxy(updateRequest).unwrap()
       .then((value: Proxy) => {
         // TODO: use value to update row
-        table.setCreatingRow(null); // exit creating mode
+        table.setEditingRow(null); // exit editing mode
         setMutationError(undefined);
       })
       .catch((error) => {
@@ -141,7 +178,7 @@ function Proxies() {
   };
 
   // DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<Proxy>) => {
+  const openDeleteConfirmModal = (row: MRT_Row<RowData>) => {
     if (window.confirm('Are you sure you want to delete this proxy?')) {
       deleteProxy(row.original.id).unwrap().catch((error) => {
         window.alert(getErrorMessage(error));
@@ -152,7 +189,7 @@ function Proxies() {
 
   const table = useMaterialReactTable({
     columns,
-    data: proxies,
+    data: proxies.map(p => RowDataFromProxy(p)),
     createDisplayMode: 'modal', // default ('row', and 'custom' are also available)
     editDisplayMode: 'modal', // default ('row', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
@@ -245,12 +282,12 @@ function Proxies() {
   )
 }
 
-const validateRequired = (value: string) => !!value.length;
+const validateRequired = (value?: string) => value != null && !!value.length;
 
-function validateProxy(c: Proxy) {
+function validateProxy(c: RowData) {
   return {
     type: !validateRequired(c.type) ? 'Type is Required' : '',
-    address: !validateRequired(c.address) ? 'Address is Required' : '',
+    address: c.type != "DIRECT" ? (c.address != null && !validateRequired(c.address) ? 'Address is Required' : '') : '',
   };
 }
 
