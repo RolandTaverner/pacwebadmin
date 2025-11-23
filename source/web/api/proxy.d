@@ -7,22 +7,22 @@ import vibe.web.rest;
 interface ProxyAPI
 {
 @safe:
-    @method(HTTPMethod.GET) @path("/all")
+    @method(HTTPMethod.GET) @path("/list")
     ProxyList getAll();
 
     @method(HTTPMethod.POST) @path("/filter")
     ProxyList filter(@viaBody() in ProxyFilterDTO f);
 
-    @method(HTTPMethod.GET) @path(":id")
+    @method(HTTPMethod.GET) @path("/list/:id")
     ProxyDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create")
+    @method(HTTPMethod.POST) @path("/list")
     ProxyDTO create(@viaBody() in ProxyCreateDTO c);
 
-    @method(HTTPMethod.PUT) @path("/:id/update")
+    @method(HTTPMethod.PUT) @path("/list/:id")
     ProxyDTO update(in long _id, @viaBody() in ProxyUpdateDTO p);
 
-    @method(HTTPMethod.DELETE) @path(":id")
+    @method(HTTPMethod.DELETE) @path("/list/:id")
     void remove(in long _id);
 }
 
@@ -54,9 +54,9 @@ struct ProxyUpdateDTO
         this.description = description;
     }
 
-    @optional string type;
-    @optional string address;
-    @optional string description;
+    string type;
+    string address;
+    string description;
 }
 
 struct ProxyFilterDTO

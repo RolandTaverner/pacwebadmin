@@ -28,7 +28,7 @@ export interface Category {
   name: string;
 }
 
-export interface ProxyItem {
+export interface Proxy {
   id: number;
   type: ProxyType;
   address: string;
@@ -44,7 +44,7 @@ export interface Condition {
 
 export interface ProxyRule {
   id: number;
-  proxy: ProxyItem;
+  proxy: Proxy;
   enabled: boolean;
   name: string;
   conditions: Condition[];
@@ -68,7 +68,7 @@ export interface PAC {
   saveToFS: boolean;
   saveToFSPath: string;
 
-  fallbackProxy: ProxyItem;
+  fallbackProxy: Proxy;
 }
 
 
@@ -111,7 +111,7 @@ export type CategoryUpdateResponse = Category;
 // ============================
 
 export interface ProxiesResponse {
-  proxies: ProxyItem[];
+  proxies: Proxy[];
 }
 
 export interface ProxyFilterRequest {
@@ -130,6 +130,10 @@ export interface ProxyUpdateRequest {
   address?: string;
   description?: string;
 }
+
+export type ProxyGetByIdResponse = Proxy;
+export type ProxyCreateResponse = Proxy;
+export type ProxyUpdateResponse = Proxy;
 
 
 // ============================

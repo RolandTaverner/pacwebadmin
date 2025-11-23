@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './App.css'
 
 import Categories from '../categories/Categories';
+import Proxies from '../proxies/Proxies';
 
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -91,7 +92,7 @@ function App() {
             Item Four
           </TabPanel>
           <TabPanel value={value} index={4}>
-            Item Five
+            <Proxies />
           </TabPanel>
           <TabPanel value={value} index={5}>
             <Categories />

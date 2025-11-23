@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import './Categories.css'
+import './Proxies.css'
 
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import type { SerializedError } from '@reduxjs/toolkit';
@@ -27,23 +27,23 @@ import {
   useMaterialReactTable,
 } from 'material-react-table';
 
-import { useAllCategoriesQuery, useCreateCategoryMutation, useUpdateCategoryMutation, useDeleteCategoryMutation } from '../../services/category';
-import type { Category, CategoryCreateRequest, CategoryUpdateRequest } from "../../services/types";
+import { useAllProxiesQuery, useCreateProxyMutation, useUpdateProxyMutation, useDeleteProxyMutation } from '../../services/proxy';
+import type { Proxy, ProxyCreateRequest, ProxyUpdateRequest } from "../../services/types";
 import { MutationError, getErrorMessage } from '../errors/errors';
 
-function Categories() {
-  const { data: categories = [], isLoading, isFetching: isFetchingCategories, isError: isFetchingCategoriesError } = useAllCategoriesQuery();
+function Proxies() {
+  const { data: proxies = [], isLoading, isFetching: isFetchingProxies, isError: isFetchingProxiesError } = useAllProxiesQuery();
   const [validationErrors, setValidationErrors] = useState<Record<string, string | undefined>>({});
   const [mutationError, setMutationError] = useState<FetchBaseQueryError | SerializedError | undefined>(undefined);
 
   // call CREATE hook
-  const [createCategory, createCategoryResult] = useCreateCategoryMutation()
+  const [createProxy, createProxyResult] = useCreateProxyMutation()
   // call UPDATE hook
-  const [updateCategory, updateCategoryResult] = useUpdateCategoryMutation()
+  const [updateProxy, updateProxyResult] = useUpdateProxyMutation()
   // call DELETE hook
-  const [deleteCategory, deleteCategoryResult] = useDeleteCategoryMutation()
+  const [deleteProxy, deleteProxyResult] = useDeleteProxyMutation()
 
-  const columns = useMemo<MRT_ColumnDef<Category>[]>(
+  const columns = useMemo<MRT_ColumnDef<Proxy>[]>(
     () => [
       {
         accessorKey: 'id',
@@ -52,17 +52,33 @@ function Categories() {
         size: 80,
       },
       {
-        accessorKey: 'name',
-        header: 'Name',
+        accessorKey: 'type',
+        header: 'Type',
         muiEditTextFieldProps: {
           required: true,
-          error: !!validationErrors?.name,
-          helperText: validationErrors?.name,
+          error: !!validationErrors?.type,
+          helperText: validationErrors?.type,
           // remove any previous validation errors when user focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              name: undefined,
+              type: undefined,
+            }),
+          //optionally add validation checking for onBlur or onChange
+        },
+      },
+      {
+        accessorKey: 'address',
+        header: 'Address',
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.address,
+          helperText: validationErrors?.address,
+          // remove any previous validation errors when user focuses on the input
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              address: undefined,
             }),
           //optionally add validation checking for onBlur or onChange
         },
@@ -72,76 +88,76 @@ function Categories() {
   );
 
   // CREATE action
-  const handleCreateCategory: MRT_TableOptions<Category>['onCreatingRowSave'] = async ({
+  const handleCreateProxy: MRT_TableOptions<Proxy>['onCreatingRowSave'] = async ({
     values,
     table,
   }) => {
-    const newValidationErrors = validateCategory(values);
+    const newValidationErrors = validateProxy(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
       return;
     }
     setValidationErrors({});
 
-    const createRequest: CategoryCreateRequest = { name: values.name };
+    const createRequest: ProxyCreateRequest = { type: values.type, address: values.address, description: '' };
 
-    await createCategory(createRequest).unwrap()
-      .then((value: Category) => {
+    await createProxy(createRequest).unwrap()
+      .then((value: Proxy) => {
         // TODO: use value to update row
         table.setCreatingRow(null); // exit creating mode
         setMutationError(undefined);
       })
       .catch((error) => {
         setMutationError(error);
-        console.error('createCategory()', error)
+        console.error('createProxy()', error)
       });
   };
 
   // UPDATE action
-  const handleSaveCategory: MRT_TableOptions<Category>['onEditingRowSave'] = async ({
+  const handleSaveProxy: MRT_TableOptions<Proxy>['onEditingRowSave'] = async ({
     values,
     table,
   }) => {
-    const newValidationErrors = validateCategory(values);
+    const newValidationErrors = validateProxy(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
       return;
     }
     setValidationErrors({});
 
-    const updateRequestBody: CategoryUpdateRequest = { name: values.name }
+    const updateRequestBody: ProxyUpdateRequest = { type: values.type, address: values.address }
     const updateRequest = { id: values.id, body: updateRequestBody }
 
-    await updateCategory(updateRequest).unwrap()
-      .then((value: Category) => {
+    await updateProxy(updateRequest).unwrap()
+      .then((value: Proxy) => {
         // TODO: use value to update row
         table.setCreatingRow(null); // exit creating mode
         setMutationError(undefined);
       })
       .catch((error) => {
         setMutationError(error);
-        console.error('updateCategory()', error)
+        console.error('updateProxy()', error)
       });
   };
 
   // DELETE action
-  const openDeleteConfirmModal = (row: MRT_Row<Category>) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
-      deleteCategory(row.original.id).unwrap().catch((error) => {
+  const openDeleteConfirmModal = (row: MRT_Row<Proxy>) => {
+    if (window.confirm('Are you sure you want to delete this proxy?')) {
+      deleteProxy(row.original.id).unwrap().catch((error) => {
         window.alert(getErrorMessage(error));
-        console.error('deleteCategory()', error)
+        console.error('deleteProxy()', error)
       });
     }
   };
 
   const table = useMaterialReactTable({
     columns,
-    data: categories,
+    data: proxies,
     createDisplayMode: 'modal', // default ('row', and 'custom' are also available)
     editDisplayMode: 'modal', // default ('row', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
     getRowId: (row, index, parent) => { let id = row?.id ? row.id.toString() : 'idx' + index.toString(); return id; },
-    muiToolbarAlertBannerProps: isFetchingCategoriesError
+    muiToolbarAlertBannerProps: isFetchingProxiesError
       ? {
         color: 'error',
         children: 'Error loading data',
@@ -153,13 +169,13 @@ function Categories() {
       },
     },
     onCreatingRowCancel: () => { setValidationErrors({}); setMutationError(undefined); },
-    onCreatingRowSave: handleCreateCategory,
+    onCreatingRowSave: handleCreateProxy,
     onEditingRowCancel: () => { setValidationErrors({}); setMutationError(undefined); },
-    onEditingRowSave: handleSaveCategory,
+    onEditingRowSave: handleSaveProxy,
     // optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h4">Create new Category</DialogTitle>
+        <DialogTitle variant="h4">Create new Proxy</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {internalEditComponents} {/* or render custom edit components here */}
           {MutationError(mutationError)}
@@ -172,7 +188,7 @@ function Categories() {
     // optionally customize modal content
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h4">Edit Category</DialogTitle>
+        <DialogTitle variant="h4">Edit Proxy</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {internalEditComponents} {/* or render custom edit components here */}
           {MutationError(mutationError)}
@@ -209,14 +225,14 @@ function Categories() {
           // );
         }}
       >
-        Create new Category
+        Create new Proxy
       </Button>
     ),
     state: {
-      isLoading: isFetchingCategories,
-      isSaving: createCategoryResult.isLoading || updateCategoryResult.isLoading || deleteCategoryResult.isLoading,
-      showAlertBanner: isFetchingCategoriesError,
-      showProgressBars: isFetchingCategories,
+      isLoading: isFetchingProxies,
+      isSaving: createProxyResult.isLoading || updateProxyResult.isLoading || deleteProxyResult.isLoading,
+      showAlertBanner: isFetchingProxiesError,
+      showProgressBars: isFetchingProxies,
     },
   });
 
@@ -231,10 +247,11 @@ function Categories() {
 
 const validateRequired = (value: string) => !!value.length;
 
-function validateCategory(c: Category) {
+function validateProxy(c: Proxy) {
   return {
-    name: !validateRequired(c.name) ? 'Name is Required' : ''
+    type: !validateRequired(c.type) ? 'Type is Required' : '',
+    address: !validateRequired(c.address) ? 'Address is Required' : '',
   };
 }
 
-export default Categories;
+export default Proxies;
