@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react'
 import './Categories.css'
 
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import type { SerializedError } from '@reduxjs/toolkit';
+
 import {
   Box,
   Button,
@@ -25,10 +28,13 @@ import {
 } from 'material-react-table';
 
 import { useAllQuery, useCreateMutation, useUpdateMutation, useDeleteMutation } from '../../services/category';
-import type { Category, CategoryUpdateRequest } from "../../services/types";
+import type { Category, CategoryCreateRequest, CategoryUpdateRequest } from "../../services/types";
+import { MutationError, getErrorMessage } from '../errors/errors';
 
 function Categories() {
   const { data: categories = [], isLoading, isFetching: isFetchingCategories, isError: isFetchingCategoriesError } = useAllQuery();
+  const [validationErrors, setValidationErrors] = useState<Record<string, string | undefined>>({});
+  const [mutationError, setMutationError] = useState<FetchBaseQueryError | SerializedError | undefined>(undefined);
 
   // call CREATE hook
   const [createCategory, createCategoryResult] = useCreateMutation()
@@ -50,14 +56,14 @@ function Categories() {
         header: 'Name',
         muiEditTextFieldProps: {
           required: true,
-          // error: !!validationErrors?.firstName,
-          // helperText: validationErrors?.firstName,
-          //remove any previous validation errors when user focuses on the input
-          // onFocus: () =>
-          //   setValidationErrors({
-          //     ...validationErrors,
-          //     firstName: undefined,
-          //   }),
+          error: !!validationErrors?.name,
+          helperText: validationErrors?.name,
+          // remove any previous validation errors when user focuses on the input
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              name: undefined,
+            }),
           //optionally add validation checking for onBlur or onChange
         },
       },
@@ -65,54 +71,76 @@ function Categories() {
     [ /*validationErrors */],
   );
 
-  //CREATE action
+  // CREATE action
   const handleCreateCategory: MRT_TableOptions<Category>['onCreatingRowSave'] = async ({
     values,
     table,
   }) => {
-    // const newValidationErrors = validateUser(values);
-    // if (Object.values(newValidationErrors).some((error) => error)) {
-    //   setValidationErrors(newValidationErrors);
-    //   return;
-    // }
-    //setValidationErrors({});
+    const newValidationErrors = validateCategory(values);
+    if (Object.values(newValidationErrors).some((error) => error)) {
+      setValidationErrors(newValidationErrors);
+      return;
+    }
+    setValidationErrors({});
 
-    console.log(values);
-    await createCategory(values);
-    table.setCreatingRow(null); // exit creating mode
+    const createRequest: CategoryCreateRequest = { name: values.name };
+
+    await createCategory(createRequest).unwrap()
+      .then((value: Category) => {
+        // TODO: use value to update row
+        table.setCreatingRow(null); // exit creating mode
+        setMutationError(undefined);
+      })
+      .catch((error) => {
+        setMutationError(error);
+        console.error('createCategory()', error)
+      });
   };
 
-  //UPDATE action
+  // UPDATE action
   const handleSaveCategory: MRT_TableOptions<Category>['onEditingRowSave'] = async ({
     values,
     table,
   }) => {
-    // const newValidationErrors = validateUser(values);
-    // if (Object.values(newValidationErrors).some((error) => error)) {
-    //   setValidationErrors(newValidationErrors);
-    //   return;
-    // }
-    // setValidationErrors({});
-    let updateRequest = { id: values.id, body: { name: values.name } }
+    const newValidationErrors = validateCategory(values);
+    if (Object.values(newValidationErrors).some((error) => error)) {
+      setValidationErrors(newValidationErrors);
+      return;
+    }
+    setValidationErrors({});
 
-    await updateCategory(updateRequest);
-    table.setEditingRow(null); //exit editing mode
+    const updateRequestBody: CategoryUpdateRequest = { name: values.name }
+    const updateRequest = { id: values.id, body: updateRequestBody }
+
+    await updateCategory(updateRequest).unwrap()
+      .then((value: Category) => {
+        // TODO: use value to update row
+        table.setCreatingRow(null); // exit creating mode
+        setMutationError(undefined);
+      })
+      .catch((error) => {
+        setMutationError(error);
+        console.error('updateCategory()', error)
+      });
   };
 
   // DELETE action
   const openDeleteConfirmModal = (row: MRT_Row<Category>) => {
     if (window.confirm('Are you sure you want to delete this category?')) {
-      deleteCategory(row.original.id);
+      deleteCategory(row.original.id).unwrap().catch((error) => {
+        window.alert(getErrorMessage(error));
+        console.error('deleteCategory()', error)
+      });
     }
   };
 
   const table = useMaterialReactTable({
     columns,
     data: categories,
-    createDisplayMode: 'modal', //default ('row', and 'custom' are also available)
-    editDisplayMode: 'modal', //default ('row', 'cell', 'table', and 'custom' are also available)
+    createDisplayMode: 'modal', // default ('row', and 'custom' are also available)
+    editDisplayMode: 'modal', // default ('row', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
-    getRowId: (row, index, parent) => { let id = row?.id ? row.id.toString() : 'idx' + index.toString(); console.log(id); return id; },
+    getRowId: (row, index, parent) => { let id = row?.id ? row.id.toString() : 'idx' + index.toString(); return id; },
     muiToolbarAlertBannerProps: isFetchingCategoriesError
       ? {
         color: 'error',
@@ -124,32 +152,30 @@ function Categories() {
         minHeight: '500px',
       },
     },
-    // onCreatingRowCancel: () => setValidationErrors({}),
+    onCreatingRowCancel: () => { setValidationErrors({}); setMutationError(undefined); },
     onCreatingRowSave: handleCreateCategory,
-    // onEditingRowCancel: () => setValidationErrors({}),
+    onEditingRowCancel: () => { setValidationErrors({}); setMutationError(undefined); },
     onEditingRowSave: handleSaveCategory,
-    //optionally customize modal content
+    // optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Create new Category</DialogTitle>
-        <DialogContent
-          sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-        >
+        <DialogTitle variant="h4">Create new Category</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {internalEditComponents} {/* or render custom edit components here */}
+          {MutationError(mutationError)}
         </DialogContent>
         <DialogActions>
           <MRT_EditActionButtons variant="text" table={table} row={row} />
         </DialogActions>
       </>
     ),
-    //optionally customize modal content
+    // optionally customize modal content
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Edit Category</DialogTitle>
-        <DialogContent
-          sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
-        >
+        <DialogTitle variant="h4">Edit Category</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {internalEditComponents} {/* or render custom edit components here */}
+          {MutationError(mutationError)}
         </DialogContent>
         <DialogActions>
           <MRT_EditActionButtons variant="text" table={table} row={row} />
@@ -174,8 +200,8 @@ function Categories() {
       <Button
         variant="contained"
         onClick={() => {
-          table.setCreatingRow(true); //simplest way to open the create row modal with no default values
-          //or you can pass in a row object to set default values with the `createRow` helper function
+          table.setCreatingRow(true); // simplest way to open the create row modal with no default values
+          // or you can pass in a row object to set default values with the `createRow` helper function
           // table.setCreatingRow(
           //   createRow(table, {
           //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
@@ -188,7 +214,7 @@ function Categories() {
     ),
     state: {
       isLoading: isFetchingCategories,
-      //isSaving: isCreatingUser || isUpdatingUser || isDeletingUser,
+      isSaving: createCategoryResult.isLoading || updateCategoryResult.isLoading || deleteCategoryResult.isLoading,
       showAlertBanner: isFetchingCategoriesError,
       showProgressBars: isFetchingCategories,
     },
@@ -203,4 +229,12 @@ function Categories() {
   )
 }
 
-export default Categories
+const validateRequired = (value: string) => !!value.length;
+
+function validateCategory(c: Category) {
+  return {
+    name: !validateRequired(c.name) ? 'Name is Required' : ''
+  };
+}
+
+export default Categories;
