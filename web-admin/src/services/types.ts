@@ -156,6 +156,10 @@ export interface ConditionUpdateRequest {
   categoryId?: number;
 }
 
+export type ConditionGetByIdResponse = Condition;
+export type ConditionCreateResponse = Condition;
+export type ConditionUpdateResponse = Condition;
+
 
 // ============================
 // Proxy Rule API

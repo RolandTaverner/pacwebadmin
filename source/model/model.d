@@ -262,7 +262,7 @@ class Model
             validateConditionModify(-1, i, false);
 
             const auto created = conditions.create(
-                new dlcondition.ConditionValue(i.type.strip, i.expression.strip, i.categoryId));
+                new dlcondition.ConditionValue(i.type.get().strip(), i.expression.get().strip(), i.categoryId.get()));
             return makeCondition(created);
         }
     }
@@ -277,9 +277,9 @@ class Model
             try
             {
                 auto old = conditions.getByKey(id).value();
-                auto newType = valueOrDefault(i.type, old.type());
-                auto newExpression = valueOrDefault(i.expression, old.expression());
-                auto newCategoryId = valueOrDefault(i.categoryId, old.categoryId());
+                auto newType = i.type ? i.type.get().strip() : old.type();
+                auto newExpression = i.expression ? i.expression.get().strip() : old.expression();
+                auto newCategoryId = i.categoryId ? i.categoryId.get() : old.categoryId();
 
                 const auto updated = conditions.update(id,
                     new dlcondition.ConditionValue(newType, newExpression, newCategoryId));
@@ -760,13 +760,10 @@ protected:
 
     void validateConditionModify(in long id, in ConditionInput i, in bool update)
     {
-        enforce!bool(categories.exists(i.categoryId), new ConstraintError("category not exists"));
-
-        auto pred = (in dlcondition.Condition c) {
-            return (!update || c.key() != id) && (c.value().type() == i.type.strip() && c.value().expression() == i.expression.strip());
-        };
-
-        enforce!bool(conditions.count(pred) == 0, new ConstraintError("already exists"));
+        if (!i.categoryId.isNull)
+        {
+            enforce!bool(categories.exists(i.categoryId.get()), new ConstraintError("category not exists"));
+        }
     }
 
     void validateConditionDelete(in long id)

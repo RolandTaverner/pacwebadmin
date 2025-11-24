@@ -296,7 +296,7 @@ Response: HTTP 200 with empty body
 ### Get all
 
 ```bash
-curl http://127.0.0.1:8080/api/condition/all
+curl http://127.0.0.1:8080/api/condition/list
 ```
 
 Response
@@ -358,7 +358,7 @@ Response
 ### Create
 
 ```bash
-curl -X POST http://127.0.0.1:8080/api/condition/create -H "Content-Type: application/json" -d '{"type": "host_domain_only", "expression": "example.com", "categoryId": 1}'
+curl -X POST http://127.0.0.1:8080/api/condition/list -H "Content-Type: application/json" -d '{"type": "host_domain_only", "expression": "example.com", "categoryId": 1}'
 ```
 
 Response
@@ -380,7 +380,7 @@ Response
 If any of `type`, `expression` or `categoryId` fields are not provided in request, corresponding values remain unchanged.
 
 ```bash
- curl -X PUT http://127.0.0.1:8080/api/condition/1/update -H "Content-Type: application/json" -d '{"type": "host_domain_subdomain", "expression": "example.com", "categoryId": 1}'
+ curl -X PUT http://127.0.0.1:8080/api/condition/list/1 -H "Content-Type: application/json" -d '{"type": "host_domain_subdomain", "expression": "example.com", "categoryId": 1}'
 ```
 
 Response
@@ -400,7 +400,7 @@ Response
 ### Delete
 
 ```bash
-curl -X DELETE http://127.0.0.1:8080/api/condition/1
+curl -X DELETE http://127.0.0.1:8080/api/condition/list/1
 ```
 
 Response: HTTP 200 with empty body

@@ -32,7 +32,7 @@ import type { Category, CategoryCreateRequest, CategoryUpdateRequest } from "../
 import { MutationError, getErrorMessage } from '../errors/errors';
 
 function Categories() {
-  console.log("=================== Categories");
+  console.debug("=================== Categories");
 
   const { data: categories = [], isLoading, isFetching: isFetchingCategories, isError: isFetchingCategoriesError } = useAllCategoriesQuery();
   const [validationErrors, setValidationErrors] = useState<Record<string, string | undefined>>({});

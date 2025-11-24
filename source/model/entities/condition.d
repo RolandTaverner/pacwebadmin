@@ -1,10 +1,11 @@
 module model.entities.condition;
 
-import std.algorithm: canFind, map;
+import std.algorithm : canFind, map;
 import std.array;
 import std.exception : enforce;
 import std.string;
 import std.traits : EnumMembers;
+import std.typecons : Nullable;
 
 import model.entities.category;
 import model.entities.common;
@@ -62,23 +63,39 @@ private:
 
 struct ConditionInput
 {
-    string type;
-    string expression;
-    long categoryId;
+    Nullable!string type;
+    Nullable!string expression;
+    Nullable!long categoryId;
 
     @safe void validate(bool update) const pure
     {
-        enforce!bool(update || type.strip().length != 0, new ConstraintError("type can't be empty"));
-        enforce!bool(update || expression.strip().length != 0, new ConstraintError(
-                "expression can't be empty"));
+        if (!update)
+        {
+            enforce!bool(!type.isNull, new ConstraintError("type can't be null"));
+            enforce!bool(!expression.isNull, new ConstraintError("expression can't be null"));
+            enforce!bool(!categoryId.isNull, new ConstraintError("categoryId can't be null"));
 
-        if (type.length != 0)
+            enforce!bool(type.get().strip().length != 0, new ConstraintError("type can't be empty"));
+
+            enforce!bool(expression.get().strip().length != 0, 
+                new ConstraintError("expression can't be empty"));
+        }
+        else
+        {
+            enforce!bool(type.isNull || type.get().strip().length != 0, 
+                new ConstraintError("type can't be empty"));
+
+            enforce!bool(expression.isNull || expression.get().strip().length != 0, 
+                new ConstraintError("expression can't be empty"));
+        }
+
+        if (!type.isNull)
         {
             const auto conditionTypeValues = [EnumMembers!ConditionType]
                 .map!(el => cast(string) el)
                 .array;
 
-            enforce!bool(conditionTypeValues.canFind(type), new ConstraintError("invalid type"));
+            enforce!bool(conditionTypeValues.canFind(type.get()), new ConstraintError("invalid type"));
         }
     }
 }

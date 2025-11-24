@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 import './Proxies.css'
 
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
@@ -60,7 +60,7 @@ const proxyTypes = [
 ]
 
 function Proxies() {
-  console.log("=================== Proxies");
+  console.debug("=================== Proxies");
 
   const { data: proxies = [], isLoading, isFetching: isFetchingProxies, isError: isFetchingProxiesError } = useAllProxiesQuery();
   const [validationErrors, setValidationErrors] = useState<Record<string, string | undefined>>({});
@@ -120,6 +120,14 @@ function Proxies() {
       {
         accessorKey: 'description',
         header: 'Description',
+        muiTableBodyCellProps: {
+          sx: {
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            maxWidth: 100,
+          },
+        },
         muiEditTextFieldProps: {
           required: false,
         },
@@ -133,7 +141,7 @@ function Proxies() {
     values,
     table,
   }) => {
-    console.log("handleCreateProxy");
+    console.debug("handleCreateProxy");
 
     const newValidationErrors = validateProxy(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
@@ -161,7 +169,7 @@ function Proxies() {
     values,
     table,
   }) => {
-    console.log("handleSaveProxy");
+    console.debug("handleSaveProxy");
 
     const newValidationErrors = validateProxy(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
@@ -198,7 +206,6 @@ function Proxies() {
   const table = useMaterialReactTable({
     columns,
     data: rowsData,
-
     createDisplayMode: 'modal', // default ('row', and 'custom' are also available)
     editDisplayMode: 'modal', // default ('row', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,

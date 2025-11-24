@@ -10,7 +10,7 @@ export function MutationError(error: FetchBaseQueryError | SerializedError | und
         return (<></>);
     }
 
-    console.log('MutationError error: ', error);
+    console.debug('MutationError error: ', error);
 
     return <div>{getErrorMessage(error)}</div>;
 }
