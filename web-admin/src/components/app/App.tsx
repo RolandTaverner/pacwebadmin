@@ -3,6 +3,7 @@ import './App.css'
 
 import Categories from '../categories/Categories';
 import Proxies from '../proxies/Proxies';
+import Conditions from '../conditions/Conditions';
 
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -71,7 +72,7 @@ function App() {
             <Tab label="Dashboard" {...a11yProps(0)} />
             <Tab label="PAC" {...a11yProps(1)} />
             <Tab label="Proxy rules" {...a11yProps(2)} />
-            <Tab label="Hosts" {...a11yProps(3)} />
+            <Tab label="Conditions" {...a11yProps(3)} />
             <Tab label="Proxies" {...a11yProps(4)} />
             <Tab label="Categories" {...a11yProps(5)} />
             <Tab label="About" {...a11yProps(6)} />
@@ -89,7 +90,7 @@ function App() {
             Item Three
           </TabPanel>
           <TabPanel value={value} index={3}>
-            Item Four
+            <Conditions/>
           </TabPanel>
           <TabPanel value={value} index={4}>
             <Proxies />
