@@ -735,12 +735,19 @@ protected:
 
     void validateProxyDelete(in long id)
     {
-        auto pred = (in dlproxyrule.ProxyRule p) {
+        auto predProxyRule = (in dlproxyrule.ProxyRule p) {
             return p.value().proxyId() == id;
         };
 
-        enforce!bool(proxyRules.count(pred) == 0, new ConstraintError(
+        enforce!bool(proxyRules.count(predProxyRule) == 0, new ConstraintError(
                 "there are proxy rules referenced this proxy"));
+
+        auto predPAC = (in dlpac.PAC p) {
+            return p.value().fallbackProxyId() == id;
+        };
+
+        enforce!bool(pacs.count(predPAC) == 0, new ConstraintError(
+                "there are PACs referenced this proxy"));
     }
 
     @safe Proxy makeProxy(in dlproxy.Proxy dto)

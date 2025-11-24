@@ -71,8 +71,8 @@ struct ConditionDTO
     @safe this(in ConditionDTO other) pure
     {
         this.id = other.id;
-        this.type =  other.type;
-        this.expression =  other.expression;
+        this.type = other.type;
+        this.expression = other.expression;
         this.category = other.category;
     }
 

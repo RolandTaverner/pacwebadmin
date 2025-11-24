@@ -6,11 +6,11 @@ import type { SerializedError } from '@reduxjs/toolkit';
 import type { ErrorResponse } from "../../services/types";
 
 export function MutationError(error: FetchBaseQueryError | SerializedError | undefined) {
-    console.log('MutationError error: ', error);
-
     if (error == null) {
         return (<></>);
     }
+
+    console.log('MutationError error: ', error);
 
     return <div>{getErrorMessage(error)}</div>;
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef, useEffect } from 'react'
 import './Proxies.css'
 
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
@@ -49,7 +49,19 @@ function RowDataFromProxy(p: Proxy): RowData {
   return new RowData(p.id, p.type, p.address, p.description);
 }
 
+const proxyTypes = [
+  'DIRECT',
+  'PROXY',
+  'SOCKS',
+  'SOCKS4',
+  'SOCKS5',
+  'HTTP',
+  'HTTPS'
+]
+
 function Proxies() {
+  console.log("=================== Proxies");
+
   const { data: proxies = [], isLoading, isFetching: isFetchingProxies, isError: isFetchingProxiesError } = useAllProxiesQuery();
   const [validationErrors, setValidationErrors] = useState<Record<string, string | undefined>>({});
   const [mutationError, setMutationError] = useState<FetchBaseQueryError | SerializedError | undefined>(undefined);
@@ -61,15 +73,7 @@ function Proxies() {
   // call DELETE hook
   const [deleteProxy, deleteProxyResult] = useDeleteProxyMutation()
 
-  const proxyTypes = [
-    'DIRECT',
-    'PROXY',
-    'SOCKS',
-    'SOCKS4',
-    'SOCKS5',
-    'HTTP',
-    'HTTPS'
-  ]
+  const rowsData = useMemo<RowData[]>(() => proxies.map(p => RowDataFromProxy(p)), [proxies]);
 
   const columns = useMemo<MRT_ColumnDef<RowData>[]>(
     () => [
@@ -110,7 +114,7 @@ function Proxies() {
               ...validationErrors,
               address: undefined,
             }),
-          //optionally add validation checking for onBlur or onChange
+          // optionally add validation checking for onBlur or onChange
         },
       },
       {
@@ -129,6 +133,8 @@ function Proxies() {
     values,
     table,
   }) => {
+    console.log("handleCreateProxy");
+
     const newValidationErrors = validateProxy(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
@@ -155,6 +161,8 @@ function Proxies() {
     values,
     table,
   }) => {
+    console.log("handleSaveProxy");
+
     const newValidationErrors = validateProxy(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
@@ -189,7 +197,8 @@ function Proxies() {
 
   const table = useMaterialReactTable({
     columns,
-    data: proxies.map(p => RowDataFromProxy(p)),
+    data: rowsData,
+
     createDisplayMode: 'modal', // default ('row', and 'custom' are also available)
     editDisplayMode: 'modal', // default ('row', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
@@ -205,9 +214,9 @@ function Proxies() {
         minHeight: '500px',
       },
     },
-    onCreatingRowCancel: () => { setValidationErrors({}); setMutationError(undefined); },
+    onCreatingRowCancel: () => { setValidationErrors({}); /*setMutationError(undefined); */ },
     onCreatingRowSave: handleCreateProxy,
-    onEditingRowCancel: () => { setValidationErrors({}); setMutationError(undefined); },
+    onEditingRowCancel: () => { setValidationErrors({}); /* setMutationError(undefined); */ },
     onEditingRowSave: handleSaveProxy,
     // optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (

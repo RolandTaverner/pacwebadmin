@@ -55,7 +55,7 @@ const proxyApi = api.injectEndpoints({
             query: (id) => ({ url: `/proxy/list/${id}`, method: 'DELETE' }),
             invalidatesTags: (result, error, id) => error ? [
             ]
-                : [{ type: 'Proxy' as const, id: id },
+                : [{ type: 'Proxy' as const, id },
                 { type: 'Proxy' as const, id: 'LIST' },]
         }),
     }),

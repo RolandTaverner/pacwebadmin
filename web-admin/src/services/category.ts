@@ -55,7 +55,7 @@ const categoryApi = api.injectEndpoints({
             query: (id) => ({ url: `/category/list/${id}`, method: 'DELETE' }),
             invalidatesTags: (result, error, id) => error ? [
             ]
-                : [{ type: 'Category' as const, id: id },
+                : [{ type: 'Category' as const, id },
                 { type: 'Category' as const, id: 'LIST' },]
         }),
     }),
