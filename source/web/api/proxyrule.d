@@ -12,28 +12,28 @@ import web.api.proxy;
 interface ProxyRuleAPI
 {
 @safe:
-    @method(HTTPMethod.GET) @path("/all")
+    @method(HTTPMethod.GET) @path("/list")
     ProxyRuleList getAll();
 
-    @method(HTTPMethod.GET) @path(":id")
+    @method(HTTPMethod.GET) @path("/list/:id")
     ProxyRuleDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create")
+    @method(HTTPMethod.POST) @path("/list")
     ProxyRuleDTO create(@viaBody() in ProxyRuleCreateDTO c);
 
-    @method(HTTPMethod.PUT) @path("/:id/update")
+    @method(HTTPMethod.PUT) @path("/list/:id")
     ProxyRuleDTO update(in long _id, @viaBody() in ProxyRuleUpdateDTO c);
 
-    @method(HTTPMethod.DELETE) @path(":id")
+    @method(HTTPMethod.DELETE) @path("/list/:id")
     void remove(in long _id);
 
-    @method(HTTPMethod.GET) @path("/:id/conditions")
+    @method(HTTPMethod.GET) @path("/list/:id/conditions")
     ConditionList getConditions(in long _id);
 
-    @method(HTTPMethod.POST) @path("/:id/conditions/:hrid")
+    @method(HTTPMethod.POST) @path("/list/:id/conditions/:hrid")
     ConditionList addCondition(in long _id, in long _hrid);
 
-    @method(HTTPMethod.DELETE) @path("/:id/conditions/:hrid")
+    @method(HTTPMethod.DELETE) @path("/list/:id/conditions/:hrid")
     void removeCondition(in long _id, in long _hrid);
 }
 

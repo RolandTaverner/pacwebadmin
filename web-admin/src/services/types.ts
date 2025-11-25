@@ -187,6 +187,10 @@ export interface ProxyRuleUpdateRequest {
   conditionIds?: number[];
 }
 
+export type ProxyRuleGetByIdResponse = ProxyRule;
+export type ProxyRuleCreateResponse = ProxyRule;
+export type ProxyRuleUpdateResponse = ProxyRule;
+
 
 // ============================
 // PAC API

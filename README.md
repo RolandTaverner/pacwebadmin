@@ -410,7 +410,7 @@ Response: HTTP 200 with empty body
 ### Get all
 
 ```bash
-curl http://127.0.0.1:8080/api/proxyrule/all
+curl http://127.0.0.1:8080/api/proxyrule/list
 ```
 
 Response
@@ -447,7 +447,7 @@ Response
 ### Get by id
 
 ```bash
-curl http://127.0.0.1:8080/api/proxyrule/1
+curl http://127.0.0.1:8080/api/proxyrule/list/1
 ```
 
 Response
@@ -480,7 +480,7 @@ Response
 ### Create
 
 ```bash
-curl -X POST http://127.0.0.1:8080/api/proxyrule/create -H "Content-Type: application/json" -d '{"proxyId": 1, "enabled": true, "name": "proxy group 1", "conditionIds": [1,2]}'
+curl -X POST http://127.0.0.1:8080/api/proxyrule/list -H "Content-Type: application/json" -d '{"proxyId": 1, "enabled": true, "name": "proxy group 1", "conditionIds": [1,2]}'
 ```
 
 Response
@@ -524,7 +524,7 @@ Response
 If any of `proxyId`, `enabled`, `name` or `conditionIds` fields are not provided in request, corresponding values remain unchanged.
 
 ```bash
-curl -X PUT http://127.0.0.1:8080/api/proxyrule/1/update -H "Content-Type: application/json" -d '{"proxyId": 1, "enabled": true, "name": "proxy group updated", "conditionIds": [2]}'
+curl -X PUT http://127.0.0.1:8080/api/proxyrule/list/1 -H "Content-Type: application/json" -d '{"proxyId": 1, "enabled": true, "name": "proxy group updated", "conditionIds": [2]}'
 ```
 
 Response
@@ -557,7 +557,7 @@ Response
 ### Delete
 
 ```bash
-curl -X DELETE http://127.0.0.1:8080/api/proxyrule/1
+curl -X DELETE http://127.0.0.1:8080/api/proxyrule/list/1
 ```
 
 Response: HTTP 200 with empty body
@@ -565,7 +565,7 @@ Response: HTTP 200 with empty body
 ### Get conditions linked to proxy rules
 
 ```bash
-curl http://127.0.0.1:8080/api/proxyrule/1/conditions
+curl http://127.0.0.1:8080/api/proxyrule/list/1/conditions
 ```
 
 Response
@@ -598,7 +598,7 @@ Response
 ### Add condition to proxy rules
 
 ```bash
-curl -X POST http://127.0.0.1:8080/api/proxyrule/1/conditions/3
+curl -X POST http://127.0.0.1:8080/api/proxyrule/list/1/conditions/3
 ```
 
 Returns updated conditions for proxy rules object.
@@ -640,7 +640,7 @@ Returns updated conditions for proxy rules object.
 ### Delete condition from proxy rules
 
 ```bash
-curl -X DELETE http://127.0.0.1:8080/api/proxyrule/1/conditions/3
+curl -X DELETE http://127.0.0.1:8080/api/proxyrule/list/1/conditions/3
 ```
 
 Response: HTTP 200 with empty body
