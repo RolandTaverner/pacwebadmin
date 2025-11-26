@@ -4,7 +4,11 @@ import type {
     ProxyRule, ProxyRulesResponse,
     ProxyRuleGetByIdResponse,
     ProxyRuleCreateRequest, ProxyRuleCreateResponse,
-    ProxyRuleUpdateRequest, ProxyRuleUpdateResponse
+    ProxyRuleUpdateRequest, ProxyRuleUpdateResponse,
+    ProxyRuleAddConditionRequest, ProxyRuleAddConditionResponse,
+    ProxyRuleRemoveConditionRequest, ProxyRuleRemoveConditionResponse,
+    Condition, ConditionsResponse
+
 } from './types'
 
 const proxyruleApi = api.injectEndpoints({
@@ -48,8 +52,24 @@ const proxyruleApi = api.injectEndpoints({
                 : [{ type: 'ProxyRule' as const, id },
                 { type: 'ProxyRule' as const, id: 'LIST' },]
         }),
+        proxyRuleConditions: builder.query<Condition[], number>({
+            query: (id) => ({ url: `/proxyrule/list/${id}/conditions` }),
+            transformResponse: (response: ConditionsResponse): Condition[] => response.conditions,
+            providesTags: (result, error, id) => error ? [] : [{ type: 'ProxyRuleConditions' as const, id }],
+        }),
+        proxyRuleAddCondition: builder.mutation<Condition[], ProxyRuleAddConditionRequest>({
+            query: (createRequest) => ({ url: `/proxyrule/list/${createRequest.id}/conditions/${createRequest.conditionId}`, method: 'POST' }),
+            transformResponse: (response: ProxyRuleAddConditionResponse): Condition[] => response.conditions,
+            invalidatesTags: (result, error, request) => error ? [] : [{ type: 'ProxyRuleConditions' as const, id: request.id }],
+        }),
+        proxyRuleRemoveCondition: builder.mutation<Condition[], ProxyRuleRemoveConditionRequest>({
+            query: (removeRequest) => ({ url: `/proxyrule/list/${removeRequest.id}/conditions/${removeRequest.conditionId}`, method: 'DELETE' }),
+            transformResponse: (response: ProxyRuleRemoveConditionResponse): Condition[] => response.conditions,
+            invalidatesTags: (result, error, request) => error ? [] : [{ type: 'ProxyRuleConditions' as const, id: request.id }],
+        }),
     }),
     overrideExisting: false,
 })
 
-export const { useAllProxyRulesQuery, useByIdProxyRuleQuery, useCreateProxyRuleMutation, useUpdateProxyRuleMutation, useDeleteProxyRuleMutation } = proxyruleApi
+export const { useAllProxyRulesQuery, useByIdProxyRuleQuery, useCreateProxyRuleMutation, useUpdateProxyRuleMutation, useDeleteProxyRuleMutation,
+    useProxyRuleConditionsQuery, useProxyRuleAddConditionMutation, useProxyRuleRemoveConditionMutation } = proxyruleApi
