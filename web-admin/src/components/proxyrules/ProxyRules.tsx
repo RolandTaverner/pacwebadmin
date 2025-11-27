@@ -132,7 +132,7 @@ function ProxyRules() {
         },
       },
     ],
-    [validationErrors],
+    [validationErrors, proxiesSelectData],
   );
 
   // CREATE action

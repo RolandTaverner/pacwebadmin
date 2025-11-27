@@ -139,7 +139,7 @@ function Conditions() {
         },
       },
     ],
-    [validationErrors],
+    [validationErrors, categoriesSelectData],
   );
 
   // CREATE action
