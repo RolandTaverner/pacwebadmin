@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import './Conditions.css';
+import './ProxyRules.css';
 
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import type { SerializedError } from '@reduxjs/toolkit';
@@ -28,59 +28,54 @@ import {
   type DropdownOption,
 } from 'material-react-table';
 
-import { useAllConditionsQuery, useCreateConditionMutation, useUpdateConditionMutation, useDeleteConditionMutation } from '../../services/condition';
-import { useAllCategoriesQuery } from '../../services/category';
-import type { Condition, ConditionCreateRequest, ConditionUpdateRequest, Category } from "../../services/types";
+import { useAllProxyRulesQuery, useCreateProxyRuleMutation, useUpdateProxyRuleMutation, useDeleteProxyRuleMutation } from '../../services/proxyrule';
+import { useAllProxiesQuery } from '../../services/proxy';
+import type { ProxyRule, ProxyRuleCreateRequest, ProxyRuleUpdateRequest, Proxy } from "../../services/types";
 import { MutationError, getErrorMessage } from '../errors/errors';
 
 class RowData {
   id: number;
-  type: string;
-  expression?: string;
-  category?: Category;
-  categoryId?: number;
-  categoryName?: string;
+  name: string;
+  enabled?: boolean;
+  proxy?: Proxy;
+  proxyId?: number;
+  proxyType?: string;
+  proxyAddress?: string;
 
-  constructor(id: number, type: string, expression?: string, category?: Category) {
+
+  constructor(id: number, name: string, enabled?: boolean, proxy?: Proxy) {
     this.id = id;
-    this.type = type;
-    this.expression = expression;
-    this.category = category;
-    this.categoryId = category?.id;
-    this.categoryName = category?.name;
+    this.name = name;
+    this.enabled = enabled;
+    this.proxy = proxy;
+    this.proxyId = proxy?.id;
+    this.proxyType = proxy?.type;
+    this.proxyAddress = proxy?.address;
   }
 }
 
-function RowDataFromCondition(p: Condition): RowData {
-  return new RowData(p.id, p.type, p.expression, p.category);
+function RowDataFromProxyRule(p: ProxyRule): RowData {
+  return new RowData(p.id, p.name, p.enabled, p.proxy);
 }
 
-const conditionTypes = [
-  'host_domain_only',
-  'host_domain_subdomain',
-  'host_subdomain_only',
-  'url_shexp_match',
-  'url_regexp_match'
-]
+function ProxyRules() {
+  console.debug("=================== ProxyRules");
 
-function Conditions() {
-  console.debug("=================== Conditions");
-
-  const { data: conditions = [], isFetching: isFetchingConditions, isError: isFetchingConditionsError } = useAllConditionsQuery();
-  const { data: categories = [], isFetching: isFetchingCategories, isError: isFetchingCategoriesError } = useAllCategoriesQuery();
+  const { data: proxyrules = [], isFetching: isFetchingProxyRules, isError: isFetchingProxyRulesError } = useAllProxyRulesQuery();
+  const { data: proxies = [], isFetching: isFetchingProxies, isError: isFetchingProxiesError } = useAllProxiesQuery();
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string | undefined>>({});
   const [mutationError, setMutationError] = useState<FetchBaseQueryError | SerializedError | undefined>(undefined);
 
   // call CREATE hook
-  const [createCondition, createConditionResult] = useCreateConditionMutation()
+  const [createProxyRule, createProxyRuleResult] = useCreateProxyRuleMutation()
   // call UPDATE hook
-  const [updateCondition, updateConditionResult] = useUpdateConditionMutation()
+  const [updateProxyRule, updateProxyRuleResult] = useUpdateProxyRuleMutation()
   // call DELETE hook
-  const [deleteCondition, deleteConditionResult] = useDeleteConditionMutation()
+  const [deleteProxyRule, deleteProxyRuleResult] = useDeleteProxyRuleMutation()
 
-  const rowsData = useMemo<RowData[]>(() => conditions.map(p => RowDataFromCondition(p)), [conditions]);
-  const categoriesSelectData = useMemo<DropdownOption[]>(() => categories.map(c => ({ label: c.name, value: c.id })), [categories]);
+  const rowsData = useMemo<RowData[]>(() => proxyrules.map(p => RowDataFromProxyRule(p)), [proxyrules]);
+  const proxiesSelectData = useMemo<DropdownOption[]>(() => proxies.map(p => ({ label: p.id + ' ' + p.type + ' ' + p.address, value: p.id })), [proxies]);
 
   const columns = useMemo<MRT_ColumnDef<RowData>[]>(
     () => [
@@ -91,49 +86,47 @@ function Conditions() {
         size: 80,
       },
       {
-        accessorKey: 'type',
-        header: 'Type',
-        editVariant: 'select',
-        editSelectOptions: conditionTypes,
+        accessorKey: 'name',
+        header: 'Name',
         muiEditTextFieldProps: {
           required: true,
-          error: !!validationErrors?.type,
-          helperText: validationErrors?.type,
+          error: !!validationErrors?.name,
+          helperText: validationErrors?.name,
           // remove any previous validation errors when user focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              type: undefined,
-            }),
-          //optionally add validation checking for onBlur or onChange
-        },
-      },
-      {
-        accessorKey: 'expression',
-        header: 'Expression',
-        muiEditTextFieldProps: {
-          required: false,
-          error: !!validationErrors?.expression,
-          helperText: validationErrors?.expression,
-          // remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              expression: undefined,
+              name: undefined,
             }),
           // optionally add validation checking for onBlur or onChange
         },
       },
       {
-        accessorKey: 'categoryId',
+        accessorKey: 'enabled',
+        header: 'Enabled',
+        muiEditTextFieldProps: {
+          required: true,
+          error: !!validationErrors?.enabled,
+          helperText: validationErrors?.enabled,
+          // remove any previous validation errors when user focuses on the input
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              enabled: undefined,
+            }),
+          // optionally add validation checking for onBlur or onChange
+        },
+      },
+      {
+        accessorKey: 'proxyId',
         Cell: ({ row }) => (
           <div>
-            {row.original.categoryName}
+            {row.original.proxyType + ' ' + row.original.proxyAddress}
           </div>
         ),
-        header: 'Category',
+        header: 'Proxy',
         editVariant: 'select',
-        editSelectOptions: categoriesSelectData,
+        editSelectOptions: proxiesSelectData,
         muiEditTextFieldProps: {
           required: true,
         },
@@ -143,68 +136,68 @@ function Conditions() {
   );
 
   // CREATE action
-  const handleCreateCondition: MRT_TableOptions<RowData>['onCreatingRowSave'] = async ({
+  const handleCreateProxyRule: MRT_TableOptions<RowData>['onCreatingRowSave'] = async ({
     values,
     table,
   }) => {
-    console.debug("handleCreateCondition");
+    console.debug("handleCreateProxyRule");
 
-    const newValidationErrors = validateCondition(values);
+    const newValidationErrors = validateProxyRule(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
       return;
     }
     setValidationErrors({});
 
-    const createRequest: ConditionCreateRequest = { type: values.type, expression: values.expression, categoryId: values.categoryId };
+    const createRequest: ProxyRuleCreateRequest = { name: values.name, enabled: values.enabled, proxyId: values.proxyId, conditionIds: [] };
 
-    await createCondition(createRequest).unwrap()
-      .then((value: Condition) => {
+    await createProxyRule(createRequest).unwrap()
+      .then((value: ProxyRule) => {
         // TODO: use value to update row
         table.setCreatingRow(null); // exit creating mode
         setMutationError(undefined);
       })
       .catch((error) => {
         setMutationError(error);
-        console.error('createCondition()', error)
+        console.error('createProxyRule()', error)
       });
   };
 
   // UPDATE action
-  const handleSaveCondition: MRT_TableOptions<RowData>['onEditingRowSave'] = async ({
+  const handleSaveProxyRule: MRT_TableOptions<RowData>['onEditingRowSave'] = async ({
     values,
     table,
   }) => {
-    console.debug("handleSaveCondition");
+    console.debug("handleSaveProxyRule");
 
-    const newValidationErrors = validateCondition(values);
+    const newValidationErrors = validateProxyRule(values);
     if (Object.values(newValidationErrors).some((error) => error)) {
       setValidationErrors(newValidationErrors);
       return;
     }
     setValidationErrors({});
 
-    let updateRequestBody: ConditionUpdateRequest = { type: values.type, expression: values.expression, categoryId: values.categoryId }
+    const updateRequestBody: ProxyRuleUpdateRequest = { name: values.name, enabled: values.enabled, proxyId: values.proxyId };
     const updateRequest = { id: values.id, body: updateRequestBody }
 
-    await updateCondition(updateRequest).unwrap()
-      .then((value: Condition) => {
+    await updateProxyRule(updateRequest).unwrap()
+      .then((value: ProxyRule) => {
         // TODO: use value to update row
         table.setEditingRow(null); // exit editing mode
         setMutationError(undefined);
       })
       .catch((error) => {
         setMutationError(error);
-        console.error('updateCondition()', error)
+        console.error('updateProxyRule()', error)
       });
   };
 
   // DELETE action
   const openDeleteConfirmModal = (row: MRT_Row<RowData>) => {
-    if (window.confirm('Are you sure you want to delete this condition?')) {
-      deleteCondition(row.original.id).unwrap().catch((error) => {
+    if (window.confirm('Are you sure you want to delete this proxyrule?')) {
+      deleteProxyRule(row.original.id).unwrap().catch((error) => {
         window.alert(getErrorMessage(error));
-        console.error('deleteCondition()', error)
+        console.error('deleteProxyRule()', error)
       });
     }
   };
@@ -216,7 +209,7 @@ function Conditions() {
     editDisplayMode: 'modal', // default ('row', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
     getRowId: (row, index, parent) => { let id = row?.id ? row.id.toString() : 'idx' + index.toString(); return id; },
-    muiToolbarAlertBannerProps: isFetchingConditionsError
+    muiToolbarAlertBannerProps: isFetchingProxyRulesError
       ? {
         color: 'error',
         children: 'Error loading data',
@@ -228,13 +221,13 @@ function Conditions() {
       },
     },
     onCreatingRowCancel: () => { setValidationErrors({}); /*setMutationError(undefined); */ },
-    onCreatingRowSave: handleCreateCondition,
+    onCreatingRowSave: handleCreateProxyRule,
     onEditingRowCancel: () => { setValidationErrors({}); /* setMutationError(undefined); */ },
-    onEditingRowSave: handleSaveCondition,
+    onEditingRowSave: handleSaveProxyRule,
     // optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h4">Create new Condition</DialogTitle>
+        <DialogTitle variant="h4">Create new ProxyRule</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {internalEditComponents} {/* or render custom edit components here */}
           {MutationError(mutationError)}
@@ -247,7 +240,7 @@ function Conditions() {
     // optionally customize modal content
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h4">Edit Condition</DialogTitle>
+        <DialogTitle variant="h4">Edit ProxyRule</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {internalEditComponents} {/* or render custom edit components here */}
           {MutationError(mutationError)}
@@ -284,14 +277,14 @@ function Conditions() {
           // );
         }}
       >
-        Create new Condition
+        Create new ProxyRule
       </Button>
     ),
     state: {
-      isLoading: isFetchingConditions || isFetchingCategories,
-      isSaving: createConditionResult.isLoading || updateConditionResult.isLoading || deleteConditionResult.isLoading,
-      showAlertBanner: isFetchingConditionsError,
-      showProgressBars: isFetchingConditions || isFetchingCategories,
+      isLoading: isFetchingProxyRules || isFetchingProxies,
+      isSaving: createProxyRuleResult.isLoading || updateProxyRuleResult.isLoading || deleteProxyRuleResult.isLoading,
+      showAlertBanner: isFetchingProxyRulesError,
+      showProgressBars: isFetchingProxyRules || isFetchingProxies,
     },
   });
 
@@ -306,11 +299,10 @@ function Conditions() {
 
 const validateRequired = (value?: string) => value != null && !!value.length;
 
-function validateCondition(c: RowData) {
+function validateProxyRule(c: RowData) {
   return {
-    type: !validateRequired(c.type) ? 'Type is Required' : '',
-    expression: !validateRequired(c.expression) ? 'Expression is Required' : '',
+    name: !validateRequired(c.name) ? 'Name is Required' : '',
   };
 }
 
-export default Conditions;
+export default ProxyRules;

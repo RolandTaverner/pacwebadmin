@@ -4,6 +4,7 @@ import './App.css'
 import Categories from '../categories/Categories';
 import Proxies from '../proxies/Proxies';
 import Conditions from '../conditions/Conditions';
+import ProxyRules from '../proxyrules/ProxyRules';
 
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -56,7 +57,7 @@ function App() {
       <Container sx={{ bgcolor: 'primary.light', display: 'flex', height: 30, width: 1000 }} >
         Header
       </Container>
-      <Box sx={{display: 'grid', gridTemplateColumns: '150px auto' }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: '150px auto' }}>
 
         <Box
           sx={{ flexGrow: 1, bgcolor: 'background.paper' }}
@@ -79,7 +80,7 @@ function App() {
           </Tabs>
         </Box>
 
-        <Box sx={{ bgcolor: 'background.paper'}}>
+        <Box sx={{ bgcolor: 'background.paper' }}>
           <TabPanel value={value} index={0}>
             Item One
           </TabPanel>
@@ -87,10 +88,10 @@ function App() {
             Item Two
           </TabPanel>
           <TabPanel value={value} index={2}>
-            Item Three
+            <ProxyRules />
           </TabPanel>
           <TabPanel value={value} index={3}>
-            <Conditions/>
+            <Conditions />
           </TabPanel>
           <TabPanel value={value} index={4}>
             <Proxies />
@@ -99,7 +100,7 @@ function App() {
             <Categories />
           </TabPanel>
           <TabPanel value={value} index={6}>
-            Item Seven
+            TODO
           </TabPanel>
         </Box>
 

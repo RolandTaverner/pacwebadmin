@@ -180,6 +180,7 @@ export interface ProxyRuleCreateRequest {
   conditionIds: number[];
 }
 
+
 export interface ProxyRuleUpdateRequest {
   proxyId?: number;
   enabled?: boolean;
@@ -196,7 +197,7 @@ export interface ProxyRuleAddConditionRequest {
   conditionId: number,
 }
 
-export type ProxyRuleAddConditionRespone = ProxyRuleConditionsResponse;
+export type ProxyRuleAddConditionResponse = ProxyRuleConditionsResponse;
 
 export interface ProxyRuleRemoveConditionRequest {
   id: number,
