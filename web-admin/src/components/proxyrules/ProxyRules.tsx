@@ -12,6 +12,7 @@ import {
   DialogTitle,
   IconButton,
   Tooltip,
+  Typography
 } from '@mui/material';
 
 import EditIcon from '@mui/icons-material/Edit';
@@ -32,6 +33,7 @@ import { useAllProxyRulesQuery, useCreateProxyRuleMutation, useUpdateProxyRuleMu
 import { useAllProxiesQuery } from '../../services/proxy';
 import type { ProxyRule, ProxyRuleCreateRequest, ProxyRuleUpdateRequest, Proxy } from "../../services/types";
 import { MutationError, getErrorMessage } from '../errors/errors';
+import ConditionSelector from './ConditionSelector';
 
 class RowData {
   id: number;
@@ -41,9 +43,10 @@ class RowData {
   proxyId?: number;
   proxyType?: string;
   proxyAddress?: string;
+  conditionIds?: number[];
 
 
-  constructor(id: number, name: string, enabled?: boolean, proxy?: Proxy) {
+  constructor(id: number, name: string, enabled?: boolean, proxy?: Proxy, conditionIds?: number[]) {
     this.id = id;
     this.name = name;
     this.enabled = enabled;
@@ -51,11 +54,12 @@ class RowData {
     this.proxyId = proxy?.id;
     this.proxyType = proxy?.type;
     this.proxyAddress = proxy?.address;
+    this.conditionIds = conditionIds;
   }
 }
 
 function RowDataFromProxyRule(p: ProxyRule): RowData {
-  return new RowData(p.id, p.name, p.enabled, p.proxy);
+  return new RowData(p.id, p.name, p.enabled, p.proxy, p.conditions.map(c => c.id));
 }
 
 function ProxyRules() {
@@ -149,7 +153,7 @@ function ProxyRules() {
     }
     setValidationErrors({});
 
-    const createRequest: ProxyRuleCreateRequest = { name: values.name, enabled: values.enabled, proxyId: values.proxyId, conditionIds: [] };
+    const createRequest: ProxyRuleCreateRequest = { name: values.name, enabled: values.enabled === 'true', proxyId: values.proxyId, conditionIds: values.conditionIds };
 
     await createProxyRule(createRequest).unwrap()
       .then((value: ProxyRule) => {
@@ -177,7 +181,7 @@ function ProxyRules() {
     }
     setValidationErrors({});
 
-    const updateRequestBody: ProxyRuleUpdateRequest = { name: values.name, enabled: values.enabled, proxyId: values.proxyId };
+    const updateRequestBody: ProxyRuleUpdateRequest = { name: values.name, enabled: values.enabled === 'true', proxyId: values.proxyId, conditionIds: values.conditionIds };
     const updateRequest = { id: values.id, body: updateRequestBody }
 
     await updateProxyRule(updateRequest).unwrap()
@@ -220,6 +224,14 @@ function ProxyRules() {
         minHeight: '500px',
       },
     },
+    muiEditRowDialogProps: {
+      open: true,
+      maxWidth: 'md',
+    },
+    muiCreateRowModalProps: {
+      open: true,
+      maxWidth: 'md',
+    },
     onCreatingRowCancel: () => { setValidationErrors({}); /*setMutationError(undefined); */ },
     onCreatingRowSave: handleCreateProxyRule,
     onEditingRowCancel: () => { setValidationErrors({}); /* setMutationError(undefined); */ },
@@ -227,9 +239,17 @@ function ProxyRules() {
     // optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h4">Create new ProxyRule</DialogTitle>
+        <DialogTitle variant="h4" >Create new ProxyRule</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {internalEditComponents} {/* or render custom edit components here */}
+          <Typography variant="h6" sx={{ mt: 2 }}>Conditions</Typography>
+          <ConditionSelector
+            conditionIds={row.original.conditionIds ? row.original.conditionIds : []}
+            onSelectionChange={(ids) => {
+              console.debug("onSelectionChange", ids);
+              row._valuesCache.conditionIds = ids;
+            }}
+          />
           {MutationError(mutationError)}
         </DialogContent>
         <DialogActions>
@@ -243,6 +263,13 @@ function ProxyRules() {
         <DialogTitle variant="h4">Edit ProxyRule</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {internalEditComponents} {/* or render custom edit components here */}
+          <Typography variant="h6" sx={{ mt: 2 }}>Conditions</Typography>
+          <ConditionSelector
+            conditionIds={row.original.conditionIds ? row.original.conditionIds : []}
+            onSelectionChange={(ids) => {
+              row._valuesCache.conditionIds = ids;
+            }}
+          />
           {MutationError(mutationError)}
         </DialogContent>
         <DialogActions>
