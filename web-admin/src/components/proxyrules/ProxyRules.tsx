@@ -7,6 +7,7 @@ import type { SerializedError } from '@reduxjs/toolkit';
 import {
   Box,
   Button,
+  Checkbox,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -81,6 +82,11 @@ function ProxyRules() {
   const rowsData = useMemo<RowData[]>(() => proxyrules.map(p => RowDataFromProxyRule(p)), [proxyrules]);
   const proxiesSelectData = useMemo<DropdownOption[]>(() => proxies.map(p => ({ label: p.id + ' ' + p.type + ' ' + p.address, value: p.id })), [proxies]);
 
+  const boolValues = [
+    'true',
+    'false',
+  ]
+
   const columns = useMemo<MRT_ColumnDef<RowData>[]>(
     () => [
       {
@@ -108,6 +114,11 @@ function ProxyRules() {
       {
         accessorKey: 'enabled',
         header: 'Enabled',
+        Cell: ({ cell }) => (
+          <Checkbox checked={cell.row.original.enabled} disabled />
+        ),
+        editVariant: 'select',
+        editSelectOptions: boolValues,
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.enabled,

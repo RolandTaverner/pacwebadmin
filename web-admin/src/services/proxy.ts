@@ -53,10 +53,9 @@ const proxyApi = api.injectEndpoints({
     }),
     deleteProxy: builder.mutation<void, number>({
       query: (id) => ({ url: `/proxy/list/${id}`, method: 'DELETE' }),
-      invalidatesTags: (result, error, id) => error ? [
-      ]
+      invalidatesTags: (result, error, id) => error ? []
         : [{ type: 'Proxy' as const, id },
-        { type: 'Proxy' as const, id: 'LIST' },]
+        { type: 'Proxy' as const, id: 'LIST' }]
     }),
   }),
   overrideExisting: false,

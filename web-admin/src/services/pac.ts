@@ -43,7 +43,7 @@ const pacApi = api.injectEndpoints({
         { type: 'PAC' as const, id: result.id }, { type: 'PAC' as const, id: 'LIST' }]
         : [{ type: 'PAC' as const, id: 'LIST' }],
     }),
-    deletePac: builder.mutation<void, number>({
+    deletePAC: builder.mutation<void, number>({
       query: (id) => ({ url: `/pac/list/${id}`, method: 'DELETE' }),
       invalidatesTags: (result, error, id) => error ? []
         : [{ type: 'PAC' as const, id },
@@ -73,7 +73,7 @@ export const {
   useByIdPACQuery,
   useCreatePACMutation,
   useUpdatePACMutation,
-  useDeletePacMutation,
+  useDeletePACMutation,
   usePacProxyRulesQuery,
   usePacProxyRulesAddMutation,
   usePacProxyRulesRemoveMutation,
