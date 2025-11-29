@@ -5,6 +5,7 @@ import Categories from '../categories/Categories';
 import Proxies from '../proxies/Proxies';
 import Conditions from '../conditions/Conditions';
 import ProxyRules from '../proxyrules/ProxyRules';
+import PACs from '../pacs/PACs';
 
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -85,7 +86,7 @@ function App() {
             Item One
           </TabPanel>
           <TabPanel value={value} index={1}>
-            Item Two
+            <PACs />
           </TabPanel>
           <TabPanel value={value} index={2}>
             <ProxyRules />

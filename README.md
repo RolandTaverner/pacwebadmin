@@ -650,7 +650,7 @@ Response: HTTP 200 with empty body
 ### Get all
 
 ```bash
-curl http://127.0.0.1:8080/api/pac/all
+curl http://127.0.0.1:8080/api/pac/list
 ```
 
 Response
@@ -716,7 +716,7 @@ Response
 ### Get by id
 
 ```bash
-curl http://127.0.0.1:8080/api/pac/1
+curl http://127.0.0.1:8080/api/pac/list/1
 ```
 
 Response
@@ -778,7 +778,7 @@ Response
 ### Create
 
 ```bash
-curl -X POST http://127.0.0.1:8080/api/pac/create -H "Content-Type: application/json" -d '{"name": "pac 2", "description": "PAC for something else", "proxyRules": [{"proxyRuleId": 1, "priority":1}], "fallbackProxyId": 3, "serve": true, "servePath": "pac2.pac", "saveToFS": true, "saveToFSPath": "pac2.pac"}'
+curl -X POST http://127.0.0.1:8080/api/pac/list -H "Content-Type: application/json" -d '{"name": "pac 2", "description": "PAC for something else", "proxyRules": [{"proxyRuleId": 1, "priority":1}], "fallbackProxyId": 3, "serve": true, "servePath": "pac2.pac", "saveToFS": true, "saveToFSPath": "pac2.pac"}'
 ```
 
 Response
@@ -840,7 +840,7 @@ Response
 ### Update
 
 ```bash
-curl -X PUT http://127.0.0.1:8080/api/pac/2/update -H "Content-Type: application/json" -d '{"name": "pac 2 updated", "description": "PAC for something else updated", "proxyRules": [{"proxyRuleId": 2, "priority":1}], "fallbackProxyId": 2, "serve": false, "servePath": "pac2updated.pac", "saveToFS": false, "saveToFSPath": "pac2updated.pac"}'
+curl -X PUT http://127.0.0.1:8080/api/pac/list/2 -H "Content-Type: application/json" -d '{"name": "pac 2 updated", "description": "PAC for something else updated", "proxyRules": [{"proxyRuleId": 2, "priority":1}], "fallbackProxyId": 2, "serve": false, "servePath": "pac2updated.pac", "saveToFS": false, "saveToFSPath": "pac2updated.pac"}'
 ```
 
 Response
@@ -902,7 +902,7 @@ Response
 ### Delete
 
 ```bash
-curl -X DELETE http://127.0.0.1:8080/api/pac/2
+curl -X DELETE http://127.0.0.1:8080/api/pac/list/2
 ```
 
 Response: HTTP 200 with empty body
@@ -910,7 +910,7 @@ Response: HTTP 200 with empty body
 ### Get proxy rules linked to PAC
 
 ```bash
-curl http://127.0.0.1:8080/api/pac/1/proxyrules
+curl http://127.0.0.1:8080/api/pac/list/1/proxyrules
 ```
 
 Response
@@ -959,7 +959,7 @@ Response
 ### Add proxy rules to PAC
 
 ```bash
-curl -X POST http://127.0.0.1:8080/api/pac/1/proxyrules/2?priority=2
+curl -X POST http://127.0.0.1:8080/api/pac/list/1/proxyrules/2?priority=2
 ```
 
 Returns updated proxy rules for PAC object.
@@ -1043,7 +1043,7 @@ Returns updated proxy rules for PAC object.
 
 
 ```bash
-curl -X PATCH http://127.0.0.1:8080/api/pac/1/proxyrules/2?priority=10
+curl -X PATCH http://127.0.0.1:8080/api/pac/list/1/proxyrules/2?priority=10
 ```
 
 Returns updated proxy rules for PAC object.
@@ -1126,7 +1126,7 @@ Returns updated proxy rules for PAC object.
 ### Delete proxy rules from PAC
 
 ```bash
-curl -X DELETE http://127.0.0.1:8080/api/pac/1/proxyrules/2
+curl -X DELETE http://127.0.0.1:8080/api/pac/list/1/proxyrules/2
 ```
 
 Response: HTTP 200 with empty body

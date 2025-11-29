@@ -12,31 +12,31 @@ import web.api.proxyrule;
 interface PACAPI
 {
 @safe:
-    @method(HTTPMethod.GET) @path("/all")
+    @method(HTTPMethod.GET) @path("/list")
     PACList getAll();
 
-    @method(HTTPMethod.GET) @path(":id")
+    @method(HTTPMethod.GET) @path("/list/:id")
     PACDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/create")
+    @method(HTTPMethod.POST) @path("/list")
     PACDTO create(@viaBody() in PACCreateDTO c);
 
-    @method(HTTPMethod.PUT) @path("/:id/update")
+    @method(HTTPMethod.PUT) @path("/list/:id")
     PACDTO update(in long _id, @viaBody() in PACUpdateDTO c);
 
-    @method(HTTPMethod.DELETE) @path(":id")
+    @method(HTTPMethod.DELETE) @path("/list/:id")
     void remove(in long _id);
 
-    @method(HTTPMethod.GET) @path("/:id/proxyrules")
+    @method(HTTPMethod.GET) @path("/list/:id/proxyrules")
     ProxyRulePriorityList getProxyRules(in long _id);
 
-    @method(HTTPMethod.POST) @path("/:id/proxyrules/:prid")
+    @method(HTTPMethod.POST) @path("/list/:id/proxyrules/:prid")
     ProxyRulePriorityList addProxyRule(in long _id, in long _prid, @viaQuery("priority") long _priority);
 
-    @method(HTTPMethod.PATCH) @path("/:id/proxyrules/:prid")
+    @method(HTTPMethod.PATCH) @path("/list/:id/proxyrules/:prid")
     ProxyRulePriorityList setProxyRulePriority(in long _id, in long _prid, @viaQuery("priority") long _priority);
 
-    @method(HTTPMethod.DELETE) @path("/:id/proxyrules/:prid")
+    @method(HTTPMethod.DELETE) @path("/list/:id/proxyrules/:prid")
     void removeProxyRule(in long _id, in long _prid);
 }
 

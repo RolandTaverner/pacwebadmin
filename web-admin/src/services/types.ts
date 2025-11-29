@@ -210,28 +210,19 @@ export type ProxyRuleRemoveConditionResponse = ProxyRuleConditionsResponse;
 // PAC API
 // ============================
 
-export interface PACListResponse {
+export interface PACsResponse {
   pacs: PAC[];
 }
 
-export interface PACRulesResponse {
-  proxyRules: ProxyRuleWithPriority[];
-}
-
-export interface PACProxyRuleLinkRequest {
+export interface ProxyRuleWithPriority {
   proxyRuleId: number;
   priority: number;
 }
 
-export interface PACRuleRef {
-  proxyRuleId: number;
-  priority: number;
-}
-
-export interface PacCreateRequest {
+export interface PACCreateRequest {
   name: string;
   description: string;
-  proxyRules: PACRuleRef[];
+  proxyRules: ProxyRuleWithPriority[];
   fallbackProxyId: number;
   serve: boolean;
   servePath: string;
@@ -239,13 +230,36 @@ export interface PacCreateRequest {
   saveToFSPath: string;
 }
 
-export interface PacUpdateRequest {
+export interface PACUpdateRequest {
   name?: string;
   description?: string;
-  proxyRules?: PACRuleRef[];
+  proxyRules?: ProxyRuleWithPriority[];
   fallbackProxyId?: number;
   serve?: boolean;
   servePath?: string;
   saveToFS?: boolean;
   saveToFSPath?: string;
 }
+
+export type PACGetByIdResponse = PAC;
+export type PACCreateResponse = PAC;
+export type PACUpdateResponse = PAC;
+
+export interface PACProxyRulesResponse {
+  proxyRules: ProxyRuleWithPriority[];
+}
+
+export interface PACProxyRuleAddRequest {
+  id: number;
+  proxyRuleId: number;
+  priority: number;  
+}
+
+export type PACProxyRuleAddResponse = PACProxyRulesResponse;
+
+export interface PACProxyRuleRemoveRequest {
+  id: number;
+  proxyRuleId: number;
+}
+
+export type PACProxyRuleRemoveResponse = PACProxyRulesResponse;
