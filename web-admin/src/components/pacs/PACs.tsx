@@ -32,9 +32,9 @@ import {
 
 import { useAllPACsQuery, useCreatePACMutation, useUpdatePACMutation, useDeletePACMutation } from '../../services/pac';
 import { useAllProxiesQuery } from '../../services/proxy';
-import type { PAC, PACCreateRequest, PACUpdateRequest, ProxyRule, Proxy } from "../../services/types";
+import type { PAC, PACCreateRequest, PACUpdateRequest, ProxyRuleWithPriority, ProxyRuleIdWithPriority, ProxyRule, Proxy } from "../../services/types";
 import { MutationError, getErrorMessage } from '../errors/errors';
-// import ConditionSelector from './ConditionSelector';
+import ProxyRuleSelector from './ProxyRuleSelector';
 
 
 class RowData {
@@ -49,7 +49,7 @@ class RowData {
   fallBackProxyId?: number;
   fallBackProxyType?: string;
   fallBackProxyAddress?: string;
-  //proxyRules: ProxyRuleWithPriority[];
+  proxyRuleIdsWithPriority?: ProxyRuleIdWithPriority[];
 
   constructor(
     id: number,
@@ -60,6 +60,7 @@ class RowData {
     saveToFS: boolean,
     saveToFSPath: string,
     fallBackProxy?: Proxy,
+    proxyRuleIdsWithPriority?: ProxyRuleIdWithPriority[]
   ) {
     this.id = id;
     this.name = name;
@@ -72,6 +73,7 @@ class RowData {
     this.fallBackProxyId = fallBackProxy?.id;
     this.fallBackProxyType = fallBackProxy?.type;
     this.fallBackProxyAddress = fallBackProxy?.address;
+    this.proxyRuleIdsWithPriority = proxyRuleIdsWithPriority;
   }
 }
 
@@ -81,7 +83,8 @@ function RowDataFromPAC(p: PAC): RowData {
     p.description,
     p.serve, p.servePath,
     p.saveToFS, p.saveToFSPath,
-    p.fallbackProxy
+    p.fallbackProxy,
+    p.proxyRules.map<ProxyRuleIdWithPriority>(i => ({ proxyRuleId: i.proxyRule.id, priority: i.priority }))
   );
 }
 
@@ -342,20 +345,19 @@ function PACs() {
     onCreatingRowSave: handleCreatePAC,
     onEditingRowCancel: () => { setValidationErrors({}); /* setMutationError(undefined); */ },
     onEditingRowSave: handleSavePAC,
-    // optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
         <DialogTitle variant="h4" >Create new PAC</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {internalEditComponents} {/* or render custom edit components here */}
-          {/* <Typography variant="h6" sx={{ mt: 2 }}>Conditions</Typography>
-          <ConditionSelector
-            conditionIds={row.original.conditionIds ? row.original.conditionIds : []}
-            onSelectionChange={(ids) => {
-              console.debug("onSelectionChange", ids);
-              row._valuesCache.conditionIds = ids;
+          {internalEditComponents}
+          <Typography variant="h6" sx={{ mt: 2 }}>Proxy rules</Typography>
+          <ProxyRuleSelector
+            proxyRuleIdsWithPriority={row.original.proxyRuleIdsWithPriority ? row.original.proxyRuleIdsWithPriority : []}
+            onSelectionChange={(proxyRuleIdsWithPriority) => {
+              console.debug("onSelectionChange", proxyRuleIdsWithPriority);
+              row._valuesCache.proxyRuleIdsWithPriority = proxyRuleIdsWithPriority;
             }}
-          /> */}
+          />
           {MutationError(mutationError)}
         </DialogContent>
         <DialogActions>
@@ -363,19 +365,19 @@ function PACs() {
         </DialogActions>
       </>
     ),
-    // optionally customize modal content
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
         <DialogTitle variant="h4">Edit PAC</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {internalEditComponents} {/* or render custom edit components here */}
-          {/* <Typography variant="h6" sx={{ mt: 2 }}>Conditions</Typography>
-          <ConditionSelector
-            conditionIds={row.original.conditionIds ? row.original.conditionIds : []}
-            onSelectionChange={(ids) => {
-              row._valuesCache.conditionIds = ids;
+          {internalEditComponents}
+          <Typography variant="h6" sx={{ mt: 2 }}>Proxy rules</Typography>
+          <ProxyRuleSelector
+            proxyRuleIdsWithPriority={row.original.proxyRuleIdsWithPriority ? row.original.proxyRuleIdsWithPriority : []}
+            onSelectionChange={(proxyRuleIdsWithPriority) => {
+              console.debug("onSelectionChange", proxyRuleIdsWithPriority);
+              row._valuesCache.proxyRuleIdsWithPriority = proxyRuleIdsWithPriority;
             }}
-          /> */}
+          />
           {MutationError(mutationError)}
         </DialogContent>
         <DialogActions>

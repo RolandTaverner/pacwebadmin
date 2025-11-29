@@ -225,12 +225,11 @@ function Proxies() {
     onCreatingRowSave: handleCreateProxy,
     onEditingRowCancel: () => { setValidationErrors({}); /* setMutationError(undefined); */ },
     onEditingRowSave: handleSaveProxy,
-    // optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
         <DialogTitle variant="h4">Create new Proxy</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {internalEditComponents} {/* or render custom edit components here */}
+          {internalEditComponents}
           {MutationError(mutationError)}
         </DialogContent>
         <DialogActions>
@@ -238,12 +237,11 @@ function Proxies() {
         </DialogActions>
       </>
     ),
-    // optionally customize modal content
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
         <DialogTitle variant="h4">Edit Proxy</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {internalEditComponents} {/* or render custom edit components here */}
+          {internalEditComponents}
           {MutationError(mutationError)}
         </DialogContent>
         <DialogActions>

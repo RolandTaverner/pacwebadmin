@@ -214,7 +214,7 @@ export interface PACsResponse {
   pacs: PAC[];
 }
 
-export interface ProxyRuleWithPriority {
+export interface ProxyRuleIdWithPriority {
   proxyRuleId: number;
   priority: number;
 }
@@ -222,7 +222,7 @@ export interface ProxyRuleWithPriority {
 export interface PACCreateRequest {
   name: string;
   description: string;
-  proxyRules: ProxyRuleWithPriority[];
+  proxyRules: ProxyRuleIdWithPriority[];
   fallbackProxyId: number;
   serve: boolean;
   servePath: string;
@@ -233,7 +233,7 @@ export interface PACCreateRequest {
 export interface PACUpdateRequest {
   name?: string;
   description?: string;
-  proxyRules?: ProxyRuleWithPriority[];
+  proxyRules?: ProxyRuleIdWithPriority[];
   fallbackProxyId?: number;
   serve?: boolean;
   servePath?: string;

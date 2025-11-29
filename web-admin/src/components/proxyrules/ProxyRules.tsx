@@ -247,12 +247,11 @@ function ProxyRules() {
     onCreatingRowSave: handleCreateProxyRule,
     onEditingRowCancel: () => { setValidationErrors({}); /* setMutationError(undefined); */ },
     onEditingRowSave: handleSaveProxyRule,
-    // optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
         <DialogTitle variant="h4" >Create new ProxyRule</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {internalEditComponents} {/* or render custom edit components here */}
+          {internalEditComponents}
           <Typography variant="h6" sx={{ mt: 2 }}>Conditions</Typography>
           <ConditionSelector
             conditionIds={row.original.conditionIds ? row.original.conditionIds : []}
@@ -268,12 +267,11 @@ function ProxyRules() {
         </DialogActions>
       </>
     ),
-    // optionally customize modal content
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
         <DialogTitle variant="h4">Edit ProxyRule</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {internalEditComponents} {/* or render custom edit components here */}
+          {internalEditComponents}
           <Typography variant="h6" sx={{ mt: 2 }}>Conditions</Typography>
           <ConditionSelector
             conditionIds={row.original.conditionIds ? row.original.conditionIds : []}
