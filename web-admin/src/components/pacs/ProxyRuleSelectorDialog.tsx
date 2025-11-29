@@ -57,7 +57,8 @@ const ProxyRuleSelectorDialog: React.FC<{
   const columns: MRT_ColumnDef<RowData>[] = [
     {
       accessorKey: 'id',
-      header: 'ID'
+      header: 'ID',
+      mmaxSize: 50,
     },
     {
       accessorKey: 'name',
@@ -66,6 +67,7 @@ const ProxyRuleSelectorDialog: React.FC<{
     {
       accessorKey: 'enabled',
       header: 'Enabled',
+      maxSize: 100,
       Cell: ({ cell }) => (
         <Checkbox checked={cell.row.original.enabled} disabled />
       ),

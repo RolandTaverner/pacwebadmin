@@ -93,7 +93,7 @@ function ProxyRules() {
         accessorKey: 'id',
         header: 'Id',
         enableEditing: false,
-        size: 80,
+        maxSize: 50,
       },
       {
         accessorKey: 'name',
@@ -114,6 +114,7 @@ function ProxyRules() {
       {
         accessorKey: 'enabled',
         header: 'Enabled',
+        maxSize: 80,
         Cell: ({ cell }) => (
           <Checkbox checked={cell.row.original.enabled} disabled />
         ),

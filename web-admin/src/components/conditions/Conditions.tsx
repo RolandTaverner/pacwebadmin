@@ -88,7 +88,7 @@ function Conditions() {
         accessorKey: 'id',
         header: 'Id',
         enableEditing: false,
-        size: 80,
+        maxSize: 50,
       },
       {
         accessorKey: 'type',

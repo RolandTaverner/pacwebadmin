@@ -38,8 +38,12 @@ const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
   const { data: allProxyRules = [], isLoading } = useAllProxyRulesQuery();
   const [selectedProxyRules, setSelectedProxyRules] = useState<ProxyRuleIdWithPriority[]>(proxyRuleIdsWithPriority ? proxyRuleIdsWithPriority : []);
 
-  const rows = proxyRuleIdsWithPriority.map(prp => ({ proxyRule: allProxyRules.find(pr => pr.id == prp.proxyRuleId), priority: prp.priority }))
+  const rows = selectedProxyRules.map(prp => ({ proxyRule: allProxyRules.find(pr => pr.id == prp.proxyRuleId), priority: prp.priority }))
     .filter(i => i.proxyRule != null)
+    .sort((a, b) => {
+      if (a.priority != b.priority) return a.priority - b.priority;
+      return (a.proxyRule ? a.proxyRule.id : 0) - (b.proxyRule ? b.proxyRule.id : 0);
+    })
     .map<RowData>(i => ({
       proxyRuleId: i.proxyRule?.id,
       proxyRuleName: i.proxyRule?.name,
@@ -49,10 +53,10 @@ const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
 
 
   const columns: MRT_ColumnDef<RowData>[] = [
-    { accessorKey: 'proxyRuleId', header: 'Proxy rule ID' },
+    { accessorKey: 'proxyRuleId', header: 'Proxy rule ID', maxSize: 100 },
     { accessorKey: 'proxyRuleName', header: 'Name' },
     { accessorKey: 'proxyRuleProxy', header: 'Proxy' },
-    { accessorKey: 'priority', header: 'Priority' },
+    { accessorKey: 'priority', header: 'Priority', maxSize: 100 },
   ];
 
   return (
@@ -95,10 +99,33 @@ const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
         open={isDialogOpen}
         onClose={(selectedIds) => {
           setIsDialogOpen(false);
-          // if (selectedIds !== proxyRuleIdsWithPriority) {
-          //   setSelectedProxyRules(selectedIds);
-          //   onSelectionChange(selectedIds);
-          // }
+          console.debug("onClose() selectedIds", selectedIds);
+
+          let changed = false;
+          const withoutUnselected = proxyRuleIdsWithPriority.filter(prp => selectedIds.includes(prp.proxyRuleId));
+          console.debug("onClose() withoutUnselected", withoutUnselected);
+          changed = changed || withoutUnselected.length != proxyRuleIdsWithPriority.length;
+
+          const withoutUnselectedIds = withoutUnselected.map(prp => prp.proxyRuleId);
+          console.debug("onClose() withoutUnselectedIds", withoutUnselectedIds);
+
+          const idsToAdd = selectedIds.filter(id => !withoutUnselectedIds.includes(id)).sort((a, b) => a - b);
+          changed = changed || idsToAdd.length != 0;
+
+          console.debug("onClose() idsToAdd", idsToAdd);
+          let priority = 1;
+          if (withoutUnselected.length != 0) {
+            priority += Math.max(...withoutUnselected.map(prp => prp.priority))
+          }
+          const proxyRuleIdsWithPriorityToAdd = idsToAdd.map<ProxyRuleIdWithPriority>(id => ({ proxyRuleId: id, priority: priority++ }));
+
+          console.debug("onClose() changed", changed);
+
+          if (changed) {
+            const result = withoutUnselected.concat(proxyRuleIdsWithPriorityToAdd);
+            setSelectedProxyRules(result);
+            onSelectionChange(result);
+          }
         }}
         initialSelected={proxyRuleIdsWithPriority.map(prp => prp.proxyRuleId)}
         allProxyRules={allProxyRules}

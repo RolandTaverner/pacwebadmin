@@ -81,11 +81,12 @@ function Proxies() {
         accessorKey: 'id',
         header: 'Id',
         enableEditing: false,
-        size: 80,
+        maxSize: 50,
       },
       {
         accessorKey: 'type',
         header: 'Type',
+        maxSize: 80,
         editVariant: 'select',
         editSelectOptions: proxyTypes,
         muiEditTextFieldProps: {
