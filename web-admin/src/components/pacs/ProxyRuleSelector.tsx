@@ -2,10 +2,6 @@ import React, { useMemo, useState } from 'react';
 
 import {
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   IconButton,
   Tooltip,
 } from '@mui/material';
@@ -14,10 +10,11 @@ import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 import { MaterialReactTable, type MRT_ColumnDef } from 'material-react-table';
-import type { Updater, RowSelectionState } from '@tanstack/react-table';
 
 import { useAllProxyRulesQuery } from '../../services/proxyrule';
-import type { ProxyRule, ProxyRuleIdWithPriority } from '../../services/types';
+import type { ProxyRuleIdWithPriority } from '../../services/types';
+
+import ProxyRuleSelectorDialog from './ProxyRuleSelectorDialog';
 
 interface ProxyRuleSelectorProps {
   proxyRuleIdsWithPriority: ProxyRuleIdWithPriority[];
@@ -35,10 +32,11 @@ const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
   proxyRuleIdsWithPriority,
   onSelectionChange,
 }) => {
+  console.debug("=================== ProxyRuleSelector");
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data: allProxyRules = [], isLoading } = useAllProxyRulesQuery();
   const [selectedProxyRules, setSelectedProxyRules] = useState<ProxyRuleIdWithPriority[]>(proxyRuleIdsWithPriority ? proxyRuleIdsWithPriority : []);
-
 
   const rows = proxyRuleIdsWithPriority.map(prp => ({ proxyRule: allProxyRules.find(pr => pr.id == prp.proxyRuleId), priority: prp.priority }))
     .filter(i => i.proxyRule != null)
@@ -50,15 +48,12 @@ const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
     }));
 
 
-  const columns: MRT_ColumnDef<RowData>[] = useMemo<MRT_ColumnDef<RowData>[]>(
-    () => [
-      { accessorKey: 'proxyRuleId', header: 'Proxy rule ID' },
-      { accessorKey: 'proxyRuleName', header: 'Name' },
-      { accessorKey: 'proxyRuleProxy', header: 'Proxy' },
-      { accessorKey: 'priority', header: 'Priority' },
-    ],
-    [selectedProxyRules],
-  );
+  const columns: MRT_ColumnDef<RowData>[] = [
+    { accessorKey: 'proxyRuleId', header: 'Proxy rule ID' },
+    { accessorKey: 'proxyRuleName', header: 'Name' },
+    { accessorKey: 'proxyRuleProxy', header: 'Proxy' },
+    { accessorKey: 'priority', header: 'Priority' },
+  ];
 
   return (
     <div>
@@ -96,18 +91,18 @@ const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
         state={{ isLoading }}
       />
 
-      {/* <ConditionSelectorDialog
+      <ProxyRuleSelectorDialog
         open={isDialogOpen}
         onClose={(selectedIds) => {
           setIsDialogOpen(false);
-          if (selectedIds !== conditionIds) {
-            setSelectedConditionIds(selectedIds);
-            onSelectionChange(selectedIds);
-          }
+          // if (selectedIds !== proxyRuleIdsWithPriority) {
+          //   setSelectedProxyRules(selectedIds);
+          //   onSelectionChange(selectedIds);
+          // }
         }}
-        initialSelected={conditionIds}
-        allConditions={allConditions}
-      /> */}
+        initialSelected={proxyRuleIdsWithPriority.map(prp => prp.proxyRuleId)}
+        allProxyRules={allProxyRules}
+      />
     </div>
   );
 };
