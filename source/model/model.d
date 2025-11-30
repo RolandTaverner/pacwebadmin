@@ -184,6 +184,8 @@ class Model
 
                 const auto updated = proxies.update(id,
                     new dlproxy.ProxyValue(newType, newAddress, newDescription));
+                
+                touchPACByProxy(id);
                 return makeProxy(updated);
             }
             catch (re.NotFoundError e)
@@ -283,6 +285,8 @@ class Model
 
                 const auto updated = conditions.update(id,
                     new dlcondition.ConditionValue(newType, newExpression, newCategoryId));
+                
+                touchPACByCondition(id);
                 return makeCondition(updated);
             }
             catch (re.NotFoundError e)
@@ -363,13 +367,16 @@ class Model
                 auto newProxyId = i.proxyId ? i.proxyId.get : old.proxyId();
                 auto newEnabled = i.enabled ? i.enabled.get : old.enabled();
                 auto newName = valueOrDefault(i.name, old.name());
-                auto newConditionIds = i.conditionIds.length != 0 ? i.conditionIds : old.conditionIds();
+                auto newConditionIds = i.conditionIds.length != 0 ? i.conditionIds
+                    : old.conditionIds();
 
                 const auto updated = proxyRules.update(id,
                     new dlproxyrule.ProxyRuleValue(newProxyId,
                         newEnabled,
                         newName,
                         newConditionIds));
+
+                touchPACByProxyRule(id);
                 return makeProxyRule(updated);
             }
             catch (re.NotFoundError e)
@@ -398,6 +405,7 @@ class Model
                 const auto updated = proxyRules.update(id, new dlproxyrule.ProxyRuleValue(pr.value()
                         .proxyId(), pr.value().enabled(), pr.value().name(), newHrIds));
 
+                touchPACByProxyRule(id);
                 return makeProxyRule(updated).conditions();
             }
             catch (re.NotFoundError e)
@@ -424,6 +432,7 @@ class Model
                 const auto updated = proxyRules.update(id, new dlproxyrule.ProxyRuleValue(pr.value()
                         .proxyId(), pr.value().enabled(), pr.value().name(), filteredHrIds));
 
+                touchPACByProxyRule(id);
                 return makeProxyRule(updated).conditions();
             }
             catch (re.NotFoundError e)
@@ -938,6 +947,53 @@ protected:
             fallBackProxy,
             dto.value().updatedAt()
         );
+    }
+
+    void touchPACByProxyRule(in long proxyRuleId)
+    {
+        auto affectedPACs = pacs().filterBy(p => p.value().proxyRules().canFind!(v => v.proxyRuleId == proxyRuleId))
+            .array
+            .map!(pac => pac.key())
+            .array;
+
+        pacs().touch(affectedPACs);
+    }
+
+    void touchPACByProxy(in long proxyId)
+    {
+        auto affectedPACsByFallbackProxy = pacs().filterBy(p => p.value().fallbackProxyId() == proxyId)
+            .array
+            .map!(pac => pac.key())
+            .array;
+
+        auto affectedProxyRules = proxyRules().filterBy(p => p.value().proxyId() == proxyId)
+            .array
+            .map!(p => p.key())
+            .array;
+
+        auto affectedPACsByProxyRule = pacs()
+            .filterBy(p => p.value().proxyRules().canFind!(v => affectedProxyRules.canFind(v.proxyRuleId)))
+            .array
+            .map!(pac => pac.key())
+            .array;
+
+        pacs().touch(affectedPACsByFallbackProxy ~ affectedPACsByProxyRule);
+    }
+
+    void touchPACByCondition(in long conditionId)
+    {
+        auto affectedProxyRules = proxyRules().filterBy(p => p.value().conditionIds().canFind(conditionId))
+            .array
+            .map!(p => p.key())
+            .array;
+
+        auto affectedPACsByProxyRule = pacs()
+            .filterBy(p => p.value().proxyRules().canFind!(v => affectedProxyRules.canFind(v.proxyRuleId)))
+            .array
+            .map!(pac => pac.key())
+            .array;
+
+        pacs().touch(affectedPACsByProxyRule);
     }
 
     @property @safe inout(dlcategory.CategoryRepository) categories() inout pure

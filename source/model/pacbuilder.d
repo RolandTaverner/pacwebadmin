@@ -108,6 +108,8 @@ protected:
 
     void addProxyRule(scope ref Appender!string app, scope ref const ProxyRule pr) const
     {
+        app.put("    " ~ commentText(pr.name()));
+
         app.put("    if (");
         
         bool isFirst = true;
