@@ -2,11 +2,17 @@ module datalayer.entities.pac;
 
 import std.algorithm.iteration : map;
 import std.array : array;
+import std.conv;
 import std.datetime.date : DateTime;
-import std.datetime.systime : SysTime;
+import std.datetime.systime : Clock, SysTime;
+import std.datetime.timezone : UTC;
+import std.exception : enforce;
+import std.traits : fullyQualifiedName;
+
 import std.json;
 import std.typecons : tuple, Tuple;
 
+import datalayer.repository.errors;
 import datalayer.repository.repository;
 
 struct ProxyRulePriority
@@ -25,6 +31,12 @@ class PACValue : ISerializable
 {
     @safe this() pure
     {
+    }
+
+    @safe this(in PACValue v, in SysTime updatedAt) pure
+    {
+        this(v);
+        m_updatedAt = updatedAt;
     }
 
     @safe this(in PACValue v) pure
@@ -225,5 +237,52 @@ class PACRepository : RepositoryBase!(Key, PACValue)
     this(IPACListener listener)
     {
         super(listener);
+    }
+
+    const(PAC) touch(in Key key) @safe
+    {
+        auto now = Clock.currTime(UTC());
+        DataObjectType updatedDataObject;
+        synchronized (m_mutex.writer)
+        {
+            updatedDataObject = touchImpl(key, now);
+        }
+        m_listener.onChange(ListenerEvent.UPDATE, updatedDataObject);
+        return updatedDataObject;
+    }
+
+    const(DataObjectType)[] touch(in Key[] keys) @safe
+    {
+        auto now = Clock.currTime(UTC());
+        const(DataObjectType)[] updatedDataObjects;
+        synchronized (m_mutex.writer)
+        {
+            // Check all before update
+            foreach (const Key key; keys)
+            {
+                enforce!NotFoundError(key in m_entities,
+                    fullyQualifiedName!PAC ~ " id=" ~ to!string(key) ~ " not found");
+            }
+
+            foreach (const Key key; keys)
+            {
+                updatedDataObjects ~= touchImpl(key, now);
+            }
+        }
+
+        m_listener.onChangeBatch(ListenerEvent.UPDATE, updatedDataObjects);
+        return updatedDataObjects;
+    }
+
+private:
+    PAC touchImpl(in Key key, in SysTime updatedAt) @safe
+    {
+        auto entity = enforce!NotFoundError(key in m_entities,
+            fullyQualifiedName!PAC ~ " id=" ~ to!string(key) ~ " not found");
+
+        auto updatedValue = new PACValue(entity.value(), updatedAt);
+        auto updatedDataObject = new PAC(key, updatedValue);
+        m_entities[key] = updatedDataObject;
+        return updatedDataObject;
     }
 }

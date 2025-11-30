@@ -32,12 +32,13 @@ class Storage : ICategoryListener, IConditionListener, IPACListener, IProxyListe
         m_proxyRules = new ProxyRuleRepository(this);
     }
 
-    @safe JSONValue dump() 
+    @safe JSONValue dump()
     {
         JSONValue v = JSONValue();
         synchronized (m_mutex.reader)
         {
-            foreach (ref collection; m_data.byKeyValue) {
+            foreach (ref collection; m_data.byKeyValue)
+            {
                 v[collection.key] = JSONValue(collection.value.byValue.array);
             }
         }
@@ -82,30 +83,11 @@ class Storage : ICategoryListener, IConditionListener, IPACListener, IProxyListe
         return m_proxyRules;
     }
 
-    @safe override void onChange(in ListenerEvent e, in Category object)
-    {
-        updateStorage(e, object);
-    }
-
-    @safe override void onChange(in ListenerEvent e, in Condition object)
-    {
-        updateStorage(e, object);
-    }
-
-    @safe override void onChange(in ListenerEvent e, in PAC object)
-    {
-        updateStorage(e, object);
-    }
-
-    @safe override void onChange(in ListenerEvent e, in Proxy object)
-    {
-        updateStorage(e, object);
-    }
-
-    @safe override void onChange(in ListenerEvent e, in ProxyRule object)
-    {
-        updateStorage(e, object);
-    }
+    mixin onChangeFuncs!(Category);
+    mixin onChangeFuncs!(Condition);
+    mixin onChangeFuncs!(PAC);
+    mixin onChangeFuncs!(Proxy);
+    mixin onChangeFuncs!(ProxyRule);
 
 private:
 
@@ -122,7 +104,31 @@ private:
                 m_data[collectionKey!(T)()].remove(dataObject.key());
             }
         }
-        
+
+        auto snapshot = dump();
+        m_saver.save(snapshot);
+    }
+
+    @safe void updateStorageBatch(T)(in ListenerEvent e, in const(T)[] dataObjects)
+    {
+        synchronized (m_mutex.writer)
+        {
+            if (isPutEvent(e))
+            {
+                foreach (dataObject; dataObjects)
+                {
+                    m_data[collectionKey!(T)()][dataObject.key()] = dataObject.toJSON();
+                }
+            }
+            else
+            {
+                foreach (dataObject; dataObjects)
+                {
+                    m_data[collectionKey!(T)()].remove(dataObject.key());
+                }
+            }
+        }
+
         auto snapshot = dump();
         m_saver.save(snapshot);
     }
@@ -201,3 +207,15 @@ T[] parseCollection(T)(in JSONValue v)
     return v.array.map!(i => parseEntity!(T)(i)).array;
 }
 
+private mixin template onChangeFuncs(T)
+{
+    @safe override void onChange(in ListenerEvent e, in T object)
+    {
+        updateStorage(e, object);
+    }
+
+    @safe override void onChangeBatch(in ListenerEvent e, in const(T)[] objects)
+    {
+        updateStorageBatch(e, objects);
+    }
+}

@@ -112,6 +112,7 @@ enum ListenerEvent
 interface IListener(T)
 {
     @safe void onChange(in ListenerEvent e, in T object);
+    @safe void onChangeBatch(in ListenerEvent e, in const(T)[] objects);
 }
 
 alias Key = long;
@@ -144,8 +145,8 @@ class RepositoryBase(K, V) : IRepository!(K, V), IDataLoader!(K, V)
     {
         synchronized (m_mutex.reader)
         {
-            auto entity = enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(
-                    key) ~ " not found");
+            auto entity = enforce!NotFoundError(key in m_entities,
+                fullyQualifiedName!V ~ " id=" ~ to!string(key) ~ " not found");
             return *entity;
         }
     }
@@ -176,8 +177,8 @@ class RepositoryBase(K, V) : IRepository!(K, V), IDataLoader!(K, V)
         DataObjectType updatedDataObject;
         synchronized (m_mutex.writer)
         {
-            enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(
-                    key) ~ " not found");
+            enforce!NotFoundError(key in m_entities,
+                fullyQualifiedName!V ~ " id=" ~ to!string(key) ~ " not found");
 
             updatedDataObject = new DataObject!(K, V)(key, value);
             m_entities[key] = updatedDataObject;
@@ -191,8 +192,8 @@ class RepositoryBase(K, V) : IRepository!(K, V), IDataLoader!(K, V)
         DataObjectType removedDataObject;
         synchronized (m_mutex.writer)
         {
-            auto entity = enforce!NotFoundError(key in m_entities, fullyQualifiedName!V ~ " id=" ~ to!string(
-                    key) ~ " not found");
+            auto entity = enforce!NotFoundError(key in m_entities,
+                fullyQualifiedName!V ~ " id=" ~ to!string(key) ~ " not found");
             m_entities.remove(key);
             removedDataObject = *entity;
         }
@@ -215,7 +216,7 @@ class RepositoryBase(K, V) : IRepository!(K, V), IDataLoader!(K, V)
             return m_entities.values.count!(v => pred(v))();
         }
     }
-    
+
     @safe override void load(in DataObjectType[] data)
     {
         synchronized (m_mutex.writer)
@@ -294,6 +295,10 @@ unittest
     class StubListener : IListener!(UnitTest)
     {
         @safe void onChange(in ListenerEvent e, in UnitTest object)
+        {
+        }
+
+        @safe void onChangeBatch(in ListenerEvent e, in const(UnitTest)[] objects)
         {
         }
     }
