@@ -1,8 +1,13 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
+const apiUrl = import.meta.env.API_URL;
 
 function getBaseURL(): string {
-  return 'http://127.0.0.1:8080/api';
+  if (apiUrl.length != 0) {
+    return apiUrl;
+  }
+
+  return document.location.origin + '/api';
 }
 
 // initialize an empty api service that we'll inject endpoints into later as needed
