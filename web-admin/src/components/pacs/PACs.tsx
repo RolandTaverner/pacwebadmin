@@ -45,10 +45,10 @@ class RowData {
   servePath: string;
   saveToFS: boolean;
   saveToFSPath: string;
-  fallBackProxy?: Proxy;
-  fallBackProxyId?: number;
-  fallBackProxyType?: string;
-  fallBackProxyAddress?: string;
+  fallbackProxy?: Proxy;
+  fallbackProxyId?: number;
+  fallbackProxyType?: string;
+  fallbackProxyAddress?: string;
   proxyRuleIdsWithPriority?: ProxyRuleIdWithPriority[];
 
   constructor(
@@ -59,7 +59,7 @@ class RowData {
     servePath: string,
     saveToFS: boolean,
     saveToFSPath: string,
-    fallBackProxy?: Proxy,
+    fallbackProxy?: Proxy,
     proxyRuleIdsWithPriority?: ProxyRuleIdWithPriority[]
   ) {
     this.id = id;
@@ -69,10 +69,10 @@ class RowData {
     this.servePath = servePath;
     this.saveToFS = saveToFS;
     this.saveToFSPath = saveToFSPath;
-    this.fallBackProxy = fallBackProxy;
-    this.fallBackProxyId = fallBackProxy?.id;
-    this.fallBackProxyType = fallBackProxy?.type;
-    this.fallBackProxyAddress = fallBackProxy?.address;
+    this.fallbackProxy = fallbackProxy;
+    this.fallbackProxyId = fallbackProxy?.id;
+    this.fallbackProxyType = fallbackProxy?.type;
+    this.fallbackProxyAddress = fallbackProxy?.address;
     this.proxyRuleIdsWithPriority = proxyRuleIdsWithPriority;
   }
 }
@@ -213,10 +213,10 @@ function PACs() {
         },
       },
       {
-        accessorKey: 'fallBackProxyId',
+        accessorKey: 'fallbackProxyId',
         Cell: ({ row }) => (
           <div>
-            {row.original.fallBackProxyType + ' ' + row.original.fallBackProxyAddress}
+            {row.original.fallbackProxyType + ' ' + row.original.fallbackProxyAddress}
           </div>
         ),
         header: 'Fallback proxy',
@@ -246,14 +246,16 @@ function PACs() {
 
     const createRequest: PACCreateRequest = {
       name: values.name,
-      description: values.description,
+      description: values.description ? values.description : '',
       serve: values.serve === 'true',
       servePath: values.servePath,
       saveToFS: values.saveToFS === 'true',
       saveToFSPath: values.saveToFSPath,
       fallbackProxyId: values.fallbackProxyId,
-      proxyRules: []
+      proxyRules: values.proxyRuleIdsWithPriority,
     };
+
+    console.log("handleCreatePAC: createRequest", createRequest);
 
     await createPAC(createRequest).unwrap()
       .then((value: PAC) => {
@@ -289,7 +291,7 @@ function PACs() {
       saveToFS: values.saveToFS === 'true',
       saveToFSPath: values.saveToFSPath,
       fallbackProxyId: values.fallbackProxyId,
-      proxyRules: []
+      proxyRules: values.proxyRuleIdsWithPriority,
     };
     const updateRequest = { id: values.id, body: updateRequestBody }
 
