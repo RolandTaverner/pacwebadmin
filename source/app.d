@@ -1,10 +1,11 @@
-import std.stdio;
-import std.path;
-import std.file;
+import std.stdio : File, writeln;
+import std.path : buildPath;
+import std.file : exists, readText, remove, rename;
 import std.json : parseJSON, JSONValue;
 
 import vibe.core.args : finalizeCommandLineOptions, printCommandLineHelp, readOption;
 import vibe.vibe;
+import vibe.http.fileserver : serveStaticFiles, HTTPFileServerSettings ;
 import vibe.http.server;
 
 import datalayer.storage;
@@ -50,7 +51,9 @@ int main(string[] args)
 
 	auto restSettings = new RestInterfaceSettings;
 	restSettings.baseURL = URL(options.baseURL);
-	restSettings.allowedOrigins = ["*", "localhost:5173", "127.0.0.1:5173", "http://localhost:5173"];
+	restSettings.allowedOrigins = [
+		"*", "localhost:5173", "127.0.0.1:5173", "http://localhost:5173"
+	];
 
 	auto router = new URLRouter;
 	registerRestInterface(router, restService, restSettings);
@@ -61,24 +64,24 @@ int main(string[] args)
 		pacHandler.handlePACRequest(req, res);
 	});
 
+	if (!options.wwwDir.empty)
+	{
+		auto fsSettings = new HTTPFileServerSettings();
+		fsSettings.serverPathPrefix = "/assets/";
+
+		router.get("/index.html", serveStaticFiles(options.wwwDir));
+		router.get("/vite.svg", serveStaticFiles(options.wwwDir));
+		router.get("/assets/*", serveStaticFiles(buildPath(options.wwwDir, "assets"), fsSettings));
+	}
+
 	auto settings = new HTTPServerSettings;
 	settings.bindAddresses = ["::1", "127.0.0.1"];
 	settings.port = 8080;
 	settings.accessLogToConsole = true;
 
-	// if (options.logDir.length != 0) {
-	// 	settings.accessLogFile = buildPath(options.logDir, "access.log");
-	// }
-
-	// settings.sessionStore = new MemorySessionStore;
-	// settings.errorHandler = (HTTPServerRequest req, HTTPServerResponse res, RestErrorInformation error) @safe {
-	// 		res.writeJsonBody([
-	// 			"error": serializeToJson([
-	// 				"status": Json(cast(int)error.statusCode),
-	// 				"message": Json(error.exception.msg),
-	// 			])
-	// 		]);
-	// 	};
+	if (options.logDir.length != 0) {
+		settings.accessLogFile = buildPath(options.logDir, "access.log");
+	}
 
 	auto listener = listenHTTP(settings, router);
 	scope (exit)
