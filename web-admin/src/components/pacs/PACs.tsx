@@ -22,7 +22,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import {
   MRT_EditActionButtons,
   MaterialReactTable,
-  // createRow,
   type MRT_ColumnDef,
   type MRT_Row,
   type MRT_TableOptions,
@@ -32,7 +31,7 @@ import {
 
 import { useAllPACsQuery, useCreatePACMutation, useUpdatePACMutation, useDeletePACMutation } from '../../services/pac';
 import { useAllProxiesQuery } from '../../services/proxy';
-import type { PAC, PACCreateRequest, PACUpdateRequest, ProxyRuleWithPriority, ProxyRuleIdWithPriority, ProxyRule, Proxy } from "../../services/types";
+import type { PAC, PACCreateRequest, PACUpdateRequest, ProxyRuleIdWithPriority, Proxy } from "../../services/types";
 import { MutationError, getErrorMessage } from '../errors/errors';
 import ProxyRuleSelector from './ProxyRuleSelector';
 
@@ -140,7 +139,7 @@ function PACs() {
         accessorKey: 'serve',
         header: 'Serve',
         Cell: ({ cell }) => (
-          <Checkbox checked={cell.row.original.serve} disabled />
+          <Checkbox checked={cell.row.original.serve} disabled name="serve" />
         ),
         maxSize: 80,
         editVariant: 'select',
@@ -178,7 +177,7 @@ function PACs() {
         accessorKey: 'saveToFS',
         header: 'Save',
         Cell: ({ cell }) => (
-          <Checkbox checked={cell.row.original.saveToFS} disabled />
+          <Checkbox checked={cell.row.original.saveToFS} disabled name="saveToFS" />
         ),
         maxSize: 80,
         editVariant: 'select',
@@ -405,13 +404,7 @@ function PACs() {
       <Button
         variant="contained"
         onClick={() => {
-          table.setCreatingRow(true); // simplest way to open the create row modal with no default values
-          // or you can pass in a row object to set default values with the `createRow` helper function
-          // table.setCreatingRow(
-          //   createRow(table, {
-          //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
-          //   }),
-          // );
+          table.setCreatingRow(true);
         }}
       >
         Create new PAC

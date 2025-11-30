@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import './App.css'
 
+import { Typography } from '@mui/material';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+
 import Categories from '../categories/Categories';
 import Proxies from '../proxies/Proxies';
 import Conditions from '../conditions/Conditions';
 import ProxyRules from '../proxyrules/ProxyRules';
 import PACs from '../pacs/PACs';
 
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -55,8 +57,10 @@ function App() {
 
   return (
     <>
-      <Container sx={{ bgcolor: 'primary.light', display: 'flex', height: 30, width: 1000 }} >
-        Header
+      <Container sx={{ position: "relative", bgcolor: 'primary.light', display: 'flex', height: 40, width: 1500 }} maxWidth={false} >
+        <Typography color="#FFFFFF" variant="h5" sx={{ alignContent: "center" }}>
+          PAC web admin
+        </Typography>
       </Container>
       <Box sx={{ display: 'grid', gridTemplateColumns: '150px auto' }}>
 

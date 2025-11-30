@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   Button,
@@ -58,7 +58,7 @@ const ProxyRuleSelectorDialog: React.FC<{
     {
       accessorKey: 'id',
       header: 'ID',
-      mmaxSize: 50,
+      maxSize: 60,
     },
     {
       accessorKey: 'name',

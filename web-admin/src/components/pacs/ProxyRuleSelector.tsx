@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   Button,
@@ -65,7 +65,7 @@ const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
         columns={columns}
         data={rows}
         enableRowActions
-        positionActionsColumn="last"
+        positionActionsColumn="first"
         renderRowActions={({ row }) => (
           <Tooltip title="Remove proxy rule">
             <IconButton
