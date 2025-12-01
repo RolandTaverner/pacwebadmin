@@ -22,7 +22,7 @@ export function getErrorMessage(error: FetchBaseQueryError | SerializedError | u
 
   if ('data' in error && 'status' in error) {
     const { status, data } = error;
-    if (data != null && 'statusMessage' in data) {
+    if (data != null && typeof data === 'object' && 'statusMessage' in data) {
       const er = data as ErrorResponse;
       return er.statusMessage;
     }
