@@ -5,7 +5,7 @@ import std.json : parseJSON, JSONValue;
 
 import vibe.core.args : finalizeCommandLineOptions, printCommandLineHelp, readOption;
 import vibe.vibe;
-import vibe.http.fileserver : serveStaticFiles, HTTPFileServerSettings ;
+import vibe.http.fileserver : serveStaticFiles, HTTPFileServerSettings;
 import vibe.http.server;
 
 import datalayer.storage;
@@ -70,6 +70,7 @@ int main(string[] args)
 		router.get("/index.html", serveStaticFiles(opts.wwwDir));
 		router.get("/vite.svg", serveStaticFiles(opts.wwwDir));
 		router.get("/assets/*", serveStaticFiles(buildPath(opts.wwwDir, "assets"), fsSettings));
+		router.get("/", &rootHandler);
 	}
 
 	auto settings = new HTTPServerSettings;
@@ -78,7 +79,8 @@ int main(string[] args)
 	settings.useCompressionIfPossible = true;
 	settings.accessLogToConsole = opts.accessLogToConsole;
 
-	if (opts.logDir.length != 0) {
+	if (opts.logDir.length != 0)
+	{
 		settings.accessLogFile = buildPath(opts.logDir, "access.log");
 	}
 
@@ -92,6 +94,11 @@ int main(string[] args)
 	runApplication(&args);
 
 	return 0;
+}
+
+void rootHandler(HTTPServerRequest req, HTTPServerResponse res)
+{
+	res.redirect("/index.html");
 }
 
 class SimpleSaver : IStorageSaver
