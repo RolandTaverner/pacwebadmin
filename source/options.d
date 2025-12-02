@@ -4,6 +4,8 @@ import args : Arg, Optional, parseArgsConfigFile, parseConfigFile;
 
 static struct Options
 {
+	@Arg("The interfaces on which the HTTP server is listening", Optional.yes) string[] bindAddresses;
+	@Arg("The port on which the HTTP server is listening", Optional.yes) ushort port;
 	@Arg("Path to data dir", Optional.no) string dataDir;
 	@Arg("Path to directory where *.pac will be saved", Optional.yes) string saveDir;
 	@Arg("Path where *.pac will be served", Optional.yes) string servePath;

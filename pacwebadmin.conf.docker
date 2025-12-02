@@ -1,6 +1,7 @@
+bindAddresses = ::,0.0.0.0
+port = 80
 dataDir = "/app/data"
 saveDir = "/app/save"
 servePath = "/pac/"
-baseURL = "http://127.0.0.1:80/"
 logDir = "/app/log"
 wwwDir = "/app/dist"

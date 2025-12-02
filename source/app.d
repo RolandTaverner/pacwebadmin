@@ -22,11 +22,11 @@ int main(string[] args)
 	string configPath = "pacwebadmin.conf";
 	readOption("config", &configPath, "Path to the configuration file.");
 
-	Options options;
+	Options opts;
 	try
 	{
-		options = getOptions(configPath);
-		validateOptions(options);
+		opts = getOptions(configPath);
+		validateOptions(opts);
 	}
 	catch (Exception e)
 	{
@@ -36,51 +36,49 @@ int main(string[] args)
 	}
 	finalizeCommandLineOptions();
 
-	auto dataFilePath = buildPath(options.dataDir, "data.json");
+	auto dataFilePath = buildPath(opts.dataDir, "data.json");
 	string dataFileContent = readText(dataFilePath);
 	JSONValue jsonData = parseJSON(dataFileContent);
 
-	Storage storage = new Storage(new SimpleSaver(options.dataDir));
+	Storage storage = new Storage(new SimpleSaver(opts.dataDir));
 	storage.load(jsonData);
 
 	Model model = new Model(storage);
-	PACManager pacManager = new PACManager(model, options.dataDir);
+	PACManager pacManager = new PACManager(model, opts.dataDir);
 
 	Service restService = new Service(model);
-	PACHandler pacHandler = new PACHandler(pacManager, options.servePath);
+	PACHandler pacHandler = new PACHandler(pacManager, opts.servePath);
 
 	auto restSettings = new RestInterfaceSettings;
-	restSettings.baseURL = URL(options.baseURL);
-	restSettings.allowedOrigins = [
-		"*", "localhost:5173", "127.0.0.1:5173", "http://localhost:5173"
-	];
+	restSettings.baseURL = URL(opts.baseURL);
+	//restSettings.allowedOrigins = [];
 
 	auto router = new URLRouter;
 	registerRestInterface(router, restService, restSettings);
 	router.get("/myapi.js", serveRestJSClient!APIRoot(restSettings));
 
-	router.match(HTTPMethod.GET, options.servePath ~ "*",
+	router.match(HTTPMethod.GET, opts.servePath ~ "*",
 		(HTTPServerRequest req, HTTPServerResponse res) @safe {
 		pacHandler.handlePACRequest(req, res);
 	});
 
-	if (!options.wwwDir.empty)
+	if (!opts.wwwDir.empty)
 	{
 		auto fsSettings = new HTTPFileServerSettings();
 		fsSettings.serverPathPrefix = "/assets/";
 
-		router.get("/index.html", serveStaticFiles(options.wwwDir));
-		router.get("/vite.svg", serveStaticFiles(options.wwwDir));
-		router.get("/assets/*", serveStaticFiles(buildPath(options.wwwDir, "assets"), fsSettings));
+		router.get("/index.html", serveStaticFiles(opts.wwwDir));
+		router.get("/vite.svg", serveStaticFiles(opts.wwwDir));
+		router.get("/assets/*", serveStaticFiles(buildPath(opts.wwwDir, "assets"), fsSettings));
 	}
 
 	auto settings = new HTTPServerSettings;
-	settings.bindAddresses = ["::1", "127.0.0.1"];
-	settings.port = 8080;
+	settings.bindAddresses = opts.bindAddresses;
+	settings.port = opts.port != 0 ? opts.port : 8080;
 	settings.accessLogToConsole = true;
 
-	if (options.logDir.length != 0) {
-		settings.accessLogFile = buildPath(options.logDir, "access.log");
+	if (opts.logDir.length != 0) {
+		settings.accessLogFile = buildPath(opts.logDir, "access.log");
 	}
 
 	auto listener = listenHTTP(settings, router);
@@ -106,12 +104,12 @@ class SimpleSaver : IStorageSaver
 	{
 		synchronized (this)
 		{
-			auto backupFilePath = buildPath(m_dataDir, "data.local.bak");
+			auto backupFilePath = buildPath(m_dataDir, "data.json.bak");
 			if (exists(backupFilePath))
 			{
 				remove(backupFilePath);
 			}
-			auto dataFilePath = buildPath(m_dataDir, "data.local");
+			auto dataFilePath = buildPath(m_dataDir, "data.json");
 
 			if (exists(dataFilePath))
 			{

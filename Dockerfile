@@ -91,4 +91,6 @@ USER pacwebadmin
 RUN mkdir /app/data && mkdir /app/log && mkdir /app/save
 COPY --chown=pacwebadmin:pacwebadmin --chmod=644 ./data.json.docker ./data/data.json
 
+EXPOSE 80
+
 CMD ["/app/pacwebadmin --config /app/pacwebadmin.conf.docker"]
