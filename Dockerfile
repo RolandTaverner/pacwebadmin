@@ -85,11 +85,11 @@ COPY --from=dlang_builder --chown=pacwebadmin:pacwebadmin --chmod=755 /src/relea
 COPY --from=ts_builder --chown=pacwebadmin:pacwebadmin --chmod=644 /src/dist ./dist
 RUN find ./dist -type d -exec chmod 755 {} \;
 
-COPY --chown=pacwebadmin:pacwebadmin --chmod=644 ./pacwebadmin.conf.docker .
+COPY --chown=pacwebadmin:pacwebadmin --chmod=644 ./docker_assets/pacwebadmin.conf.docker .
 
 USER pacwebadmin
-RUN mkdir /app/data && mkdir /app/log && mkdir /app/save
-COPY --chown=pacwebadmin:pacwebadmin --chmod=644 ./data.json.docker ./data/data.json
+RUN mkdir /app/data && mkdir /app/log && mkdir /app/save && mkdir /app/servecache
+COPY --chown=pacwebadmin:pacwebadmin --chmod=644 ./docker_assets/data.json.docker ./data/data.json
 
 EXPOSE 80
 

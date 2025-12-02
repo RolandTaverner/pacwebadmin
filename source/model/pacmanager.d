@@ -47,7 +47,7 @@ class PACManager
 
             string pacContent = m_pacBuilder.build(pac.id());
 
-            NativePath filePath = m_dataDir ~ NativePath("servecache/" ~ makeFileName(pac));
+            NativePath filePath = m_dataDir ~ NativePath(makeFileName(pac));
 			File file = File(filePath.toString(), "w");
 			file.write(pacContent);
 			file.close();

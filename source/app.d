@@ -44,7 +44,7 @@ int main(string[] args)
 	storage.load(jsonData);
 
 	Model model = new Model(storage);
-	PACManager pacManager = new PACManager(model, opts.dataDir);
+	PACManager pacManager = new PACManager(model, opts.serveCacheDir);
 
 	Service restService = new Service(model);
 	PACHandler pacHandler = new PACHandler(pacManager, opts.servePath);
@@ -75,7 +75,8 @@ int main(string[] args)
 	auto settings = new HTTPServerSettings;
 	settings.bindAddresses = opts.bindAddresses;
 	settings.port = opts.port != 0 ? opts.port : 8080;
-	settings.accessLogToConsole = true;
+	settings.useCompressionIfPossible = true;
+	settings.accessLogToConsole = opts.accessLogToConsole;
 
 	if (opts.logDir.length != 0) {
 		settings.accessLogFile = buildPath(opts.logDir, "access.log");
