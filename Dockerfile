@@ -93,4 +93,4 @@ COPY --chown=pacwebadmin:pacwebadmin --chmod=644 ./data.json.docker ./data/data.
 
 EXPOSE 80
 
-CMD ["/app/pacwebadmin --config /app/pacwebadmin.conf.docker"]
+CMD ["/app/pacwebadmin", "--config", "/app/pacwebadmin.conf.docker"]
