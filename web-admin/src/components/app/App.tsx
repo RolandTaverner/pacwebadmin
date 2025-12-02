@@ -75,36 +75,32 @@ function App() {
             aria-label="Vertical tabs"
             sx={{ borderRight: 1, borderColor: 'divider' }}
           >
-            <Tab label="Dashboard" {...a11yProps(0)} />
-            <Tab label="PAC" {...a11yProps(1)} />
-            <Tab label="Proxy rules" {...a11yProps(2)} />
-            <Tab label="Conditions" {...a11yProps(3)} />
-            <Tab label="Proxies" {...a11yProps(4)} />
-            <Tab label="Categories" {...a11yProps(5)} />
-            <Tab label="About" {...a11yProps(6)} />
+            <Tab label="PAC" {...a11yProps(0)} />
+            <Tab label="Proxy rules" {...a11yProps(1)} />
+            <Tab label="Conditions" {...a11yProps(2)} />
+            <Tab label="Proxies" {...a11yProps(3)} />
+            <Tab label="Categories" {...a11yProps(4)} />
+            <Tab label="About" {...a11yProps(5)} />
           </Tabs>
         </Box>
 
         <Box sx={{ bgcolor: 'background.paper' }}>
           <TabPanel value={value} index={0}>
-            Item One
-          </TabPanel>
-          <TabPanel value={value} index={1}>
             <PACs />
           </TabPanel>
-          <TabPanel value={value} index={2}>
+          <TabPanel value={value} index={1}>
             <ProxyRules />
           </TabPanel>
-          <TabPanel value={value} index={3}>
+          <TabPanel value={value} index={2}>
             <Conditions />
           </TabPanel>
-          <TabPanel value={value} index={4}>
+          <TabPanel value={value} index={3}>
             <Proxies />
           </TabPanel>
-          <TabPanel value={value} index={5}>
+          <TabPanel value={value} index={4}>
             <Categories />
           </TabPanel>
-          <TabPanel value={value} index={6}>
+          <TabPanel value={value} index={5}>
             TODO
           </TabPanel>
         </Box>
