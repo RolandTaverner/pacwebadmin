@@ -36,7 +36,7 @@ int main(string[] args)
 	}
 	finalizeCommandLineOptions();
 
-	auto dataFilePath = buildPath(options.dataDir, "data.local");
+	auto dataFilePath = buildPath(options.dataDir, "data.json");
 	string dataFileContent = readText(dataFilePath);
 	JSONValue jsonData = parseJSON(dataFileContent);
 

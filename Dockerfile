@@ -60,11 +60,35 @@ RUN find . -type d -exec chmod 755 {} \;
 
 RUN dub build --parallel --build=release
 
-######### Node & npm
-FROM node:24 AS web_builder
+################# Node, npm, TS
+FROM node:24 AS ts
 RUN npm install -g typescript
+
+################# Web app builder
+FROM ts AS ts_builder
 WORKDIR /src
 COPY ./web-admin .
 RUN npm install
 RUN npm run build
 
+################# Runner image
+FROM ubuntu:24.04
+
+# Ubuntu 24.04 has user ubuntu with uid=1000
+RUN touch /var/mail/ubuntu && chown ubuntu /var/mail/ubuntu && userdel -r ubuntu
+RUN groupadd --gid 1000 pacwebadmin \
+  && useradd --uid 1000 --gid pacwebadmin --shell /bin/bash --create-home pacwebadmin
+
+WORKDIR /app
+RUN chown pacwebadmin:pacwebadmin /app
+COPY --from=dlang_builder --chown=pacwebadmin:pacwebadmin --chmod=755 /src/release/pacwebadmin .
+COPY --from=ts_builder --chown=pacwebadmin:pacwebadmin --chmod=644 /src/dist ./dist
+RUN find ./dist -type d -exec chmod 755 {} \;
+
+COPY --chown=pacwebadmin:pacwebadmin --chmod=644 ./pacwebadmin.conf.docker .
+
+USER pacwebadmin
+RUN mkdir /app/data && mkdir /app/log && mkdir /app/save
+COPY --chown=pacwebadmin:pacwebadmin --chmod=644 ./data.json.docker ./data/data.json
+
+CMD ["/app/pacwebadmin --config /app/pacwebadmin.conf.docker"]

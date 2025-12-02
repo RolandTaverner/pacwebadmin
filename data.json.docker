@@ -1,0 +1,20 @@
+{
+    "category": [
+    ],
+    "condition": [
+    ],
+    "pac": [
+    ],
+    "proxy": [
+        {
+            "id": 1,
+            "value": {
+                "address": "",
+                "description": "connect to the destination server without using a proxy",
+                "type": "DIRECT"
+            }
+        }
+    ],
+    "proxyRule": [
+    ]
+}
