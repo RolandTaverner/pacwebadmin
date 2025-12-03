@@ -48,7 +48,7 @@ chown pacwebadmin:pacwebadmin -R "${baseDataDir}/"
 echo "Created initial data file at ${baseDataDir}/data/data.json"
 
 # Create log dir
-logDir="/var/lib/pacwebadmin"
+logDir="/var/log/pacwebadmin"
 mkdir -p "${logDir}"
 chown pacwebadmin:pacwebadmin "${logDir}"
 echo "Created log dir at ${logDir}"

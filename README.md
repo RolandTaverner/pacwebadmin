@@ -1,5 +1,5 @@
 # PAC web admin (work in progress)
-Web admin to manage proxy autoconfiguration (PAC) file
+Web admin to manage proxy auto-configuration (PAC) file(s).
 
 # How to build
 
@@ -14,6 +14,13 @@ docker run -p 5000:80 pacwebadmin
 ```
 
 Open http://127.0.0.1:5000 in browser.
+
+Also you can extract files from docker image using commands:
+```bash
+docker build -t pacwebadmin .
+docker create --name pacwebadmin-ubuntu24 pacwebadmin
+docker cp pacwebadmin-ubuntu24:/app /path/to/save/build/files
+```
 
 ## Docker (AArch64)
 
@@ -39,6 +46,44 @@ Output:
 ## macOS local build
 
 TODO
+
+# How to install
+
+# Ubuntu/systemd
+
+Build (locally or in docker and extract files).
+Copy files to target machine to some directory (for example, `install`) so directory structure will look like
+```
+./install/
+├── dist                         // web stuff here
+│   ├── assets
+│   │   ├── index-D4geO1r3.css
+│   │   └── index-DAonwM5C.js
+│   ├── index.html
+│   └── vite.svg
+├── install.sh                   // install script here
+└── pacwebadmin                  // executable here
+```
+Then execute commands
+```bash
+cd ./install
+sudo ./install.sh
+```
+
+`install.sh` will do the following things:
+- create user pacwebadmin (with group)
+- copy pacwebadmin executable to /usr/bin/
+- create directory structure at /var/lib/pacwebadmin
+- create initial data file at /var/lib/pacwebadmin/data/data.json
+- create log dir at /var/log/pacwebadmin
+- create dir for www stuff at /var/www/pacwebadmin
+- copy ./dist/* to /var/www/pacwebadmin
+- create config file at /etc/pacwebadmin.conf
+- create systemd unit at /etc/systemd/system/pacwebadmin.service
+- exec systemctl daemon-reload && systemctl enable pacwebadmin && systemctl start pacwebadmin
+
+Everything except for executable and systemd unit will be chown'ed to `pacwebadmin:pacwebadmin`.
+By default service will listen on port 5000. You can change port at `/etc/pacwebadmin.conf`.
 
 # Dev notes
 
