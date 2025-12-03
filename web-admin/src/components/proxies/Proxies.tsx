@@ -29,6 +29,7 @@ import {
 import { useAllProxiesQuery, useCreateProxyMutation, useUpdateProxyMutation, useDeleteProxyMutation } from '../../services/proxy';
 import type { Proxy, ProxyCreateRequest, ProxyUpdateRequest } from "../../services/types";
 import { MutationError, getErrorMessage } from '../errors/errors';
+import EllipsisTextWithHint from '../common/EllipsisTextWithHint';
 
 class RowData {
   id: number;
@@ -121,7 +122,7 @@ function Proxies() {
       {
         accessorKey: 'description',
         header: 'Description',
-        size: 300,
+        size: 400,
         muiTableBodyCellProps: {
           sx: {
             overflow: 'hidden',
@@ -133,6 +134,9 @@ function Proxies() {
         muiEditTextFieldProps: {
           required: false,
         },
+        Cell: ({ cell }) => (
+          <EllipsisTextWithHint longText={cell.row.original.description} maxWidth={400} />
+        ),
       },
     ],
     [validationErrors],

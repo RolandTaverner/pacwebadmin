@@ -29,6 +29,7 @@ import {
 import { useAllCategoriesQuery, useCreateCategoryMutation, useUpdateCategoryMutation, useDeleteCategoryMutation } from '../../services/category';
 import type { Category, CategoryCreateRequest, CategoryUpdateRequest } from "../../services/types";
 import { MutationError, getErrorMessage } from '../errors/errors';
+import EllipsisTextWithHint from '../common/EllipsisTextWithHint';
 
 function Categories() {
   console.debug("=================== Categories");
@@ -68,6 +69,9 @@ function Categories() {
             }),
           //optionally add validation checking for onBlur or onChange
         },
+        Cell: ({ cell }) => (
+          <EllipsisTextWithHint longText={cell.row.original.name} maxWidth={300} />
+        ),
       },
     ],
     [validationErrors],

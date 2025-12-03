@@ -60,7 +60,15 @@ const conditionTypes = [
   'host_subdomain_only',
   'url_shexp_match',
   'url_regexp_match'
-]
+];
+
+const conditionTypeSelectData: DropdownOption[] = [
+  { label: 'Domain', value: 'host_domain_only' },
+  { label: 'Domain or subdomain', value: 'host_domain_subdomain' },
+  { label: 'Subdomain only', value: 'host_subdomain_only' },
+  { label: 'URL shell expression', value: 'url_shexp_match' },
+  { label: 'URL regular expression', value: 'url_regexp_match' },
+];
 
 function Conditions() {
   console.debug("=================== Conditions");
@@ -93,7 +101,7 @@ function Conditions() {
         accessorKey: 'type',
         header: 'Type',
         editVariant: 'select',
-        editSelectOptions: conditionTypes,
+        editSelectOptions: conditionTypeSelectData,
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.type,
