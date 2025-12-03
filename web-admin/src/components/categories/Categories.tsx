@@ -56,7 +56,7 @@ function Categories() {
       {
         accessorKey: 'name',
         header: 'Name',
-        size: 300,
+        size: 500,
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.name,
@@ -70,7 +70,7 @@ function Categories() {
           //optionally add validation checking for onBlur or onChange
         },
         Cell: ({ cell }) => (
-          <EllipsisTextWithHint longText={cell.row.original.name} maxWidth={300} />
+          <EllipsisTextWithHint longText={cell.row.original.name} maxWidth={500} />
         ),
       },
     ],
