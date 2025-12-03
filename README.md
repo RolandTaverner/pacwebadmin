@@ -1,8 +1,48 @@
 # PAC web admin (work in progress)
 Web admin to manage proxy autoconfiguration (PAC) file
 
+# How to build
+
+## Docker (x86-64)
+Docker image based on Ubuntu 24.04 and [DMD](https://dlang.org/dmd-linux.html) compiler.
+
+```bash
+git clone https://github.com/RolandTaverner/pacwebadmin.git
+cd pacwebadmin
+docker build -t pacwebadmin .
+docker run -p 5000:80 pacwebadmin
+```
+
+Open http://127.0.0.1:5000 in browser.
+
+## Docker (AArch64)
+
+Not supported yet. Need to create docker image with ldc or gdc compiler.
+
+## Windows, Linux local build
+
+Assuming dmd, dub, node and npm are installed and available in PATH.
+
+```bash
+git clone https://github.com/RolandTaverner/pacwebadmin.git
+cd pacwebadmin
+dub build --build=release
+cd web-admin
+npm install
+npm run build
+```
+
+Output:
+- `pacwebadmin/release/pacwebadmin[.exe]` - executable
+- `pacwebadmin/web-admin/dist` - web stuff (index.html etc.)
+
+## macOS local build
+
+TODO
+
 # Dev notes
 
+Run locally
 ```bash
 dub run -- --config "pacwebadmin.conf.local"
 ```
