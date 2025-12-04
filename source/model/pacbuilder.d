@@ -30,8 +30,7 @@ class PACBuilder
         app.put("function FindProxyForURL(url, host) {\n");
         app.put("    var host_lc = host.toLowerCase();\n\n");
 
-
-        foreach(ref const ProxyRulePriority prp; pacModel.proxyRules())
+        foreach (ref const ProxyRulePriority prp; pacModel.proxyRules())
         {
             auto pr = prp.proxyRule();
             if (!pr.enabled())
@@ -63,7 +62,7 @@ protected:
         auto fallbackProxy = pacModel.fallbackProxy();
 
         bool[long] proxyIDs;
-        foreach(ref const ProxyRulePriority pr; pacModel.proxyRules())
+        foreach (ref const ProxyRulePriority pr; pacModel.proxyRules())
         {
             auto proxy = pr.proxyRule().proxy();
             if (proxy.id() in proxyIDs)
@@ -95,7 +94,7 @@ protected:
         {
             app.put("var " ~ proxyVarName(p) ~ " = \"" ~ p.type() ~ " " ~ p.address() ~ "\";\n");
         }
-        else 
+        else
         {
             app.put("var " ~ proxyVarName(p) ~ " = \"" ~ p.type() ~ "\";\n");
         }
@@ -111,9 +110,9 @@ protected:
         app.put("    " ~ commentText(pr.name()));
 
         app.put("    if (");
-        
+
         bool isFirst = true;
-        foreach(c; pr.conditions())
+        foreach (c; pr.conditions())
         {
             if (!isFirst)
             {
@@ -132,19 +131,25 @@ protected:
 
         switch (c.type())
         {
-            case ConditionType.hostDomainOnly:
-                app.put("(host_lc == \"" ~ expressionLC ~ "\")");
-                break;
-            case ConditionType.hostDomainSubdomain:
-                app.put("/^(?:.*\\.)?" ~ expressionLC.replace(".", "\\.") ~ "$/.test(host_lc)");
-                break;
-            case ConditionType.hostSubdomainOnly:
-                app.put("/^.*\\." ~ expressionLC.replace(".", "\\.") ~ "$/.test(host_lc)");
-                break;
-            default:
-                app.put("false /* ERROR: unknown condition type " ~ c.type() ~ " */");
+        case ConditionType.hostDomainOnly:
+            app.put("(host_lc == \"" ~ expressionLC ~ "\")");
+            break;
+        case ConditionType.hostDomainSubdomain:
+            app.put("/^(?:.*\\.)?" ~ expressionLC.replace(".", "\\.") ~ "$/.test(host_lc)");
+            break;
+        case ConditionType.hostSubdomainOnly:
+            app.put("/^.*\\." ~ expressionLC.replace(".", "\\.") ~ "$/.test(host_lc)");
+            break;
+        case ConditionType.urlShexpMatch:
+            app.put("shExpMatch(url, \"" ~ c.expression() ~ "\")");
+            break;
+        case ConditionType.urlRegexpMatch:
+            app.put("/" ~ c.expression() ~ "/.test(url)");
+            break;
+        default:
+            app.put("false /* ERROR: unknown condition type " ~ c.type()
+                    ~ ", condition id=" ~ to!(string)(c.id()) ~ " */");
         }
-
     }
 
 private:

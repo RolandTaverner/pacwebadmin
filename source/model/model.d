@@ -347,8 +347,8 @@ class Model
             validateProxyRuleModify(-1, i, false);
 
             const auto created = proxyRules.create(
-                new dlproxyrule.ProxyRuleValue(i.proxyId.get,
-                    i.enabled.get,
+                new dlproxyrule.ProxyRuleValue(i.proxyId.get(),
+                    i.enabled.get(),
                     i.name.strip,
                     i.conditionIds));
             return makeProxyRule(created);
@@ -364,8 +364,8 @@ class Model
             try
             {
                 auto old = proxyRules.getByKey(id).value();
-                auto newProxyId = i.proxyId ? i.proxyId.get : old.proxyId();
-                auto newEnabled = i.enabled ? i.enabled.get : old.enabled();
+                auto newProxyId = i.proxyId ? i.proxyId.get() : old.proxyId();
+                auto newEnabled = i.enabled ? i.enabled.get() : old.enabled();
                 auto newName = valueOrDefault(i.name, old.name());
                 auto newConditionIds = i.conditionIds.length != 0 ? i.conditionIds
                     : old.conditionIds();
@@ -517,7 +517,7 @@ class Model
             const auto created = pacs.create(
                 new dlpac.PACValue(i.name.get().strip(),
                     i.description.get().strip(),
-                    i.proxyRules.byKeyValue.map!(e => dlpac.ProxyRulePriority(e.key, e.value)).array,
+                    i.proxyRules ? i.proxyRules.get().byKeyValue.map!(e => dlpac.ProxyRulePriority(e.key, e.value)).array : [],
                     i.serve.get(),
                     i.servePath.get().strip(),
                     i.saveToFS.get(),
@@ -541,12 +541,12 @@ class Model
 
                 auto newName = i.name ? i.name.get().strip() : old.name();
                 auto newDescription = i.description ? i.description.get().strip() : old.description();
-                auto newProxyRules = i.proxyRules.length != 0 ? i.proxyRules.byKeyValue.map!(e => dlpac.ProxyRulePriority(e.key, e.value)).array : old.proxyRules();
-                auto newServe = i.serve ? i.serve.get : old.serve();
+                auto newProxyRules = i.proxyRules ? i.proxyRules.get().byKeyValue.map!(e => dlpac.ProxyRulePriority(e.key, e.value)).array : old.proxyRules();
+                auto newServe = i.serve ? i.serve.get() : old.serve();
                 auto newServePath = i.servePath ? i.servePath.get().strip() : old.servePath();
-                auto newSaveToFS = i.saveToFS ? i.saveToFS.get : old.saveToFS();
+                auto newSaveToFS = i.saveToFS ? i.saveToFS.get() : old.saveToFS();
                 auto newSaveToFSPath = i.saveToFSPath ? i.saveToFSPath.get().strip() : old.saveToFSPath();
-                auto newFallbackProxyId = i.fallbackProxyId ? i.fallbackProxyId.get : old.fallbackProxyId();
+                auto newFallbackProxyId = i.fallbackProxyId ? i.fallbackProxyId.get() : old.fallbackProxyId();
 
                 const auto updated = pacs.update(id,
                     new dlpac.PACValue(newName,
@@ -914,12 +914,14 @@ protected:
                 }
             }           
         }
-        
-        foreach (prId; i.proxyRules.byKey())
-        {
-            enforce!bool(proxyRules.exists(prId), new ProxyRuleNotFound(prId));
-        }
 
+        if (i.proxyRules)
+        {
+            foreach (prId; i.proxyRules.get().byKey())
+            {
+                enforce!bool(proxyRules.exists(prId), new ProxyRuleNotFound(prId));
+            }
+        }
         enforce!bool(i.fallbackProxyId.isNull || proxies.exists(i.fallbackProxyId.get()), new ProxyNotFound(i.fallbackProxyId.get()));
     }
 

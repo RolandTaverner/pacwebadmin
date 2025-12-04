@@ -152,7 +152,7 @@ struct PACInput
 {
     Nullable!string name;
     Nullable!string description;
-    long[long] proxyRules;
+    Nullable!(long[long]) proxyRules;
     Nullable!bool serve;
     Nullable!string servePath;
     Nullable!bool saveToFS;
@@ -188,11 +188,11 @@ struct PACInput
         {
             enforce!bool(name.isNull || name.get.strip().length != 0, new ConstraintError("name can't be empty"));
             
-            if (!serve.isNull && serve.get && !servePath.isNull)
+            if (!serve.isNull && serve.get() && !servePath.isNull)
             {
                 enforce!bool(servePath.get.strip().length != 0, new ConstraintError("servePath can't be empty"));
             }
-            if (!saveToFS.isNull && saveToFS.get && !saveToFSPath.isNull)
+            if (!saveToFS.isNull && saveToFS.get() && !saveToFSPath.isNull)
             {
                 enforce!bool(saveToFSPath.get.strip().length != 0, new ConstraintError("saveToFSPath can't be empty"));
             }

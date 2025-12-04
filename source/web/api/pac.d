@@ -67,7 +67,7 @@ struct PACUpdateDTO
 {
     @optional Nullable!string name;
     @optional Nullable!string description;
-    @optional ProxyRulePriorityInput[] proxyRules;
+    @optional Nullable!(ProxyRulePriorityInput[]) proxyRules;
     @optional Nullable!bool serve;
     @optional Nullable!string servePath;
     @optional Nullable!bool saveToFS;

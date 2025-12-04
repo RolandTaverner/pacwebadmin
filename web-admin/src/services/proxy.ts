@@ -47,9 +47,15 @@ const proxyApi = api.injectEndpoints({
     updateProxy: builder.mutation<Proxy, { id: number, body: ProxyUpdateRequest }>({
       query: (updateRequest) => ({ url: `/proxy/list/${updateRequest.id}`, method: 'PUT', body: updateRequest.body }),
       transformResponse: (response: ProxyUpdateResponse): Proxy => response,
-      invalidatesTags: (result, error, updateRequest) => result ? [
-        { type: 'Proxy' as const, id: result.id }, { type: 'Proxy' as const, id: 'LIST' }]
-        : [{ type: 'Proxy' as const, id: 'LIST' }],
+      invalidatesTags: (result, error, updateRequest) => result ?
+        [
+          { type: 'Proxy' as const, id: result.id },
+          { type: 'Proxy' as const, id: 'LIST' }
+        ] : [
+          { type: 'Proxy' as const, id: 'LIST' },
+          { type: 'PAC' as const, id: 'LIST' },
+          { type: 'ProxyRule' as const, id: 'LIST' }
+        ],
     }),
     deleteProxy: builder.mutation<void, number>({
       query: (id) => ({ url: `/proxy/list/${id}`, method: 'DELETE' }),

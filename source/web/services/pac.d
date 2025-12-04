@@ -64,26 +64,28 @@ class PACService : PACAPI
     {
         return remapExceptions!(delegate() {
             long[long] proxyRules;
-            foreach (pr; p.proxyRules)
+            if (p.proxyRules)
             {
-                proxyRules[pr.proxyRuleId] = pr.priority;
+                foreach (pr; p.proxyRules.get)
+                {
+                    proxyRules[pr.proxyRuleId] = pr.priority;
+                }
             }
 
             const PACInput pi = {
                 p.name,
                 p.description,
-                proxyRules,
+                p.proxyRules ? proxyRules : null,
                 p.serve,
                 p.servePath,
                 p.saveToFS,
                 p.saveToFSPath,
-                p.fallbackProxyId
-            };
+                p.fallbackProxyId};
 
-            const PAC updated = m_model.updatePAC(id, pi);
-            return toDTO(updated);
-        }, PACDTO);
-    }
+                const PAC updated = m_model.updatePAC(id, pi);
+                return toDTO(updated);
+            }, PACDTO);
+        }
 
     @safe override PACDTO getById(in long id)
     {
