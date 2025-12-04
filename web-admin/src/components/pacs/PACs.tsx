@@ -34,6 +34,7 @@ import { useAllProxiesQuery } from '../../services/proxy';
 import type { PAC, PACCreateRequest, PACUpdateRequest, ProxyRuleIdWithPriority, Proxy } from "../../services/types";
 import { MutationError, getErrorMessage } from '../errors/errors';
 import ProxyRuleSelector from './ProxyRuleSelector';
+import CheckboxEdit from '../common/CheckboxEdit';
 
 
 class RowData {
@@ -138,23 +139,17 @@ function PACs() {
       {
         accessorKey: 'serve',
         header: 'Serve',
+        size: 80,
         Cell: ({ cell }) => (
-          <Checkbox checked={cell.row.original.serve} disabled name="serve" />
+          <Checkbox checked={cell.row.original.serve} disabled name='serve'/>
         ),
-        maxSize: 80,
-        editVariant: 'select',
-        editSelectOptions: boolValues,
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.serve,
-          helperText: validationErrors?.serve,
-          // remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              serve: undefined,
-            }),
-          // optionally add validation checking for onBlur or onChange
+        Edit: ({ cell, column, row, table }) => {
+          const onChange = (checked: boolean) => {
+            console.log('Edit.onChange()', checked);
+            row._valuesCache[column.id] = checked;
+          };
+          const checkedInitial: boolean = cell.row.original.serve ? cell.row.original.serve : false;
+          return <CheckboxEdit required={true} label='Serve' checkedInitial={checkedInitial} onChange={onChange}/>
         },
       },
       {
@@ -176,23 +171,17 @@ function PACs() {
       {
         accessorKey: 'saveToFS',
         header: 'Save',
+        size: 80,
         Cell: ({ cell }) => (
-          <Checkbox checked={cell.row.original.saveToFS} disabled name="saveToFS" />
+          <Checkbox checked={cell.row.original.saveToFS} disabled name='saveToFS' />
         ),
-        maxSize: 80,
-        editVariant: 'select',
-        editSelectOptions: boolValues,
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.saveToFS,
-          helperText: validationErrors?.saveToFS,
-          // remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              saveToFS: undefined,
-            }),
-          // optionally add validation checking for onBlur or onChange
+        Edit: ({ cell, column, row, table }) => {
+          const onChange = (checked: boolean) => {
+            console.log('Edit.onChange()', checked);
+            row._valuesCache[column.id] = checked;
+          };
+          const checkedInitial: boolean = cell.row.original.saveToFS ? cell.row.original.saveToFS : false;
+          return <CheckboxEdit required={true} label='Save' checkedInitial={checkedInitial} onChange={onChange}/>
         },
       },
       {
@@ -246,12 +235,12 @@ function PACs() {
     const createRequest: PACCreateRequest = {
       name: values.name,
       description: values.description ? values.description : '',
-      serve: values.serve === 'true',
+      serve: values.serve,
       servePath: values.servePath,
-      saveToFS: values.saveToFS === 'true',
+      saveToFS: values.saveToFS,
       saveToFSPath: values.saveToFSPath,
       fallbackProxyId: values.fallbackProxyId,
-      proxyRules: values.proxyRuleIdsWithPriority,
+      proxyRules: values.proxyRuleIdsWithPriority ? values.proxyRuleIdsWithPriority : [],
     };
 
     console.log("handleCreatePAC: createRequest", createRequest);
@@ -285,9 +274,9 @@ function PACs() {
     const updateRequestBody: PACUpdateRequest = {
       name: values.name,
       description: values.description,
-      serve: values.serve === 'true',
+      serve: values.serve,
       servePath: values.servePath,
-      saveToFS: values.saveToFS === 'true',
+      saveToFS: values.saveToFS,
       saveToFSPath: values.saveToFSPath,
       fallbackProxyId: values.fallbackProxyId,
       proxyRules: values.proxyRuleIdsWithPriority,

@@ -34,6 +34,7 @@ import { useAllProxiesQuery } from '../../services/proxy';
 import type { ProxyRule, ProxyRuleCreateRequest, ProxyRuleUpdateRequest, Proxy } from "../../services/types";
 import { MutationError, getErrorMessage } from '../errors/errors';
 import ConditionSelector from './ConditionSelector';
+import CheckboxEdit from '../common/CheckboxEdit';
 
 class RowData {
   id: number;
@@ -114,23 +115,17 @@ function ProxyRules() {
       {
         accessorKey: 'enabled',
         header: 'Enabled',
-        size: 150,
+        size: 120,
         Cell: ({ cell }) => (
-          <Checkbox checked={cell.row.original.enabled} disabled />
+          <Checkbox checked={cell.row.original.enabled} disabled name='enabled' />
         ),
-        editVariant: 'select',
-        editSelectOptions: boolValues,
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.enabled,
-          helperText: validationErrors?.enabled,
-          // remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              enabled: undefined,
-            }),
-          // optionally add validation checking for onBlur or onChange
+        Edit: ({ cell, column, row, table }) => {
+          const onChange = (checked: boolean) => {
+            console.log('Edit.onChange()', checked);
+            row._valuesCache[column.id] = checked;
+          };
+          const checkedInitial: boolean = cell.row.original.enabled ? cell.row.original.enabled : false;
+          return <CheckboxEdit required={true} label='Enabled' checkedInitial={checkedInitial} onChange={onChange}/>
         },
       },
       {
@@ -194,7 +189,7 @@ function ProxyRules() {
     }
     setValidationErrors({});
 
-    const updateRequestBody: ProxyRuleUpdateRequest = { name: values.name, enabled: values.enabled === 'true', proxyId: values.proxyId, conditionIds: values.conditionIds };
+    const updateRequestBody: ProxyRuleUpdateRequest = { name: values.name, enabled: values.enabled, proxyId: values.proxyId, conditionIds: values.conditionIds };
     const updateRequest = { id: values.id, body: updateRequestBody }
 
     await updateProxyRule(updateRequest).unwrap()
