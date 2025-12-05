@@ -1,10 +1,171 @@
-# PAC web admin (work in progress)
-Web admin to manage proxy auto-configuration (PAC) file(s).
+# PAC web admin
+
+Web admin to manage and serve [Proxy Auto-Configuration (PAC) file(s)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Proxy_servers_and_tunneling/Proxy_Auto-Configuration_PAC_file).
+
+# Goal
+
+Provide a simple and user-friendly tool for managing, generating, and serving PAC (Proxy Auto-Configuration) files without editing JavaScript PAC code manually.
+
+# Current state
+
+It basically works (see Roadmap).
+
+# Roadmap
+
+JWT-based authentication.
+
+Advanced input validation at backend and frontend.
+
+Polish UI.
+
+Generated PAC file preview.
+
+# Key concepts
+
+## Category
+
+Just a human-readable label for Condition. For example: Work, Social, Thrash etc. Categories are only used for grouping/filtering conditions in the UI. They do not affect the generated PAC logic.
+
+## Proxy
+
+Represents a proxy in terms of [Proxy Auto-Configuration (PAC) file](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Proxy_servers_and_tunneling/Proxy_Auto-Configuration_PAC_file). It has type and address (except for DIRECT).
+Type can be one of
+- DIRECT (proxy bypass)
+- PROXY
+- SOCKS
+- SOCKS4
+- SOCKS5
+- HTTP
+- HTTPS
+
+In a PAC file, each proxy is represented as a string such as `"PROXY 192.168.0.1:8080"` or `"DIRECT"`.
+
+## Condition
+
+Represents a condition on `url` or `host` arguments of FindProxyForURL() function. Has type, expression and category.
+A Condition defines when a Proxy Rule should apply.
+If any condition in a rule matches, the rule is considered a match.
+
+Type can be one of
+- host_domain_only
+- host_domain_subdomain
+- host_subdomain_only
+- url_shexp_match
+- url_regexp_match
+
+A condition defines when a proxy rule should apply. Conditions are evaluated against the `url` and `host` parameters passed to `FindProxyForURL()`.
+
+### host_domain_only
+
+Tests if lowercased `host` equals to expression (exact match).
+
+If expression is `bar.com` then it translates to `(host_lc == "bar.com")`.
+
+### host_domain_subdomain
+
+Tests if lowercased `host` equals to expression or is a subdomain of a domain provided in expression.
+
+If expression is `foo.com` then it translates to `/^(?:.*\.)?foo\.com$/.test(host_lc)`. So it will match `foo.com`, `www.foo.com`, `www.some.foo.com` etc.
+
+### host_subdomain_only
+
+Tests if lowercased `host` is a subdomain of a domain provided in expression.
+
+If expression is `baz.com` then it translates to `/^.*\.baz\.com$/.test(host_lc)`. So it will match `www.baz.com`, `www.some.baz.com` etc but not `baz.com`.
+
+### url_shexp_match
+
+Tests `shExpMatch(url, expression)`.
+
+If expression is `*goog*` then it translates to `shExpMatch(url, "*goog*")`.
+
+### url_regexp_match
+
+Test regular expression on `url`.
+If expression is `^http:\/\/api.*` then it translates to `/^http:\/\/api.*/.test(url)`.
+
+### Summary
+
+| Type                  | Meaning             | Expression example          |
+| --------------------- | ------------------- | --------------------------- |
+| host_domain_only      | Exact domain        | `example.com`               |
+| host_domain_subdomain | Domain + subdomains | `google.com`                |
+| host_subdomain_only   | Subdomains only     | `service.local`             |
+| url_shexp_match       | Shell wildcard      | `*api*`                     |
+| url_regexp_match      | Full scale regexp   | `^https://.*\.internal/.*`  |
+
+## Proxy rule
+
+A proxy rule groups one or more conditions and assigns a proxy to them.
+If **any** condition in the rule matches (logical OR), the associated proxy is returned.
+
+## PAC
+
+PAC defines the final FindProxyForURL() output.
+Rules are evaluated in priority order. The first matching rule determines the proxy.
+If no rule matches, the fallback proxy is returned (typically DIRECT).
+
+It has the following properties:
+- name (human-readable name)
+- serve option (enables serving PAC)
+- serve path
+- save option (enables saving PAC file to disk)
+- save path
+- fallback proxy (a proxy returned if no conditions matched, usually DIRECT)
+- list of proxy rules with priorities.
+
+## Sample generated PAC file
+
+```js
+// sample
+// some PAC
+
+// Ban (invalid address)
+var proxy2 = "PROXY 127.0.0.0:0";
+
+// my proxy
+var proxy3 = "HTTP 192.168.1.1:1080";
+
+// Used as proxy if no rules matched
+// No proxy
+var proxy1 = "DIRECT";
+
+
+// This function gets called every time a url is submitted
+function FindProxyForURL(url, host) {
+    var host_lc = host.toLowerCase();
+
+    // ban
+    if (/^(?:.*\.)?facebook\.com$/.test(host_lc)
+        || /^(?:.*\.)?x\.com$/.test(host_lc)) return proxy2;
+
+    // sample
+    if ((host_lc == "bar.com")
+        || /^(?:.*\.)?foo\.com$/.test(host_lc)
+        || /^.*\.baz\.com$/.test(host_lc)
+        || shExpMatch(url, "*goog*")
+        || /^http:\/\/api.*/.test(url)) return proxy3;
+
+    return proxy1;
+}
+```
+
+# Tech details
+
+Backend implemented in [D language](https://dlang.org/) with [vibe.d](https://vibed.org) as HTTP server.
+
+Frontend implemented in [TypeScript](https://www.typescriptlang.org) using
+- [Vite](https://vite.dev)
+- [React](https://react.dev)
+- [RTK Query](https://redux-toolkit.js.org/rtk-query/overview)
+- [Material UI](https://mui.com/material-ui/)
+- [Material React Table](https://www.material-react-table.com)
 
 # How to build
 
 ## Docker (x86-64)
-Docker image based on Ubuntu 24.04 and [DMD](https://dlang.org/dmd-linux.html) compiler.
+
+Docker image based on Ubuntu 24.04 and the latest version of [DMD](https://dlang.org/dmd-linux.html) compiler.
 
 ```bash
 git clone https://github.com/RolandTaverner/pacwebadmin.git
@@ -53,6 +214,7 @@ TODO
 
 Build (locally or in docker and extract files).
 Copy files to target machine to some directory (for example, `install`) so directory structure will look like
+
 ```
 ./install/
 ├── dist                         // web stuff here
@@ -64,7 +226,9 @@ Copy files to target machine to some directory (for example, `install`) so direc
 ├── install.sh                   // install script here
 └── pacwebadmin                  // executable here
 ```
+
 Then execute commands
+
 ```bash
 cd ./install
 sudo ./install.sh
