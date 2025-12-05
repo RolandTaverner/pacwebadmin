@@ -6,6 +6,8 @@ Web admin to manage and serve [Proxy Auto-Configuration (PAC) file(s)](https://d
 
 Provide a simple and user-friendly tool for managing, generating, and serving PAC (Proxy Auto-Configuration) files without editing JavaScript PAC code manually.
 
+It is suitable for small LANs, home networks with a dedicated server, or standalone machines.
+
 # Current state
 
 It basically works (see Roadmap).
@@ -19,6 +21,10 @@ Advanced input validation at backend and frontend.
 Polish UI.
 
 Generated PAC file preview.
+
+Install as Windows service.
+
+HTTPS support.
 
 # Key concepts
 
