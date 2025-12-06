@@ -13,7 +13,10 @@ static struct Options
 	@Arg("Path where *.pac will be served", Optional.yes) string servePath;
 	@Arg("Base URL for REST API", Optional.yes) string baseURL;
 	@Arg("Path to log dir", Optional.yes) string logDir;
-	@Arg("Access log entries will be output to the console.", Optional.yes) bool accessLogToConsole;
+	@Arg("Access log entries will be output to the console", Optional.yes) bool accessLogToConsole;
+	@Arg("Path to server certificate chain file", Optional.yes) string certificateChainFile;
+	@Arg("Path to private key file", Optional.yes) string privateKeyFile;
+	@Arg("Path to trusted certificates for verifying peer certificates", Optional.yes) string trustedCertificateFile;
 }
 
 Options getOptions(in string filePath)

@@ -5,9 +5,7 @@ unittest/
 .vscode/
 
 # local temporary files
-/pacwebadmin.conf.local
-/data.local
-/data.local.bak
+.local/
 
 # Compiled Object files
 *.o
