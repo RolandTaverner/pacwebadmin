@@ -77,8 +77,15 @@ int main(string[] args)
 	settings.bindAddresses = opts.bindAddresses;
 	settings.port = opts.port != 0 ? opts.port : 8080;
 	settings.useCompressionIfPossible = true;
-	settings.accessLogToConsole = opts.accessLogToConsole;
 
+	if (opts.privateKeyFile.length != 0)
+	{
+		settings.tlsContext = createTLSContext(TLSContextKind.server);
+		settings.tlsContext.useCertificateChainFile(opts.certificateChainFile);
+		settings.tlsContext.usePrivateKeyFile(opts.privateKeyFile);
+	}
+
+	settings.accessLogToConsole = opts.accessLogToConsole;
 	if (opts.logDir.length != 0)
 	{
 		settings.accessLogFile = buildPath(opts.logDir, "access.log");
