@@ -97,7 +97,7 @@ int main(string[] args)
 		listener.stopListening();
 	}
 
-	logInfo("Please open http://127.0.0.1:8080/ in your browser.");
+	logInfo("Please open " ~ (opts.privateKeyFile.length != 0 ? "https" : "http") ~ "://127.0.0.1:" ~ to!(string)(opts.port) ~ "/ in your browser.");
 	runApplication(&args);
 
 	return 0;
