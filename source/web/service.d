@@ -12,6 +12,8 @@ import web.api.condition;
 import web.api.proxyrule;
 import web.api.pac;
 
+import web.auth.provider : AuthProvider;
+
 import web.services.category;
 import web.services.proxy;
 import web.services.condition;
@@ -23,15 +25,15 @@ import web.services.common.todto;
 
 class Service : APIRoot
 {
-    this(Model model)
+    this(Model model, AuthProvider authProvider)
     {
         m_model = model;
 
-        m_categorySvc = new CategoryService(m_model);
-        m_proxySvc = new ProxyService(m_model);
-        m_conditionSvc = new ConditionService(m_model);
-        m_proxyRuleSvc = new ProxyRuleService(m_model);
-        m_pacSvc = new PACService(m_model);
+        m_categorySvc = new CategoryService(m_model, authProvider);
+        m_proxySvc = new ProxyService(m_model, authProvider);
+        m_conditionSvc = new ConditionService(m_model, authProvider);
+        m_proxyRuleSvc = new ProxyRuleService(m_model, authProvider);
+        m_pacSvc = new PACService(m_model, authProvider);
     }
 
     override @property CategoryAPI categories()

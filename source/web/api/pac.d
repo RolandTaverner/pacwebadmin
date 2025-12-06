@@ -4,40 +4,45 @@ import std.typecons : Nullable;
 
 import vibe.data.serialization : optional;
 import vibe.http.server;
+import vibe.web.auth : requiresAuth, anyAuth;
 import vibe.web.rest;
 
 import web.api.proxy;
 import web.api.proxyrule;
+import web.auth.common;
 
+@requiresAuth!AuthInfo
 interface PACAPI
 {
 @safe:
-    @method(HTTPMethod.GET) @path("/list")
+    @anyAuth @method(HTTPMethod.GET) @path("/list")
     PACList getAll();
 
-    @method(HTTPMethod.GET) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.GET) @path("/list/:id")
     PACDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/list")
+    @anyAuth @method(HTTPMethod.POST) @path("/list")
     PACDTO create(@viaBody() in PACCreateDTO c);
 
-    @method(HTTPMethod.PUT) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.PUT) @path("/list/:id")
     PACDTO update(in long _id, @viaBody() in PACUpdateDTO c);
 
-    @method(HTTPMethod.DELETE) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.DELETE) @path("/list/:id")
     void remove(in long _id);
 
-    @method(HTTPMethod.GET) @path("/list/:id/proxyrules")
+    @anyAuth @method(HTTPMethod.GET) @path("/list/:id/proxyrules")
     ProxyRulePriorityList getProxyRules(in long _id);
 
-    @method(HTTPMethod.POST) @path("/list/:id/proxyrules/:prid")
+    @anyAuth @method(HTTPMethod.POST) @path("/list/:id/proxyrules/:prid")
     ProxyRulePriorityList addProxyRule(in long _id, in long _prid, @viaQuery("priority") long _priority);
 
-    @method(HTTPMethod.PATCH) @path("/list/:id/proxyrules/:prid")
+    @anyAuth @method(HTTPMethod.PATCH) @path("/list/:id/proxyrules/:prid")
     ProxyRulePriorityList setProxyRulePriority(in long _id, in long _prid, @viaQuery("priority") long _priority);
 
-    @method(HTTPMethod.DELETE) @path("/list/:id/proxyrules/:prid")
+    @anyAuth @method(HTTPMethod.DELETE) @path("/list/:id/proxyrules/:prid")
     void removeProxyRule(in long _id, in long _prid);
+
+    mixin authInterfaceMethod;
 }
 
 struct PACList

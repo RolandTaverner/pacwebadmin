@@ -9,13 +9,16 @@ import vibe.http.fileserver : serveStaticFiles, HTTPFileServerSettings;
 import vibe.http.server;
 
 import datalayer.storage;
+
 import model.model;
 import model.pacmanager;
 
-import options;
+import web.auth.provider : AuthProvider;
 import web.api.root : APIRoot;
 import web.pachandler;
 import web.service;
+
+import options;
 
 int main(string[] args)
 {
@@ -46,7 +49,9 @@ int main(string[] args)
 	Model model = new Model(storage);
 	PACManager pacManager = new PACManager(model, opts.serveCacheDir);
 
-	Service restService = new Service(model);
+	AuthProvider authProvider = new AuthProvider();
+
+	Service restService = new Service(model, authProvider);
 	PACHandler pacHandler = new PACHandler(pacManager, opts.servePath);
 
 	auto restSettings = new RestInterfaceSettings;
@@ -97,7 +102,8 @@ int main(string[] args)
 		listener.stopListening();
 	}
 
-	logInfo("Please open " ~ (opts.privateKeyFile.length != 0 ? "https" : "http") ~ "://127.0.0.1:" ~ to!(string)(opts.port) ~ "/ in your browser.");
+	logInfo("Please open " ~ (opts.privateKeyFile.length != 0 ? "https" : "http") ~ "://127.0.0.1:" ~ to!(
+			string)(opts.port) ~ "/ in your browser.");
 	runApplication(&args);
 
 	return 0;

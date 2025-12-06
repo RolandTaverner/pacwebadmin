@@ -5,19 +5,24 @@ import std.algorithm.mutation : SwapStrategy;
 import std.algorithm.sorting : sort;
 import std.array;
 
+import vibe.web.auth;
+import vibe.web.common : noRoute;
+
 import model.model;
 import model.entities.proxy;
 
 import web.api.proxy;
 
+import web.services.common.auth;
 import web.services.common.exceptions;
 import web.services.common.todto;
 
 class ProxyService : ProxyAPI
 {
-    this(Model model)
+    this(Model model, AuthProvider authProvider)
     {
         m_model = model;
+        m_authProvider = authProvider;
     }
 
     @safe override ProxyList getAll()
@@ -85,6 +90,8 @@ class ProxyService : ProxyAPI
             m_model.deleteProxy(id);
         }, void);
     }
+
+    mixin authMethodImpl;
 
     private:
         Model m_model;

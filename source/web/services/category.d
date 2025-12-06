@@ -5,18 +5,23 @@ import std.algorithm.mutation : SwapStrategy;
 import std.algorithm.sorting : sort;
 import std.array;
 
+import vibe.web.auth;
+import vibe.web.common : noRoute;
+
 import model.model;
 import model.entities.category;
 import web.api.category;
 
+import web.services.common.auth;
 import web.services.common.exceptions;
 import web.services.common.todto;
 
 class CategoryService : CategoryAPI
 {
-    this(Model model)
+    this(Model model, AuthProvider authProvider)
     {
         m_model = model;
+        m_authProvider = authProvider;
     }
 
     @safe override CategoryList getAll()
@@ -82,6 +87,8 @@ class CategoryService : CategoryAPI
             m_model.deleteCategory(id);
         }, void);
     }
+
+    mixin authMethodImpl;
 
 private:
     Model m_model;

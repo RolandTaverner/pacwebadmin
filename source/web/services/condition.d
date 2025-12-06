@@ -5,19 +5,24 @@ import std.algorithm.mutation : SwapStrategy;
 import std.algorithm.sorting : sort;
 import std.array;
 
+import vibe.web.auth;
+import vibe.web.common : noRoute;
+
 import model.model;
 import model.entities.condition;
 
 import web.api.condition;
 
+import web.services.common.auth;
 import web.services.common.exceptions;
 import web.services.common.todto;
 
 class ConditionService : ConditionAPI
 {
-    this(Model model)
+    this(Model model, AuthProvider authProvider)
     {
         m_model = model;
+        m_authProvider = authProvider;
     }
 
     @safe override ConditionList getAll()
@@ -48,28 +53,33 @@ class ConditionService : ConditionAPI
     {
         return remapExceptions!(delegate() {
             const ConditionInput ci = {
-                type: p.type, expression: p.expression, categoryId: p.categoryId
+                type: p.type,
+                expression: p.expression,
+                categoryId: p.categoryId
             };
+
             const Condition updated = m_model.updateCondition(id, ci);
             return toDTO(updated);
-            }, ConditionDTO);
-        }
+        }, ConditionDTO);
+    }
 
-        @safe override ConditionDTO getById(in long id)
-        {
-            return remapExceptions!(delegate() {
-                const Condition got = m_model.conditionById(id);
-                return toDTO(got);
-            }, ConditionDTO);
-        }
+    @safe override ConditionDTO getById(in long id)
+    {
+        return remapExceptions!(delegate() {
+            const Condition got = m_model.conditionById(id);
+            return toDTO(got);
+        }, ConditionDTO);
+    }
 
-        @safe override void remove(in long id)
-        {
-            return remapExceptions!(delegate() {
-                m_model.deleteCondition(id);
-            }, void);
-        }
+    @safe override void remove(in long id)
+    {
+        return remapExceptions!(delegate() {
+            m_model.deleteCondition(id);
+        }, void);
+    }
+
+    mixin authMethodImpl;
 
     private:
         Model m_model;
-    }
+}

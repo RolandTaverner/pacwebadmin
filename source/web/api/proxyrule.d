@@ -4,37 +4,42 @@ import std.typecons : Nullable;
 
 import vibe.data.serialization : optional;
 import vibe.http.server;
+import vibe.web.auth : requiresAuth, anyAuth;
 import vibe.web.rest;
 
 import web.api.condition;
 import web.api.proxy;
+import web.auth.common;
 
+@requiresAuth!AuthInfo
 interface ProxyRuleAPI
 {
 @safe:
-    @method(HTTPMethod.GET) @path("/list")
+    @anyAuth @method(HTTPMethod.GET) @path("/list")
     ProxyRuleList getAll();
 
-    @method(HTTPMethod.GET) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.GET) @path("/list/:id")
     ProxyRuleDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/list")
+    @anyAuth @method(HTTPMethod.POST) @path("/list")
     ProxyRuleDTO create(@viaBody() in ProxyRuleCreateDTO c);
 
-    @method(HTTPMethod.PUT) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.PUT) @path("/list/:id")
     ProxyRuleDTO update(in long _id, @viaBody() in ProxyRuleUpdateDTO c);
 
-    @method(HTTPMethod.DELETE) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.DELETE) @path("/list/:id")
     void remove(in long _id);
 
-    @method(HTTPMethod.GET) @path("/list/:id/conditions")
+    @anyAuth @method(HTTPMethod.GET) @path("/list/:id/conditions")
     ConditionList getConditions(in long _id);
 
-    @method(HTTPMethod.POST) @path("/list/:id/conditions/:hrid")
+    @anyAuth @method(HTTPMethod.POST) @path("/list/:id/conditions/:hrid")
     ConditionList addCondition(in long _id, in long _hrid);
 
-    @method(HTTPMethod.DELETE) @path("/list/:id/conditions/:hrid")
+    @anyAuth @method(HTTPMethod.DELETE) @path("/list/:id/conditions/:hrid")
     void removeCondition(in long _id, in long _hrid);
+
+    mixin authInterfaceMethod;
 }
 
 struct ProxyRuleList
