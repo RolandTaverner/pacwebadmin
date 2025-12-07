@@ -10,10 +10,10 @@ import model.pacmanager;
 
 class PACHandler
 {
-    this(PACManager manager, string baseURL)
+    this(PACManager manager, string basePACServeURL)
     {
         m_manager = manager;
-        m_prefix = InetPath(baseURL);
+        m_prefix = InetPath(basePACServeURL);
 
         m_settings = new HTTPFileServerSettings();
         m_settings.preWriteCallback =

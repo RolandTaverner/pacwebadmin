@@ -73,7 +73,6 @@ serveCacheDir = "${baseDataDir}/servecache"
 logDir = "${logDir}"
 accessLogToConsole = false
 wwwDir = "${wwwDir}"
-baseURL = "http://127.0.0.1:80/"
 EOF
 chown pacwebadmin:pacwebadmin /etc/pacwebadmin.conf
 echo "Created config file at /etc/pacwebadmin.conf"

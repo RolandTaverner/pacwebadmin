@@ -24,8 +24,6 @@ Generated PAC file preview.
 
 Install as Windows service.
 
-HTTPS support.
-
 # Key concepts
 
 ## Category
@@ -277,14 +275,13 @@ dataDir = ".local/data"
 saveDir = ".local/save"
 serveCacheDir = ".local/servecache"
 servePath = "/pac/"
-baseURL = "http://127.0.0.1:80/"
 logDir = ".local/log"
 wwwDir = "web-admin/dist"
 
 # Uncomment if you want to see access log in console output
 # accessLogToConsole = true
 
-# Uncomment if you have server key and certificate
+# Uncomment if you have server key and certificate (this enables HTTPS)
 # certificateChainFile = ".local/server.crt"
 # privateKeyFile = ".local/server.key"
 ```

@@ -50,12 +50,12 @@ int main(string[] args)
 	PACHandler pacHandler = new PACHandler(pacManager, opts.servePath);
 
 	auto restSettings = new RestInterfaceSettings;
-	restSettings.baseURL = URL(opts.baseURL);
+	//restSettings.baseURL = URL(opts.baseURL);
 	//restSettings.allowedOrigins = [];
 
 	auto router = new URLRouter;
 	registerRestInterface(router, restService, restSettings);
-	router.get("/myapi.js", serveRestJSClient!APIRoot(restSettings));
+	//router.get("/myapi.js", serveRestJSClient!APIRoot(restSettings));
 
 	router.match(HTTPMethod.GET, opts.servePath ~ "*",
 		(HTTPServerRequest req, HTTPServerResponse res) @safe {

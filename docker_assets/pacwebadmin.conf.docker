@@ -7,4 +7,7 @@ serveCacheDir = "/app/servecache"
 logDir = "/app/log"
 accessLogToConsole = false
 wwwDir = "/app/dist"
-baseURL = "http://127.0.0.1:80/"
+
+# enable HTTPS (docker image does not contain pacwebadmin.crt, pacwebadmin.key)
+# certificateChainFile = "/etc/pacwebadmin/pacwebadmin.crt"
+# privateKeyFile = "/etc/pacwebadmin/pacwebadmin.key"
