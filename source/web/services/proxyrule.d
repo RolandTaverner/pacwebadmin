@@ -54,8 +54,9 @@ class ProxyRuleService : ProxyRuleAPI
                 proxyId: pr.proxyId,
                 enabled: pr.enabled,
                 name: pr.name,
-                conditionIds: pr.conditionIds.dup};
-                const ProxyRule updated = m_model.updateProxyRule(id, prsi);
+                conditionIds: pr.conditionIds.dup
+            };
+            const ProxyRule updated = m_model.updateProxyRule(id, prsi);
             return toDTO(updated);
         }, ProxyRuleDTO);
     }

@@ -4,6 +4,7 @@ import std.algorithm.iteration : map;
 import std.algorithm.mutation : SwapStrategy;
 import std.algorithm.sorting : sort;
 import std.array;
+import std.typecons : nullable, Nullable;
 
 import model.model;
 import model.entities.pac;
@@ -63,29 +64,30 @@ class PACService : PACAPI
     @safe override PACDTO update(in long id, in PACUpdateDTO p)
     {
         return remapExceptions!(delegate() {
-            long[long] proxyRules;
+            long[long] proxyRulesMap;
             if (p.proxyRules)
             {
                 foreach (pr; p.proxyRules.get)
                 {
-                    proxyRules[pr.proxyRuleId] = pr.priority;
+                    proxyRulesMap[pr.proxyRuleId] = pr.priority;
                 }
             }
 
             const PACInput pi = {
                 p.name,
                 p.description,
-                p.proxyRules ? proxyRules : null,
+                p.proxyRules ? nullable!()(proxyRulesMap) : Nullable!(long[long]).init,
                 p.serve,
                 p.servePath,
                 p.saveToFS,
                 p.saveToFSPath,
-                p.fallbackProxyId};
+                p.fallbackProxyId
+            };
 
-                const PAC updated = m_model.updatePAC(id, pi);
-                return toDTO(updated);
-            }, PACDTO);
-        }
+            const PAC updated = m_model.updatePAC(id, pi);
+            return toDTO(updated);
+        }, PACDTO);
+    }
 
     @safe override PACDTO getById(in long id)
     {

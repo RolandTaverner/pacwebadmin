@@ -48,9 +48,10 @@ class ConditionService : ConditionAPI
     {
         return remapExceptions!(delegate() {
             const ConditionInput ci = {
-                type: p.type, expression: p.expression, categoryId: p.categoryId};
-                const Condition updated = m_model.updateCondition(id, ci);
-                return toDTO(updated);
+                type: p.type, expression: p.expression, categoryId: p.categoryId
+            };
+            const Condition updated = m_model.updateCondition(id, ci);
+            return toDTO(updated);
             }, ConditionDTO);
         }
 
