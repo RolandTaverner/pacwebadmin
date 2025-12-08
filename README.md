@@ -8,6 +8,18 @@ Provide a simple and user-friendly tool for managing, generating, and serving PA
 
 It is suitable for small LANs, home networks with a dedicated server, or standalone machines.
 
+# Features
+
+Web-based interface for managing PAC rules.
+
+Able to serve multiple PAC files, each generated from its own configuration.
+
+Shared proxy rules across multiple PAC files.
+
+Runs as a standalone service - no external web server required.
+
+HTTPS support (optional).
+
 # Current state
 
 It basically works (see Roadmap).
