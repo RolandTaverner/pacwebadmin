@@ -10,15 +10,26 @@ It is suitable for small LANs, home networks with a dedicated server, or standal
 
 # Features
 
-Web-based interface for managing PAC rules.
+**Web-based interface** for managing PAC rules with an intuitive UI.
 
-Able to serve multiple PAC files, each generated from its own configuration.
+**Multiple PAC file support** - serve multiple PAC files, each generated from its own configuration.
 
-Shared proxy rules across multiple PAC files.
+**Shared proxy rules** across multiple PAC files for easier maintenance.
 
-Runs as a standalone service - no external web server required.
+**Standalone service** - runs independently with no external web server required.
 
-HTTPS support (optional).
+**JSON-based configuration** - stored as a simple JSON file that you can easily backup, version control, or edit manually.
+
+**HTTP caching support** - efficient PAC file delivery with ETag and Last-Modified headers to minimize bandwidth and client-side updates.
+
+**Automatic configuration backup** - protects against accidental data loss.
+
+**HTTPS support (optional)** - secure delivery of PAC files when needed.
+
+**Cross-platform** - runs on Linux, Windows, and macOS.
+
+**Lightweight and fast** - minimal resource footprint suitable for small LANs, home networks, or standalone machines.
+
 
 # Current state
 
@@ -40,7 +51,7 @@ Install as Windows service.
 
 ## Category
 
-Just a human-readable label for Condition. For example: Work, Social, Thrash etc. Categories are only used for grouping/filtering conditions in the UI. They do not affect the generated PAC logic.
+Just a human-readable label for Condition. For example: Work, Social, Trash etc. Categories are only used for grouping/filtering conditions in the UI. They do not affect the generated PAC logic.
 
 ## Proxy
 

@@ -119,7 +119,20 @@ class SimpleSaver : IStorageSaver
 	{
 		synchronized (this)
 		{
-			auto backupFilePath = buildPath(m_dataDir, "data.json.bak");
+			string backupFilePath = "";
+			for (int i = 0; i < 10_000; ++i)
+			{
+				auto testFilePath = buildPath(m_dataDir, format("data.json.bak.%04d", i));
+				if (!exists(testFilePath))
+				{
+					backupFilePath = testFilePath;
+					break;
+				}
+			}
+			if (backupFilePath.length == 0) // TODO: add backup rotation
+			{
+				backupFilePath = buildPath(m_dataDir, format("data.json.bak.%04d", 0));
+			}
 			if (exists(backupFilePath))
 			{
 				remove(backupFilePath);
