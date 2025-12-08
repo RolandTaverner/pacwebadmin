@@ -49,7 +49,7 @@ int main(string[] args)
 	Model model = new Model(storage);
 	PACManager pacManager = new PACManager(model, opts.serveCacheDir);
 
-	AuthProvider authProvider = new AuthProvider(opts.authUsersFile, !opts.authEnable);
+	AuthProvider authProvider = new AuthProvider(opts.authUsersFile, !opts.authEnable, "aaa");
 
 	Service restService = new Service(model, authProvider);
 	PACHandler pacHandler = new PACHandler(pacManager, opts.servePath);

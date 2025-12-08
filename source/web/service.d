@@ -11,6 +11,7 @@ import web.api.proxy;
 import web.api.condition;
 import web.api.proxyrule;
 import web.api.pac;
+import web.api.user;
 
 import web.auth.provider : AuthProvider;
 
@@ -19,6 +20,7 @@ import web.services.proxy;
 import web.services.condition;
 import web.services.proxyrule;
 import web.services.pac;
+import web.services.user;
 
 import web.services.common.exceptions;
 import web.services.common.todto;
@@ -34,6 +36,7 @@ class Service : APIRoot
         m_conditionSvc = new ConditionService(m_model, authProvider);
         m_proxyRuleSvc = new ProxyRuleService(m_model, authProvider);
         m_pacSvc = new PACService(m_model, authProvider);
+        m_userSvc = new UserService(authProvider);
     }
 
     override @property CategoryAPI categories()
@@ -61,6 +64,11 @@ class Service : APIRoot
         return m_pacSvc;
     }
 
+    override @property UserAPI user()
+    {
+        return m_userSvc;
+    }
+
 private:
     Model m_model;
     CategoryService m_categorySvc;
@@ -68,4 +76,5 @@ private:
     ConditionService m_conditionSvc;
     ProxyRuleService m_proxyRuleSvc;
     PACService m_pacSvc;
+    UserService m_userSvc;
 }
