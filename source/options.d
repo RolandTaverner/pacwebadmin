@@ -16,6 +16,8 @@ static struct Options
 	@Arg("Path to server certificate chain file", Optional.yes) string certificateChainFile;
 	@Arg("Path to private key file", Optional.yes) string privateKeyFile;
 	@Arg("Path to trusted certificates for verifying peer certificates", Optional.yes) string trustedCertificateFile;
+	@Arg("Path to users file", Optional.yes) string authUsersFile;
+	@Arg("Enable auth (authUsersFile option must be provided)", Optional.yes) bool authEnable;
 }
 
 Options getOptions(in string filePath)
