@@ -1,11 +1,11 @@
-import { api } from './api'
+import { api } from './api';
 
 import type {
   Condition, ConditionsResponse,
   ConditionGetByIdResponse,
   ConditionCreateRequest, ConditionCreateResponse,
   ConditionUpdateRequest, ConditionUpdateResponse
-} from './types'
+} from './types';
 
 const conditionApi = api.injectEndpoints({
   endpoints: (builder) => ({

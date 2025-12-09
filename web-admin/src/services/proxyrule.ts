@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api } from './api';
 
 import type {
   ProxyRule, ProxyRulesResponse,
@@ -9,7 +9,7 @@ import type {
   ProxyRuleRemoveConditionRequest, ProxyRuleRemoveConditionResponse,
   Condition, ConditionsResponse
 
-} from './types'
+} from './types';
 
 const proxyruleApi = api.injectEndpoints({
   endpoints: (builder) => ({

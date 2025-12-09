@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import './App.css'
+import { useState } from 'react';
+import './App.css';
 
 import { Typography } from '@mui/material';
 import Tabs from '@mui/material/Tabs';
@@ -110,4 +110,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

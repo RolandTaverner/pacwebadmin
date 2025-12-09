@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api } from './api';
 
 import type {
   Category, CategoriesResponse,
@@ -6,7 +6,7 @@ import type {
   CategoryFilterRequest,
   CategoryCreateRequest, CategoryCreateResponse,
   CategoryUpdateRequest, CategoryUpdateResponse
-} from './types'
+} from './types';
 
 const categoryApi = api.injectEndpoints({
   endpoints: (builder) => ({

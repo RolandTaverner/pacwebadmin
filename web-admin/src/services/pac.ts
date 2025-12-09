@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api } from './api';
 
 import type {
   PAC, PACsResponse,
@@ -9,7 +9,7 @@ import type {
   PACProxyRulesResponse,
   PACProxyRuleAddRequest, PACProxyRuleAddResponse,
   PACProxyRuleRemoveRequest, PACProxyRuleRemoveResponse
-} from './types'
+} from './types';
 
 const pacApi = api.injectEndpoints({
   endpoints: (builder) => ({
