@@ -6,20 +6,25 @@ import std.algorithm.sorting : sort;
 import std.array;
 import std.typecons : nullable, Nullable;
 
+import vibe.web.auth;
+import vibe.web.common : noRoute;
+
 import model.model;
 import model.entities.pac;
 
 import web.api.pac;
 import web.api.proxyrule;
 
+import web.services.common.auth;
 import web.services.common.exceptions;
 import web.services.common.todto;
 
 class PACService : PACAPI
 {
-    this(Model model)
+    this(Model model, AuthProvider authProvider)
     {
         m_model = model;
+        m_authProvider = authProvider;
     }
 
     @safe override PACList getAll()
@@ -138,6 +143,8 @@ class PACService : PACAPI
             m_model.pacRemoveProxyRule(id, prid);
         }, void);
     }
+
+    mixin authMethodImpl;
 
 private:
     Model m_model;

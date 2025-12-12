@@ -1121,3 +1121,43 @@ curl -X DELETE http://127.0.0.1:8080/api/pac/list/1/proxyrules/2
 ```
 
 Response: HTTP 200 with empty body
+
+## User API requests
+
+### Login
+
+Password is SHA256 of password string.
+
+Here 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918 = SHA256("admin").
+
+```bash
+curl -X POST http://127.0.0.1:8080/api/user/login?user=admin\&password=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+```
+
+Response
+
+```json
+{
+  "token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImFkbWluIiwiY3JlYXRlZEF0IjoxNzY1MjIzODgzfQ.chtn-6SX3Q_tj2NbmGLkEwJB6NUcXDRms5q59QEn-Yx0L7yoQUzynHpOhCD8t2BU6V0xpkI-3Sp_IKYpj44rLA"
+}
+```
+
+### Logout
+
+curl -X POST http://127.0.0.1:8080/api/user/logout
+
+Response: HTTP 200 with empty body
+
+### Get profile
+
+```bash
+curl http://127.0.0.1:8080/api/user/profile -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImFkbWluIiwiY3JlYXRlZEF0IjoxNzY1MjIzNjU2fQ.3z8VeN0FerbZT4w8U8aCjkK7O9NouKMFScEwXly22FxIbTkkpADS-1yWZmTivIgqxA_G5ffH4-L8A2n-275ELg'
+```
+
+Response
+
+```json
+{
+  "userName": "admin"
+}
+```

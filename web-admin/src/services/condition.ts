@@ -1,11 +1,11 @@
-import { api } from './api'
+import { api } from './api';
 
 import type {
   Condition, ConditionsResponse,
   ConditionGetByIdResponse,
   ConditionCreateRequest, ConditionCreateResponse,
   ConditionUpdateRequest, ConditionUpdateResponse
-} from './types'
+} from './types';
 
 const conditionApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -52,4 +52,4 @@ const conditionApi = api.injectEndpoints({
   overrideExisting: false,
 })
 
-export const { useAllConditionsQuery, useByIdConditionQuery, useCreateConditionMutation, useUpdateConditionMutation, useDeleteConditionMutation } = conditionApi
+export const { useAllConditionsQuery, useByIdConditionQuery, useCreateConditionMutation, useUpdateConditionMutation, useDeleteConditionMutation } = conditionApi;

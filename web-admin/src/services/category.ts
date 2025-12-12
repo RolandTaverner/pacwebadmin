@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api } from './api';
 
 import type {
   Category, CategoriesResponse,
@@ -6,7 +6,7 @@ import type {
   CategoryFilterRequest,
   CategoryCreateRequest, CategoryCreateResponse,
   CategoryUpdateRequest, CategoryUpdateResponse
-} from './types'
+} from './types';
 
 const categoryApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -62,4 +62,4 @@ const categoryApi = api.injectEndpoints({
   overrideExisting: false,
 })
 
-export const { useAllCategoriesQuery, useFilterCategoriesQuery, useByIdCategoryQuery, useCreateCategoryMutation, useUpdateCategoryMutation, useDeleteCategoryMutation } = categoryApi
+export const { useAllCategoriesQuery, useFilterCategoriesQuery, useByIdCategoryQuery, useCreateCategoryMutation, useUpdateCategoryMutation, useDeleteCategoryMutation } = categoryApi;

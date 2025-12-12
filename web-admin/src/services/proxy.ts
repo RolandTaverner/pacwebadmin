@@ -1,4 +1,4 @@
-import { api } from './api'
+import { api } from './api';
 
 import type {
   Proxy, ProxiesResponse,
@@ -6,7 +6,7 @@ import type {
   ProxyFilterRequest,
   ProxyCreateRequest, ProxyCreateResponse,
   ProxyUpdateRequest, ProxyUpdateResponse
-} from './types'
+} from './types';
 
 const proxyApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -67,4 +67,4 @@ const proxyApi = api.injectEndpoints({
   overrideExisting: false,
 })
 
-export const { useAllProxiesQuery, useFilterProxiesQuery, useByIdProxyQuery, useCreateProxyMutation, useUpdateProxyMutation, useDeleteProxyMutation } = proxyApi
+export const { useAllProxiesQuery, useFilterProxiesQuery, useByIdProxyQuery, useCreateProxyMutation, useUpdateProxyMutation, useDeleteProxyMutation } = proxyApi;

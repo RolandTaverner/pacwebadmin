@@ -1,28 +1,34 @@
 module web.api.category;
 
 import vibe.http.server;
+import vibe.web.auth : requiresAuth, anyAuth;
 import vibe.web.rest;
 
+import web.auth.common;
+
+@requiresAuth!AuthInfo
 interface CategoryAPI
 {
 @safe:
-    @method(HTTPMethod.GET) @path("/list")
+    @anyAuth @method(HTTPMethod.GET) @path("/list")
     CategoryList getAll();
 
-    @method(HTTPMethod.POST) @path("/filter")
+    @anyAuth @method(HTTPMethod.POST) @path("/filter")
     CategoryList filter(@viaBody() in CategoryFilterDTO f);
 
-    @method(HTTPMethod.GET) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.GET) @path("/list/:id")
     CategoryDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/list")
+    @anyAuth @method(HTTPMethod.POST) @path("/list")
     CategoryDTO create(@viaBody() in CategoryInputDTO c);
 
-    @method(HTTPMethod.PUT) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.PUT) @path("/list/:id")
     CategoryDTO update(in long _id, @viaBody() in CategoryInputDTO c);
 
-    @method(HTTPMethod.DELETE) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.DELETE) @path("/list/:id")
     void remove(in long _id);
+
+    mixin authInterfaceMethod;
 }
 
 struct CategoryList

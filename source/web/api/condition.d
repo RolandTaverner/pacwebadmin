@@ -4,27 +4,32 @@ import std.typecons : Nullable;
 
 import vibe.data.serialization : optional;
 import vibe.http.server;
+import vibe.web.auth : requiresAuth, anyAuth;
 import vibe.web.rest;
 
+import web.auth.common;
 import web.api.category;
 
+@requiresAuth!AuthInfo
 interface ConditionAPI
 {
 @safe:
-    @method(HTTPMethod.GET) @path("/list")
+    @anyAuth @method(HTTPMethod.GET) @path("/list")
     ConditionList getAll();
 
-    @method(HTTPMethod.GET) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.GET) @path("/list/:id")
     ConditionDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/list")
+    @anyAuth @method(HTTPMethod.POST) @path("/list")
     ConditionDTO create(@viaBody() in ConditionCreateDTO c);
 
-    @method(HTTPMethod.PUT) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.PUT) @path("/list/:id")
     ConditionDTO update(in long _id, @viaBody() in ConditionUpdateDTO c);
 
-    @method(HTTPMethod.DELETE) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.DELETE) @path("/list/:id")
     void remove(in long _id);
+
+    mixin authInterfaceMethod;
 }
 
 struct ConditionList

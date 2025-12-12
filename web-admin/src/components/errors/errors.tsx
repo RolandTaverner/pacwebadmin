@@ -1,4 +1,4 @@
-// import { useState } from 'react'
+// import { useState } from 'react';
 
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import type { SerializedError } from '@reduxjs/toolkit';

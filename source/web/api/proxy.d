@@ -4,28 +4,34 @@ import std.typecons : Nullable;
 
 import vibe.data.serialization : optional;
 import vibe.http.server;
+import vibe.web.auth : requiresAuth, anyAuth;
 import vibe.web.rest;
 
+import web.auth.common;
+
+@requiresAuth!AuthInfo
 interface ProxyAPI
 {
 @safe:
-    @method(HTTPMethod.GET) @path("/list")
+    @anyAuth @method(HTTPMethod.GET) @path("/list")
     ProxyList getAll();
 
-    @method(HTTPMethod.POST) @path("/filter")
+    @anyAuth @method(HTTPMethod.POST) @path("/filter")
     ProxyList filter(@viaBody() in ProxyFilterDTO f);
 
-    @method(HTTPMethod.GET) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.GET) @path("/list/:id")
     ProxyDTO getById(in long _id);
 
-    @method(HTTPMethod.POST) @path("/list")
+    @anyAuth @method(HTTPMethod.POST) @path("/list")
     ProxyDTO create(@viaBody() in ProxyCreateDTO c);
 
-    @method(HTTPMethod.PUT) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.PUT) @path("/list/:id")
     ProxyDTO update(in long _id, @viaBody() in ProxyUpdateDTO p);
 
-    @method(HTTPMethod.DELETE) @path("/list/:id")
+    @anyAuth @method(HTTPMethod.DELETE) @path("/list/:id")
     void remove(in long _id);
+
+    mixin authInterfaceMethod;
 }
 
 struct ProxyList

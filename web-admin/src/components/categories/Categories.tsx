@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import './Categories.css'
+import { useMemo, useState } from 'react';
+import './Categories.css';
 
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import type { SerializedError } from '@reduxjs/toolkit';
