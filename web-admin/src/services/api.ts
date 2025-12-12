@@ -14,7 +14,7 @@ function getBaseURL(): string {
 const baseQuery = fetchBaseQuery({
   baseUrl: getBaseURL(),
   prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).auth.token
+    const token = (getState() as RootState).user.token
 
     // If we have a token set in state, let's assume that we should be passing it.
     if (token) {
@@ -30,4 +30,4 @@ export const api = createApi({
   baseQuery: baseQuery,
   endpoints: () => ({}),
   tagTypes: ['Category', 'Proxy', 'Condition', 'ProxyRule', 'ProxyRuleConditions', 'PAC', 'PACProxyRules', 'User'],
-})
+});

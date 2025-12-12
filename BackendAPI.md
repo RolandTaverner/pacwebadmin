@@ -1126,8 +1126,12 @@ Response: HTTP 200 with empty body
 
 ### Login
 
+Password is SHA256 of password string.
+
+Here 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918 = SHA256("admin").
+
 ```bash
-curl -X POST http://127.0.0.1:8080/api/user/login?user=admin\&password=admin
+curl -X POST http://127.0.0.1:8080/api/user/login?user=admin\&password=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
 ```
 
 Response

@@ -77,4 +77,4 @@ export const {
   usePacProxyRulesQuery,
   usePacProxyRulesAddMutation,
   usePacProxyRulesRemoveMutation,
-} = pacApi
+} = pacApi;

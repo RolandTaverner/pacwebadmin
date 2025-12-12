@@ -62,4 +62,4 @@ const categoryApi = api.injectEndpoints({
   overrideExisting: false,
 })
 
-export const { useAllCategoriesQuery, useFilterCategoriesQuery, useByIdCategoryQuery, useCreateCategoryMutation, useUpdateCategoryMutation, useDeleteCategoryMutation } = categoryApi
+export const { useAllCategoriesQuery, useFilterCategoriesQuery, useByIdCategoryQuery, useCreateCategoryMutation, useUpdateCategoryMutation, useDeleteCategoryMutation } = categoryApi;

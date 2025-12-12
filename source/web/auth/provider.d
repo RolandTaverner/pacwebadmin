@@ -75,7 +75,8 @@ class AuthProvider
             throw new HTTPStatusException(HTTPStatus.forbidden, "user/password invalid");
         }
 
-        const(ubyte[]) passwordHash = sha256Of(password).dup;
+        const(ubyte[]) passwordHash = hexStringToByteArray(password);
+
         if (!equal(userInfo.passwordHash, passwordHash))
         {
             throw new HTTPStatusException(HTTPStatus.forbidden, "user/password invalid");

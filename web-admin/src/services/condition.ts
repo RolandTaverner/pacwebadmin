@@ -52,4 +52,4 @@ const conditionApi = api.injectEndpoints({
   overrideExisting: false,
 })
 
-export const { useAllConditionsQuery, useByIdConditionQuery, useCreateConditionMutation, useUpdateConditionMutation, useDeleteConditionMutation } = conditionApi
+export const { useAllConditionsQuery, useByIdConditionQuery, useCreateConditionMutation, useUpdateConditionMutation, useDeleteConditionMutation } = conditionApi;

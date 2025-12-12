@@ -2,13 +2,14 @@ import { api } from './api';
 
 import type {
   LoginRequest, LoginResponse, ProfileResponse
-} from './types'
+} from './types';
 
 const userApi = api.injectEndpoints({
   endpoints: (builder) => ({
     userProfile: builder.query<ProfileResponse, void>(
       {
         query: () => ({ url: '/user/profile' }),
+        transformResponse: (response: ProfileResponse): ProfileResponse => response,
         providesTags: (result, error) => [{ type: 'User' as const, id: '' }],
       }
     ),
@@ -29,4 +30,4 @@ const userApi = api.injectEndpoints({
   overrideExisting: false,
 })
 
-export const { useUserProfileQuery, useLoginUserMutation, useLogoutUserMutation } = userApi
+export const { useUserProfileQuery, useLoginUserMutation, useLogoutUserMutation } = userApi;

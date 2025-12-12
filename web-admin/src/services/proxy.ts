@@ -67,4 +67,4 @@ const proxyApi = api.injectEndpoints({
   overrideExisting: false,
 })
 
-export const { useAllProxiesQuery, useFilterProxiesQuery, useByIdProxyQuery, useCreateProxyMutation, useUpdateProxyMutation, useDeleteProxyMutation } = proxyApi
+export const { useAllProxiesQuery, useFilterProxiesQuery, useByIdProxyQuery, useCreateProxyMutation, useUpdateProxyMutation, useDeleteProxyMutation } = proxyApi;
