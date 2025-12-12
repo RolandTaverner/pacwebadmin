@@ -22,8 +22,18 @@ struct AuthInfo
 {
 @safe:
     string userName;
-    bool isReader;
-    bool isWriter;
+    bool reader;
+    bool writer;
+
+    bool isWriter() 
+    {
+        return writer;
+    }
+
+    bool isReader() 
+    {
+        return reader;
+    }
 }
 
 class AuthProvider
@@ -61,14 +71,23 @@ class AuthProvider
 
         AuthInfo ai = {
             userName: userInfo.userName,
-            isReader: userInfo.isReader,
-            isWriter: userInfo.isWriter
+            reader: userInfo.isReader,
+            writer: userInfo.isWriter
         };
         return ai;
     }
 
     string login(in string user, in string password) @safe
     {
+        if (m_noAuth)
+        {
+            JWTPayload payload = {
+                userName: "anybody",
+                createdAt: Clock.currTime(UTC())
+            };
+            return createToken("secret", JWTAlgorithm.HS512, payload);
+        }
+
         auto userInfo = user in m_users;
         if (userInfo == null)
         {
@@ -174,7 +193,8 @@ private:
         assert(userInfoRW.userName == "user");
         assert(equal(
                 userInfoRW.passwordHash,
-                hexStringToByteArray("a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b27796d9ad9f14"))
+                hexStringToByteArray(
+                "a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b27796d9ad9f14"))
         );
         assert(userInfoRW.isReader);
         assert(userInfoRW.isWriter);
@@ -184,7 +204,8 @@ private:
         assert(userInfoR.userName == "user");
         assert(equal(
                 userInfoR.passwordHash,
-                hexStringToByteArray("a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b27796d9ad9f14"))
+                hexStringToByteArray(
+                "a591a6d40bf420404a011733cfb7b190d62c65bf0bcda32b57b27796d9ad9f14"))
         );
         assert(userInfoR.isReader);
         assert(!userInfoR.isWriter);

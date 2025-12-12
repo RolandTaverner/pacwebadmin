@@ -4,7 +4,7 @@ import std.typecons : Nullable;
 
 import vibe.data.serialization : optional;
 import vibe.http.server;
-import vibe.web.auth : requiresAuth, anyAuth;
+import vibe.web.auth : requiresAuth, anyAuth, auth, Role;
 import vibe.web.rest;
 
 import web.auth.common;
@@ -22,13 +22,13 @@ interface ProxyAPI
     @anyAuth @method(HTTPMethod.GET) @path("/list/:id")
     ProxyDTO getById(in long _id);
 
-    @anyAuth @method(HTTPMethod.POST) @path("/list")
+    @auth(Role.writer) @method(HTTPMethod.POST) @path("/list")
     ProxyDTO create(@viaBody() in ProxyCreateDTO c);
 
-    @anyAuth @method(HTTPMethod.PUT) @path("/list/:id")
+    @auth(Role.writer) @method(HTTPMethod.PUT) @path("/list/:id")
     ProxyDTO update(in long _id, @viaBody() in ProxyUpdateDTO p);
 
-    @anyAuth @method(HTTPMethod.DELETE) @path("/list/:id")
+    @auth(Role.writer) @method(HTTPMethod.DELETE) @path("/list/:id")
     void remove(in long _id);
 
     mixin authInterfaceMethod;

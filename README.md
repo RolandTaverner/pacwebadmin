@@ -30,14 +30,13 @@ It is suitable for small LANs, home networks with a dedicated server, or standal
 
 **Lightweight and fast** - minimal resource footprint suitable for small LANs, home networks, or standalone machines.
 
+**JWT-based authentication (optional)** - kinda rudimentary at this moment, but.
 
 # Current state
 
 It basically works (see Roadmap).
 
 # Roadmap
-
-JWT-based authentication.
 
 Advanced input validation at backend and frontend.
 
@@ -278,7 +277,7 @@ By default service will listen on port 5000. You can change port at `/etc/pacweb
 
 # How to run
 
-# Locally
+## Locally
 
 Go to a project root.
 
@@ -304,30 +303,79 @@ wwwDir = "web-admin/dist"
 # Uncomment if you want to see access log in console output
 # accessLogToConsole = true
 
+# Uncomment if you want to enable authorization
+#authEnable = true
+#authUsersFile = ".local\users"
+
 # Uncomment if you have server key and certificate (this enables HTTPS)
 # certificateChainFile = ".local/server.crt"
 # privateKeyFile = ".local/server.key"
 ```
 
-## Debug
+Create file `.local\users`: (if authEnable = true, user "admin", password "admin")
+```
+admin:8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918:rw
+```
+
+### Debug
 
 Run at project root:
 ```bash
 ./debug/pacwebadmin --config ".local/pacwebadmin.conf"
 ```
 
-## Release
+### Release
 
 Run at project root:
 ```bash
 ./release/pacwebadmin --config ".local/pacwebadmin.conf"
 ```
 
-## Using dub
+### Using dub
 
 Run at project root:
 ```bash
 dub run -- --config ".local/pacwebadmin.conf"
+```
+
+# Configuration
+
+## Main configuration file
+
+```
+bindAddresses = ::,0.0.0.0
+port = 80
+dataDir = ".local\data"
+saveDir = ".local\save"
+serveCacheDir = ".local\servecache"
+servePath = "/pac/"
+logDir = ".local\log"
+wwwDir = "web-admin\dist"
+accessLogToConsole = false
+
+# Auth options
+authEnable = true
+authUsersFile = ".local\users"
+
+# HTTPS options
+certificateChainFile = ".local\localhost.crt"
+privateKeyFile = ".local\localhost.key"
+# trustedCertificateFile = ""
+```
+
+If `authEnable = false` the UI will still show login dialog but any user/password will be accepted.
+
+## Users configuration file
+
+Each line describes user. Line consists of 3 parts divided by colon.
+
+Format: `user:SHA256(password):access`
+- user - user name
+- password - password
+- access - user access options, may be `r` - read, `w` - write and read, `rw` - write and read (now `rw` == `wr` == `w`).
+
+```
+admin:8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918:rw
 ```
 
 # Backend API description

@@ -1,7 +1,7 @@
 module web.api.category;
 
 import vibe.http.server;
-import vibe.web.auth : requiresAuth, anyAuth;
+import vibe.web.auth : requiresAuth, anyAuth, auth, Role;
 import vibe.web.rest;
 
 import web.auth.common;
@@ -19,13 +19,13 @@ interface CategoryAPI
     @anyAuth @method(HTTPMethod.GET) @path("/list/:id")
     CategoryDTO getById(in long _id);
 
-    @anyAuth @method(HTTPMethod.POST) @path("/list")
+    @auth(Role.writer) @method(HTTPMethod.POST) @path("/list")
     CategoryDTO create(@viaBody() in CategoryInputDTO c);
 
-    @anyAuth @method(HTTPMethod.PUT) @path("/list/:id")
+    @auth(Role.writer) @method(HTTPMethod.PUT) @path("/list/:id")
     CategoryDTO update(in long _id, @viaBody() in CategoryInputDTO c);
 
-    @anyAuth @method(HTTPMethod.DELETE) @path("/list/:id")
+    @auth(Role.writer) @method(HTTPMethod.DELETE) @path("/list/:id")
     void remove(in long _id);
 
     mixin authInterfaceMethod;
