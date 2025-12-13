@@ -10,6 +10,7 @@ docker create --name pacwebadmin-ubuntu pacwebadmin-build
 
 docker cp pacwebadmin-ubuntu:/app/dist "${INSTDIR}/dist"
 docker cp pacwebadmin-ubuntu:/app/pacwebadmin "${INSTDIR}/"
+docker rm pacwebadmin-ubuntu
 
 cp ./install/ubuntu/scripts/* "${INSTDIR}/"
 

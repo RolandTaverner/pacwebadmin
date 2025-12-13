@@ -236,9 +236,40 @@ TODO
 
 # How to install
 
-# Ubuntu/systemd
+## Ubuntu/systemd
 
-Build (locally or in docker and extract files).
+You can build project using provided Dockerfile or manually.
+
+### Build using Docker
+
+Go to project root and run command
+
+```bash
+./install/ubuntu/create_install_from_docker.sh /tmp/pwa_dist
+```
+
+The following files will be created:
+
+```
+/tmp/pwa_dist
+├── install
+│   ├── dist
+│   │   ├── assets
+│   │   │   ├── index-7XOjUnRg.js
+│   │   │   └── index-D4geO1r3.css
+│   │   ├── index.html
+│   │   └── vite.svg
+│   ├── install.sh
+│   ├── pacwebadmin
+│   ├── remove.sh
+│   └── update.sh
+└── install.tar.gz
+```
+
+`install.tar.gz` contains archived `install` directory with its content. Copy `install.tar.gz` to target machine and unpack.
+
+### Build locally
+
 Copy files to target machine to some directory (for example, `install`) so directory structure will look like
 
 ```
@@ -252,6 +283,8 @@ Copy files to target machine to some directory (for example, `install`) so direc
 ├── install.sh                   // install script here
 └── pacwebadmin                  // executable here
 ```
+
+### Install
 
 Then execute commands
 
@@ -268,12 +301,13 @@ sudo ./install.sh
 - create log dir at /var/log/pacwebadmin
 - create dir for www stuff at /var/www/pacwebadmin
 - copy ./dist/* to /var/www/pacwebadmin
-- create config file at /etc/pacwebadmin.conf
+- create config file at /etc/pacwebadmin/pacwebadmin.conf
+- create users file at /etc/pacwebadmin/users (admin (password admin) and user (password user))
 - create systemd unit at /etc/systemd/system/pacwebadmin.service
 - exec systemctl daemon-reload && systemctl enable pacwebadmin && systemctl start pacwebadmin
 
 Everything except for executable and systemd unit will be chown'ed to `pacwebadmin:pacwebadmin`.
-By default service will listen on port 5000. You can change port at `/etc/pacwebadmin.conf`.
+By default service will listen on port 5000. You can change port at `/etc/pacwebadmin/pacwebadmin.conf`.
 
 # How to run
 
@@ -305,14 +339,14 @@ wwwDir = "web-admin/dist"
 
 # Uncomment if you want to enable authorization
 #authEnable = true
-#authUsersFile = ".local\users"
+#authUsersFile = ".local/users"
 
 # Uncomment if you have server key and certificate (this enables HTTPS)
 # certificateChainFile = ".local/server.crt"
 # privateKeyFile = ".local/server.key"
 ```
 
-Create file `.local\users`: (if authEnable = true, user "admin", password "admin")
+Create file `.local/users`: (if authEnable = true, user "admin", password "admin")
 ```
 admin:8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918:rw
 ```
@@ -345,21 +379,21 @@ dub run -- --config ".local/pacwebadmin.conf"
 ```
 bindAddresses = ::,0.0.0.0
 port = 80
-dataDir = ".local\data"
-saveDir = ".local\save"
-serveCacheDir = ".local\servecache"
+dataDir = ".local/data"
+saveDir = ".local/save"
+serveCacheDir = ".local/servecache"
 servePath = "/pac/"
-logDir = ".local\log"
-wwwDir = "web-admin\dist"
+logDir = ".local/log"
+wwwDir = "web-admin/dist"
 accessLogToConsole = false
 
 # Auth options
 authEnable = true
-authUsersFile = ".local\users"
+authUsersFile = ".local/users"
 
 # HTTPS options
-certificateChainFile = ".local\localhost.crt"
-privateKeyFile = ".local\localhost.key"
+certificateChainFile = ".local/localhost.crt"
+privateKeyFile = ".local/localhost.key"
 # trustedCertificateFile = ""
 ```
 
@@ -374,8 +408,11 @@ Format: `user:SHA256(password):access`
 - password - password
 - access - user access options, may be `r` - read, `w` - write and read, `rw` - write and read (now `rw` == `wr` == `w`).
 
+For example, if you want to have user `admin` (password "admin") with `rw` access and `user` (password "user") with `r` access then `users` file should look like:
+
 ```
 admin:8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918:rw
+user:04f8996da763b7a969b1028ee3007569eaf3a635486ddab211d512c85b9df8fb:r
 ```
 
 # Backend API description
