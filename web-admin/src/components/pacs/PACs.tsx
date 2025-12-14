@@ -19,6 +19,9 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+import type { Row, FilterFn, FilterMeta } from '@tanstack/react-table';
+import { filterFns, getFilteredRowModel } from '@tanstack/react-table';
+
 import {
   MRT_EditActionButtons,
   MaterialReactTable,
@@ -35,7 +38,7 @@ import type { PAC, PACCreateRequest, PACUpdateRequest, ProxyRuleIdWithPriority, 
 import { MutationError, getErrorMessage } from '../errors/errors';
 import ProxyRuleSelector from './ProxyRuleSelector';
 import CheckboxEdit from '../common/CheckboxEdit';
-
+import ProxyCell, { displayProxyString } from '../common/ProxyCell';
 
 class RowData {
   id: number;
@@ -47,8 +50,7 @@ class RowData {
   saveToFSPath: string;
   fallbackProxy?: Proxy;
   fallbackProxyId?: number;
-  fallbackProxyType?: string;
-  fallbackProxyAddress?: string;
+  fallbackProxyDisplayString?: string;
   proxyRuleIdsWithPriority?: ProxyRuleIdWithPriority[];
 
   constructor(
@@ -71,8 +73,7 @@ class RowData {
     this.saveToFSPath = saveToFSPath;
     this.fallbackProxy = fallbackProxy;
     this.fallbackProxyId = fallbackProxy?.id;
-    this.fallbackProxyType = fallbackProxy?.type;
-    this.fallbackProxyAddress = fallbackProxy?.address;
+    this.fallbackProxyDisplayString = displayProxyString(fallbackProxy);
     this.proxyRuleIdsWithPriority = proxyRuleIdsWithPriority;
   }
 }
@@ -87,6 +88,27 @@ function RowDataFromPAC(p: PAC): RowData {
     p.proxyRules.map<ProxyRuleIdWithPriority>(i => ({ proxyRuleId: i.proxyRule.id, priority: i.priority }))
   );
 }
+
+function fallbackProxyFilterFn(row: Row<RowData>, columnId: string, filterValue: any, addMeta: (meta: FilterMeta) => void): boolean {
+  if (row.original.fallbackProxyDisplayString == null) {
+    return false;
+  }
+
+  return row.original.fallbackProxyDisplayString.toLowerCase().includes(filterValue.toLowerCase());
+}
+
+const customGlobalFilter: FilterFn<RowData> = (row: Row<RowData>, columnId: string, filterValue: string, addMeta: (meta: FilterMeta) => void) => {
+  const customFilterFn = row
+    .getVisibleCells()
+    .find((c) => c.column.id === columnId)
+    ?.column.getFilterFn();
+
+  if (typeof customFilterFn === "function") {
+    return customFilterFn(row as Row<RowData>, columnId, filterValue, addMeta);
+  }
+
+  return filterFns.includesString(row as Row<RowData>, columnId, filterValue, addMeta);
+};
 
 function PACs() {
   console.debug("=================== PACs");
@@ -105,12 +127,11 @@ function PACs() {
   const [deletePAC, deletePACResult] = useDeletePACMutation()
 
   const rowsData = useMemo<RowData[]>(() => pacs.map(p => RowDataFromPAC(p)), [pacs]);
-  const proxiesSelectData = useMemo<DropdownOption[]>(() => proxies.map(p => ({ label: p.id + ' ' + p.type + ' ' + p.address, value: p.id })), [proxies]);
-
-  const boolValues = [
-    'true',
-    'false',
-  ]
+  const proxiesSelectData = useMemo<DropdownOption[]>(() => proxies.map(p => (
+    {
+      label: displayProxyString(p),
+      value: p.id
+    })), [proxies]);
 
   const columns = useMemo<MRT_ColumnDef<RowData>[]>(
     () => [
@@ -123,6 +144,7 @@ function PACs() {
       {
         accessorKey: 'name',
         header: 'Name',
+        maxSize: 100,
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.name,
@@ -141,7 +163,7 @@ function PACs() {
         header: 'Serve',
         size: 80,
         Cell: ({ cell }) => (
-          <Checkbox checked={cell.row.original.serve} disabled name='serve'/>
+          <Checkbox checked={cell.row.original.serve} disabled name='serve' />
         ),
         Edit: ({ cell, column, row, table }) => {
           const onChange = (checked: boolean) => {
@@ -149,7 +171,7 @@ function PACs() {
             row._valuesCache[column.id] = checked;
           };
           const checkedInitial: boolean = cell.row.original.serve ? cell.row.original.serve : false;
-          return <CheckboxEdit required={true} label='Serve' checkedInitial={checkedInitial} onChange={onChange}/>
+          return <CheckboxEdit required={true} label='Serve' checkedInitial={checkedInitial} onChange={onChange} />
         },
       },
       {
@@ -181,7 +203,7 @@ function PACs() {
             row._valuesCache[column.id] = checked;
           };
           const checkedInitial: boolean = cell.row.original.saveToFS ? cell.row.original.saveToFS : false;
-          return <CheckboxEdit required={true} label='Save' checkedInitial={checkedInitial} onChange={onChange}/>
+          return <CheckboxEdit required={true} label='Save' checkedInitial={checkedInitial} onChange={onChange} />
         },
       },
       {
@@ -203,9 +225,7 @@ function PACs() {
       {
         accessorKey: 'fallbackProxyId',
         Cell: ({ row }) => (
-          <div>
-            {row.original.fallbackProxyType + ' ' + row.original.fallbackProxyAddress}
-          </div>
+          <ProxyCell proxy={row.original.fallbackProxy} maxWidth={500} />
         ),
         header: 'Fallback proxy',
         editVariant: 'select',
@@ -213,6 +233,7 @@ function PACs() {
         muiEditTextFieldProps: {
           required: true,
         },
+        filterFn: fallbackProxyFilterFn,
       },
     ],
     [validationErrors, proxiesSelectData],
@@ -235,10 +256,10 @@ function PACs() {
     const createRequest: PACCreateRequest = {
       name: values.name,
       description: values.description ? values.description : '',
-      serve: values.serve,
-      servePath: values.servePath,
-      saveToFS: values.saveToFS,
-      saveToFSPath: values.saveToFSPath,
+      serve: (typeof values.serve === 'boolean') ? values.serve : false,
+      servePath: values.servePath != null ? values.servePath : '',
+      saveToFS: (typeof values.saveToFS === 'boolean') ? values.saveToFS : false,
+      saveToFSPath: values.saveToFSPath != null ? values.saveToFSPath : '',
       fallbackProxyId: values.fallbackProxyId,
       proxyRules: values.proxyRuleIdsWithPriority ? values.proxyRuleIdsWithPriority : [],
     };
@@ -399,6 +420,12 @@ function PACs() {
         Create new PAC
       </Button>
     ),
+    filterFns: {
+      customGlobalFilter: customGlobalFilter,
+    },
+    globalFilterFn: 'customGlobalFilter',
+    getFilteredRowModel: getFilteredRowModel(),
+    manualFiltering: false,
     state: {
       isLoading: isFetchingPACs || isFetchingProxies,
       isSaving: createPACResult.isLoading || updatePACResult.isLoading || deletePACResult.isLoading,
