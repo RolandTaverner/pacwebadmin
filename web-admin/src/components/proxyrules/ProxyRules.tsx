@@ -66,8 +66,6 @@ function RowDataFromProxyRule(p: ProxyRule): RowData {
 }
 
 function proxyFilterFn(row: Row<RowData>, columnId: string, filterValue: any, addMeta: (meta: FilterMeta) => void): boolean {
-  console.debug("proxyFilterFn", columnId, filterValue);
-
   if (row.original.displayProxyString == null) {
     return false;
   }
@@ -76,7 +74,6 @@ function proxyFilterFn(row: Row<RowData>, columnId: string, filterValue: any, ad
 }
 
 const customGlobalFilter: FilterFn<RowData> = (row: Row<RowData>, columnId: string, filterValue: string, addMeta: (meta: FilterMeta) => void) => {
-  console.debug("customGlobalFilter", columnId, filterValue);
   const customFilterFn = row
     .getVisibleCells()
     .find((c) => c.column.id === columnId)

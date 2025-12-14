@@ -17,6 +17,9 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+import type { Row, FilterFn, FilterMeta } from '@tanstack/react-table';
+import { filterFns, getFilteredRowModel } from '@tanstack/react-table';
+
 import {
   MRT_EditActionButtons,
   MaterialReactTable,
@@ -53,6 +56,27 @@ class RowData {
 function RowDataFromCondition(p: Condition): RowData {
   return new RowData(p.id, p.type, p.expression, p.category);
 }
+
+function categoryFilterFn(row: Row<RowData>, columnId: string, filterValue: any, addMeta: (meta: FilterMeta) => void): boolean {
+  if (row.original.categoryName == null) {
+    return false;
+  }
+
+  return row.original.categoryName.toLowerCase().includes(filterValue.toLowerCase());
+}
+
+const customGlobalFilter: FilterFn<RowData> = (row: Row<RowData>, columnId: string, filterValue: string, addMeta: (meta: FilterMeta) => void) => {
+  const customFilterFn = row
+    .getVisibleCells()
+    .find((c) => c.column.id === columnId)
+    ?.column.getFilterFn();
+
+  if (typeof customFilterFn === "function") {
+    return customFilterFn(row as Row<RowData>, columnId, filterValue, addMeta);
+  }
+
+  return filterFns.includesString(row as Row<RowData>, columnId, filterValue, addMeta);
+};
 
 const conditionTypes = [
   'host_domain_only',
@@ -144,6 +168,7 @@ function Conditions() {
         muiEditTextFieldProps: {
           required: true,
         },
+        filterFn: categoryFilterFn,
       },
     ],
     [validationErrors, categoriesSelectData],
@@ -292,6 +317,12 @@ function Conditions() {
         Create new Condition
       </Button>
     ),
+    filterFns: {
+      customGlobalFilter: customGlobalFilter,
+    },
+    globalFilterFn: 'customGlobalFilter',
+    getFilteredRowModel: getFilteredRowModel(),
+    manualFiltering: false,
     state: {
       isLoading: isFetchingConditions || isFetchingCategories,
       isSaving: createConditionResult.isLoading || updateConditionResult.isLoading || deleteConditionResult.isLoading,
