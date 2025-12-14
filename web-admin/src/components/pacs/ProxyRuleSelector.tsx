@@ -9,11 +9,14 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+import type { Row, FilterMeta } from '@tanstack/react-table';
+
 import { MaterialReactTable, type MRT_ColumnDef } from 'material-react-table';
 
 import { useAllProxyRulesQuery } from '../../services/proxyrule';
-import type { ProxyRuleIdWithPriority } from '../../services/types';
+import type { Proxy, ProxyRuleIdWithPriority } from '../../services/types';
 
+import ProxyCell, { displayProxyString } from '../common/ProxyCell';
 import ProxyRuleSelectorDialog from './ProxyRuleSelectorDialog';
 
 interface ProxyRuleSelectorProps {
@@ -21,11 +24,30 @@ interface ProxyRuleSelectorProps {
   onSelectionChange: (proxyRuleIdsWithPriority: ProxyRuleIdWithPriority[]) => void;
 }
 
-interface RowData {
+class RowData {
   proxyRuleId?: number;
   proxyRuleName?: string;
-  proxyRuleProxy: string;
-  priority: number;
+  proxy?: Proxy;
+  displayProxyString: string;
+  priority?: number;
+
+  constructor(proxyRuleId?: number, proxyRuleName?: string, proxy?: Proxy, priority?: number) {
+    this.proxyRuleId = proxyRuleId;
+    this.proxyRuleName = proxyRuleName;
+    this.proxy = proxy;
+    this.displayProxyString = displayProxyString(proxy);
+    this.priority = priority;
+  }
+}
+
+function proxyFilterFn(row: Row<RowData>, columnId: string, filterValue: any, addMeta: (meta: FilterMeta) => void): boolean {
+  console.debug("proxyFilterFn", columnId, filterValue);
+
+  if (row.original.displayProxyString == null) {
+    return false;
+  }
+
+  return row.original.displayProxyString.toLowerCase().includes(filterValue.toLowerCase());
 }
 
 const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
@@ -44,19 +66,34 @@ const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
       if (a.priority != b.priority) return a.priority - b.priority;
       return (a.proxyRule ? a.proxyRule.id : 0) - (b.proxyRule ? b.proxyRule.id : 0);
     })
-    .map<RowData>(i => ({
-      proxyRuleId: i.proxyRule?.id,
-      proxyRuleName: i.proxyRule?.name,
-      proxyRuleProxy: i.proxyRule?.proxy.type + ' ' + i.proxyRule?.proxy.address,
-      priority: i.priority,
-    }));
+    .map<RowData>(i => (new RowData(i.proxyRule?.id, i.proxyRule?.name, i.proxyRule?.proxy, i.priority)));
 
 
   const columns: MRT_ColumnDef<RowData>[] = [
-    { accessorKey: 'proxyRuleId', header: 'Proxy rule ID', maxSize: 100 },
-    { accessorKey: 'proxyRuleName', header: 'Name' },
-    { accessorKey: 'proxyRuleProxy', header: 'Proxy' },
-    { accessorKey: 'priority', header: 'Priority', maxSize: 100 },
+    {
+      accessorKey: 'proxyRuleId',
+      header: 'Proxy rule ID',
+      maxSize: 100
+    },
+    {
+      accessorKey: 'proxyRuleName',
+      header: 'Name',
+      maxSize: 100
+    },
+    {
+      accessorKey: 'proxy',
+      header: 'Proxy',
+      size: 200,
+      Cell: ({ row }) => (
+        <ProxyCell proxy={row.original.proxy} maxWidth={200} />
+      ),
+      filterFn: proxyFilterFn,
+    },
+    {
+      accessorKey: 'priority',
+      header: 'Priority',
+      maxSize: 90
+    },
   ];
 
   return (

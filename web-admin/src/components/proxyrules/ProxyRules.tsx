@@ -19,10 +19,14 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+import type { Row, FilterFn, FilterMeta } from '@tanstack/react-table';
+import { filterFns, getFilteredRowModel } from '@tanstack/react-table';
+
 import {
   MRT_EditActionButtons,
   MaterialReactTable,
   type MRT_ColumnDef,
+  type MRT_FilterFn,
   type MRT_Row,
   type MRT_TableOptions,
   useMaterialReactTable,
@@ -35,6 +39,7 @@ import type { ProxyRule, ProxyRuleCreateRequest, ProxyRuleUpdateRequest, Proxy }
 import { MutationError, getErrorMessage } from '../errors/errors';
 import ConditionSelector from './ConditionSelector';
 import CheckboxEdit from '../common/CheckboxEdit';
+import ProxyCell, { displayProxyString } from '../common/ProxyCell';
 
 class RowData {
   id: number;
@@ -42,10 +47,8 @@ class RowData {
   enabled?: boolean;
   proxy?: Proxy;
   proxyId?: number;
-  proxyType?: string;
-  proxyAddress?: string;
+  displayProxyString?: string;
   conditionIds?: number[];
-
 
   constructor(id: number, name: string, enabled?: boolean, proxy?: Proxy, conditionIds?: number[]) {
     this.id = id;
@@ -53,8 +56,7 @@ class RowData {
     this.enabled = enabled;
     this.proxy = proxy;
     this.proxyId = proxy?.id;
-    this.proxyType = proxy?.type;
-    this.proxyAddress = proxy?.address;
+    this.displayProxyString = displayProxyString(proxy);
     this.conditionIds = conditionIds;
   }
 }
@@ -62,6 +64,30 @@ class RowData {
 function RowDataFromProxyRule(p: ProxyRule): RowData {
   return new RowData(p.id, p.name, p.enabled, p.proxy, p.conditions.map(c => c.id));
 }
+
+function proxyFilterFn(row: Row<RowData>, columnId: string, filterValue: any, addMeta: (meta: FilterMeta) => void): boolean {
+  console.debug("proxyFilterFn", columnId, filterValue);
+
+  if (row.original.displayProxyString == null) {
+    return false;
+  }
+
+  return row.original.displayProxyString.toLowerCase().includes(filterValue.toLowerCase());
+}
+
+const customGlobalFilter: FilterFn<RowData> = (row: Row<RowData>, columnId: string, filterValue: string, addMeta: (meta: FilterMeta) => void) => {
+  console.debug("customGlobalFilter", columnId, filterValue);
+  const customFilterFn = row
+    .getVisibleCells()
+    .find((c) => c.column.id === columnId)
+    ?.column.getFilterFn();
+
+  if (typeof customFilterFn === "function") {
+    return customFilterFn(row as Row<RowData>, columnId, filterValue, addMeta);
+  }
+
+  return filterFns.includesString(row as Row<RowData>, columnId, filterValue, addMeta);
+};
 
 function ProxyRules() {
   console.debug("=================== ProxyRules");
@@ -80,12 +106,11 @@ function ProxyRules() {
   const [deleteProxyRule, deleteProxyRuleResult] = useDeleteProxyRuleMutation()
 
   const rowsData = useMemo<RowData[]>(() => proxyrules.map(p => RowDataFromProxyRule(p)), [proxyrules]);
-  const proxiesSelectData = useMemo<DropdownOption[]>(() => proxies.map(p => ({ label: p.id + ' ' + p.type + ' ' + p.address, value: p.id })), [proxies]);
-
-  const boolValues = [
-    'true',
-    'false',
-  ]
+  const proxiesSelectData = useMemo<DropdownOption[]>(() => proxies.map(p => (
+    {
+      label: displayProxyString(p),
+      value: p.id
+    })), [proxies]);
 
   const columns = useMemo<MRT_ColumnDef<RowData>[]>(
     () => [
@@ -125,15 +150,13 @@ function ProxyRules() {
             row._valuesCache[column.id] = checked;
           };
           const checkedInitial: boolean = cell.row.original.enabled ? cell.row.original.enabled : false;
-          return <CheckboxEdit required={true} label='Enabled' checkedInitial={checkedInitial} onChange={onChange}/>
+          return <CheckboxEdit required={true} label='Enabled' checkedInitial={checkedInitial} onChange={onChange} />
         },
       },
       {
         accessorKey: 'proxyId',
         Cell: ({ row }) => (
-          <div>
-            {row.original.proxyType + ' ' + row.original.proxyAddress}
-          </div>
+          <ProxyCell proxy={row.original.proxy} maxWidth={500} />
         ),
         header: 'Proxy',
         size: 300,
@@ -142,6 +165,7 @@ function ProxyRules() {
         muiEditTextFieldProps: {
           required: true,
         },
+        filterFn: proxyFilterFn,
       },
     ],
     [validationErrors, proxiesSelectData],
@@ -161,7 +185,7 @@ function ProxyRules() {
     }
     setValidationErrors({});
 
-    const createRequest: ProxyRuleCreateRequest = { name: values.name, enabled: values.enabled === 'true', proxyId: values.proxyId, conditionIds: values.conditionIds };
+    const createRequest: ProxyRuleCreateRequest = { name: values.name, enabled: values.enabled, proxyId: values.proxyId, conditionIds: values.conditionIds };
 
     await createProxyRule(createRequest).unwrap()
       .then((value: ProxyRule) => {
@@ -313,6 +337,12 @@ function ProxyRules() {
         Create new ProxyRule
       </Button>
     ),
+    filterFns: {
+      customGlobalFilter: customGlobalFilter,
+    },
+    globalFilterFn: 'customGlobalFilter',
+    getFilteredRowModel: getFilteredRowModel(),
+    manualFiltering: false,
     state: {
       isLoading: isFetchingProxyRules || isFetchingProxies,
       isSaving: createProxyRuleResult.isLoading || updateProxyRuleResult.isLoading || deleteProxyRuleResult.isLoading,
