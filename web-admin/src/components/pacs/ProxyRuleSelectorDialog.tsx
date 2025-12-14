@@ -13,7 +13,7 @@ import { MaterialReactTable, type MRT_ColumnDef } from 'material-react-table';
 import type { Updater, RowSelectionState } from '@tanstack/react-table';
 
 import type { ProxyRule } from '../../services/types';
-
+import { displayProxyString } from '../common/ProxyCell';
 
 interface ProxyRuleSelectorState {
   state: RowSelectionState;
@@ -35,7 +35,7 @@ class RowData {
 }
 
 function RowDataFromProxyRule(p: ProxyRule): RowData {
-  return new RowData(p.id, p.name, p.enabled, p.proxy.type + ' ' + p.proxy.address);
+  return new RowData(p.id, p.name, p.enabled, displayProxyString(p.proxy));
 }
 
 const ProxyRuleSelectorDialog: React.FC<{

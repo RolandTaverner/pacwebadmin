@@ -9,14 +9,12 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import type { Row, FilterMeta } from '@tanstack/react-table';
-
 import { MaterialReactTable, type MRT_ColumnDef } from 'material-react-table';
 
 import { useAllProxyRulesQuery } from '../../services/proxyrule';
 import type { Proxy, ProxyRuleIdWithPriority } from '../../services/types';
 
-import ProxyCell, { displayProxyString } from '../common/ProxyCell';
+import { displayProxyString } from '../common/ProxyCell';
 import ProxyRuleSelectorDialog from './ProxyRuleSelectorDialog';
 
 interface ProxyRuleSelectorProps {
@@ -38,16 +36,6 @@ class RowData {
     this.displayProxyString = displayProxyString(proxy);
     this.priority = priority;
   }
-}
-
-function proxyFilterFn(row: Row<RowData>, columnId: string, filterValue: any, addMeta: (meta: FilterMeta) => void): boolean {
-  console.debug("proxyFilterFn", columnId, filterValue);
-
-  if (row.original.displayProxyString == null) {
-    return false;
-  }
-
-  return row.original.displayProxyString.toLowerCase().includes(filterValue.toLowerCase());
 }
 
 const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
@@ -81,13 +69,9 @@ const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
       maxSize: 100
     },
     {
-      accessorKey: 'proxy',
+      accessorKey: 'displayProxyString',
       header: 'Proxy',
       size: 200,
-      Cell: ({ row }) => (
-        <ProxyCell proxy={row.original.proxy} maxWidth={200} />
-      ),
-      filterFn: proxyFilterFn,
     },
     {
       accessorKey: 'priority',
