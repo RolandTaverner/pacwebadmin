@@ -4,6 +4,7 @@ import std.algorithm.iteration : map;
 import std.algorithm.mutation : SwapStrategy;
 import std.algorithm.sorting : sort;
 import std.array;
+import std.typecons : Nullable;
 
 import model.entities.category;
 import model.entities.proxy;
@@ -51,18 +52,32 @@ import web.api.pac;
     return ProxyRulePriorityDTO(toDTO(prp.proxyRule()), prp.priority());
 }
 
-@safe PACDTO toDTO(in PAC p) pure
+@safe PACDTO toDTO(in PAC p, bool list = false) pure
 {
-    const auto proxyRules = p.proxyRules()
+    if (list)
+    {
+        return PACDTO(p.id(),
+            p.name(),
+            p.description(),
+            Nullable!(ProxyRulePriorityDTO[])(),
+            p.serve(),
+            p.servePath(),
+            p.saveToFS(),
+            p.saveToFSPath(),
+            toDTO(p.fallbackProxy()));
+    }
+
+    auto proxyRules = p.proxyRules()
         .map!(pr => toDTO(pr))
         .array
         .sort!((a, b) => a.priority < b.priority, SwapStrategy.stable)
         .array;
 
+    Nullable!(ProxyRulePriorityDTO[]) prs = proxyRules;
     return PACDTO(p.id(),
         p.name(),
         p.description(),
-        proxyRules,
+        prs,
         p.serve(),
         p.servePath(),
         p.saveToFS(),

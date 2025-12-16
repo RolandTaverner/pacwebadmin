@@ -32,7 +32,7 @@ class PACService : PACAPI
         PACList response =
         {
             m_model.getPACs()
-                .map!(c => toDTO(c))
+                .map!(c => toDTO(c, true))
                 .array
                 .sort!((a, b) => a.id < b.id, SwapStrategy.stable)
                 .array

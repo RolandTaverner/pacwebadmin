@@ -85,7 +85,7 @@ function RowDataFromPAC(p: PAC): RowData {
     p.serve, p.servePath,
     p.saveToFS, p.saveToFSPath,
     p.fallbackProxy,
-    p.proxyRules.map<ProxyRuleIdWithPriority>(i => ({ proxyRuleId: i.proxyRule.id, priority: i.priority }))
+    p.proxyRules?.map<ProxyRuleIdWithPriority>(i => ({ proxyRuleId: i.proxyRule.id, priority: i.priority }))
   );
 }
 

@@ -2,7 +2,7 @@ module web.api.pac;
 
 import std.typecons : Nullable;
 
-import vibe.data.serialization : optional;
+import vibe.data.serialization : embedNullable, optional;
 import vibe.http.server;
 import vibe.web.auth : requiresAuth, anyAuth, auth, Role;
 import vibe.web.rest;
@@ -22,10 +22,10 @@ interface PACAPI
     PACDTO getById(in long _id);
 
     @auth(Role.writer) @method(HTTPMethod.POST) @path("/list")
-    PACDTO create(@viaBody() in PACCreateDTO c);
+    PACDTO create(@viaBody()  in PACCreateDTO c);
 
     @auth(Role.writer) @method(HTTPMethod.PUT) @path("/list/:id")
-    PACDTO update(in long _id, @viaBody() in PACUpdateDTO c);
+    PACDTO update(in long _id, @viaBody()  in PACUpdateDTO c);
 
     @auth(Role.writer) @method(HTTPMethod.DELETE) @path("/list/:id")
     void remove(in long _id);
@@ -103,7 +103,7 @@ struct PACDTO
     @safe this(in long id,
         in string name,
         in string description,
-        in ProxyRulePriorityDTO[] proxyRules,
+        in Nullable!(ProxyRulePriorityDTO[]) proxyRules,
         in bool serve,
         in string servePath,
         in bool saveToFS,
@@ -114,10 +114,14 @@ struct PACDTO
         this.name = name;
         this.description = description;
 
-        //this.proxyRules = proxyRules.dup;
-        foreach (pr; proxyRules)
+        if (!proxyRules.isNull())
         {
-            this.proxyRules ~= ProxyRulePriorityDTO(pr);
+            this.proxyRules = [];
+
+            foreach (pr; proxyRules.get())
+            {
+                this.proxyRules.get() ~= ProxyRulePriorityDTO(pr);
+            }
         }
 
         this.serve = serve;
@@ -127,29 +131,10 @@ struct PACDTO
         this.fallbackProxy = ProxyDTO(fallbackProxy);
     }
 
-    @safe this(in PACDTO other) pure
-    {
-        this.id = other.id;
-        this.name = other.name;
-        this.description = other.description;
-
-        //this.proxyRules = other.proxyRules.dup;
-        foreach (pr; other.proxyRules)
-        {
-            this.proxyRules ~= ProxyRulePriorityDTO(pr);
-        }
-
-        this.serve = other.serve;
-        this.servePath = other.servePath;
-        this.saveToFS = other.saveToFS;
-        this.saveToFSPath = other.saveToFSPath;
-        this.fallbackProxy = ProxyDTO(other.fallbackProxy);
-    }
-
     long id;
     string name;
     string description;
-    ProxyRulePriorityDTO[] proxyRules;
+    @embedNullable Nullable!(ProxyRulePriorityDTO[]) proxyRules;
     bool serve;
     string servePath;
     bool saveToFS;
@@ -164,7 +149,7 @@ struct ProxyRulePriorityList
 
 unittest
 {
-    const ProxyRulePriorityDTO[] proxyRules = [];
+    const Nullable!(ProxyRulePriorityDTO[]) proxyRules = [];
 
     auto p = PACDTO(1, "name", "desc", proxyRules, true, "serve", true, "save", ProxyDTO(1, "DIRECT", "", ""));
 

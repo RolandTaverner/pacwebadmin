@@ -60,7 +60,7 @@ export interface PAC {
   name: string;
   description: string;
 
-  proxyRules: ProxyRuleWithPriority[];
+  proxyRules?: ProxyRuleWithPriority[];
 
   serve: boolean;
   servePath: string;

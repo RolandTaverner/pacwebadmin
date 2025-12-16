@@ -653,42 +653,6 @@ Response
       "id": 1,
       "name": "pac 1",
       "description": "some PAC",
-      "proxyRules": [
-        {
-          "proxyRule": {
-            "id": 1,
-            "proxy": {
-              "id": 1,
-              "type": "HTTP",
-              "address": "127.0.0.1:8080",
-              "description": "local proxy"
-            },
-            "enabled": true,
-            "name": "some proxy group",
-            "conditions": [
-              {
-                "id": 1,
-                "type": "host_domain_only",
-                "expression": "google.com",
-                "category": {
-                  "id": 2,
-                  "name": "work"
-                }
-              },
-              {
-                "id": 2,
-                "type": "host_domain_subdomain",
-                "expression": "memes.com",
-                "category": {
-                  "id": 1,
-                  "name": "fun"
-                }
-              }
-            ]
-          },
-          "priority": 1
-        }
-      ],
       "serve": true,
       "servePath": "pac1.pac",
       "saveToFS": false,
