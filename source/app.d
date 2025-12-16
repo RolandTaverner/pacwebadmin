@@ -52,7 +52,7 @@ int main(string[] args)
 	AuthProvider authProvider = new AuthProvider(opts.authUsersFile, !opts.authEnable, "aaa");
 
 	Service restService = new Service(model, authProvider);
-	PACHandler pacHandler = new PACHandler(pacManager, opts.servePath);
+	PACHandler pacHandler = new PACHandler(model, pacManager, authProvider, opts.servePath, opts.servePreviewPath);
 
 	auto restSettings = new RestInterfaceSettings;
 	//restSettings.baseURL = URL(opts.baseURL);
@@ -65,6 +65,11 @@ int main(string[] args)
 	router.match(HTTPMethod.GET, opts.servePath ~ "*",
 		(HTTPServerRequest req, HTTPServerResponse res) @safe {
 		pacHandler.handlePACRequest(req, res);
+	});
+
+	router.match(HTTPMethod.GET, opts.servePreviewPath ~ "*",
+		(HTTPServerRequest req, HTTPServerResponse res) @safe {
+		pacHandler.handlePACPreviewRequest(req, res);
 	});
 
 	if (!opts.wwwDir.empty)

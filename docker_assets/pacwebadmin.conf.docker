@@ -1,6 +1,7 @@
 bindAddresses = ::,0.0.0.0
 port = 80
 servePath = "/pac/"
+servePreviewPath = "/preview/"
 dataDir = "/app/data"
 saveDir = "/app/save"
 serveCacheDir = "/app/servecache"

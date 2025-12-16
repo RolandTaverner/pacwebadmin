@@ -73,6 +73,7 @@ cat << EOF > "${confDir}/pacwebadmin.conf"
 bindAddresses = ::,0.0.0.0
 port = 80
 servePath = "/pac/"
+servePreviewPath = "/preview/"
 dataDir = "${baseDataDir}/data"
 saveDir = "${baseDataDir}/save"
 serveCacheDir = "${baseDataDir}/servecache"
