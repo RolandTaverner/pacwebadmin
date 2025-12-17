@@ -6,8 +6,6 @@ import {
   Typography
 } from '@mui/material';
 
-import Divider from '@mui/material/Divider';
-
 interface CheckboxEditProps {
   label: string,
   required: boolean,

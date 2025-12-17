@@ -10,7 +10,7 @@ import Proxies from '../proxies/Proxies';
 import Conditions from '../conditions/Conditions';
 import ProxyRules from '../proxyrules/ProxyRules';
 import PACs from '../pacs/PACs';
-
+import Dashboard from '../dashboard/Dashboard';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -68,32 +68,37 @@ function Admin() {
             aria-label="Vertical tabs"
             sx={{ borderRight: 1, borderColor: 'divider' }}
           >
-            <Tab label="PAC" {...a11yProps(0)} />
-            <Tab label="Proxy rules" {...a11yProps(1)} />
-            <Tab label="Conditions" {...a11yProps(2)} />
-            <Tab label="Proxies" {...a11yProps(3)} />
-            <Tab label="Categories" {...a11yProps(4)} />
-            <Tab label="About" {...a11yProps(5)} />
+            <Tab label="Dashboard" {...a11yProps(0)} />
+            <Tab label="PAC" {...a11yProps(1)} />
+            <Tab label="Proxy rules" {...a11yProps(2)} />
+            <Tab label="Conditions" {...a11yProps(3)} />
+            <Tab label="Proxies" {...a11yProps(4)} />
+            <Tab label="Categories" {...a11yProps(5)} />
+            <Tab label="About" {...a11yProps(6)} />
           </Tabs>
         </Box>
 
         <Box sx={{ bgcolor: 'background.paper' }}>
           <TabPanel value={value} index={0}>
+            <Dashboard />
+          </TabPanel>
+
+          <TabPanel value={value} index={1}>
             <PACs />
           </TabPanel>
-          <TabPanel value={value} index={1}>
+          <TabPanel value={value} index={2}>
             <ProxyRules />
           </TabPanel>
-          <TabPanel value={value} index={2}>
+          <TabPanel value={value} index={3}>
             <Conditions />
           </TabPanel>
-          <TabPanel value={value} index={3}>
+          <TabPanel value={value} index={4}>
             <Proxies />
           </TabPanel>
-          <TabPanel value={value} index={4}>
+          <TabPanel value={value} index={5}>
             <Categories />
           </TabPanel>
-          <TabPanel value={value} index={5}>
+          <TabPanel value={value} index={6}>
             TODO
           </TabPanel>
         </Box>
