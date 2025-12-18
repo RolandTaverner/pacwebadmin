@@ -20,6 +20,8 @@ import web.service;
 
 import options;
 
+enum PACPreviewPath = "/api/pac/preview/";
+
 int main(string[] args)
 {
 	string configPath = "pacwebadmin.conf";
@@ -52,24 +54,40 @@ int main(string[] args)
 	AuthProvider authProvider = new AuthProvider(opts.authUsersFile, !opts.authEnable, "aaa");
 
 	Service restService = new Service(model, authProvider);
-	PACHandler pacHandler = new PACHandler(model, pacManager, authProvider, opts.servePath, opts.servePreviewPath);
+	PACHandler pacHandler = new PACHandler(model, pacManager, authProvider, opts.servePath, PACPreviewPath);
 
 	auto restSettings = new RestInterfaceSettings;
 	//restSettings.baseURL = URL(opts.baseURL);
-	//restSettings.allowedOrigins = [];
+	//restSettings.allowedOrigins = ["*"];
 
 	auto router = new URLRouter;
 	registerRestInterface(router, restService, restSettings);
 	//router.get("/myapi.js", serveRestJSClient!APIRoot(restSettings));
 
+	// PAC serve
 	router.match(HTTPMethod.GET, opts.servePath ~ "*",
 		(HTTPServerRequest req, HTTPServerResponse res) @safe {
 		pacHandler.handlePACRequest(req, res);
 	});
 
-	router.match(HTTPMethod.GET, opts.servePreviewPath ~ "*",
+	// PAC preview
+	router.match(HTTPMethod.GET, PACPreviewPath ~ "*",
 		(HTTPServerRequest req, HTTPServerResponse res) @safe {
 		pacHandler.handlePACPreviewRequest(req, res);
+	});
+
+	// OPTIONS handler for PAC preview
+	router.match(HTTPMethod.OPTIONS, PACPreviewPath ~ "*",
+		(HTTPServerRequest req, HTTPServerResponse res) @safe {
+		res.headers["Access-Control-Allow-Methods"] = "OPTIONS, GET";
+
+		if ("Origin" in req.headers)
+		{
+			res.headers["Access-Control-Allow-Origin"] = req.headers["Origin"];
+		}
+		res.headers["Access-Control-Allow-Headers"] = "Authorization";
+
+		res.writeVoidBody();
 	});
 
 	if (!opts.wwwDir.empty)

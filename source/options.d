@@ -11,7 +11,6 @@ static struct Options
 	@Arg("Path to cached PACs dir", Optional.no) string serveCacheDir;
 	@Arg("Path to directory where *.pac will be saved", Optional.yes) string saveDir;
 	@Arg("Path where *.pac will be served", Optional.yes) string servePath;
-	@Arg("Path where preview for *.pac will be served", Optional.yes) string servePreviewPath;
 	@Arg("Path to log dir", Optional.yes) string logDir;
 	@Arg("Access log entries will be output to the console", Optional.yes) bool accessLogToConsole;
 	@Arg("Path to server certificate chain file", Optional.yes) string certificateChainFile;

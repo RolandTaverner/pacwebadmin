@@ -16,9 +16,9 @@ const conditionApi = api.injectEndpoints({
         providesTags: (result, error) => result
           ? [
             ...result.map(({ id }) => ({ type: 'Condition' as const, id })),
-            { type: 'Condition' as const, id: 'LIST' },
+            { type: 'Condition', id: 'LIST' },
           ]
-          : [{ type: 'Condition' as const, id: 'LIST' }],
+          : [{ type: 'Condition', id: 'LIST' }],
 
       }
     ),
@@ -26,27 +26,27 @@ const conditionApi = api.injectEndpoints({
       {
         query: (id) => ({ url: `/condition/list/${id}` }),
         transformResponse: (response: ConditionGetByIdResponse): Condition => response,
-        providesTags: (result, error, id) => [{ type: 'Condition' as const, id }],
+        providesTags: (result, error, id) => [{ type: 'Condition', id }],
       }
     ),
     createCondition: builder.mutation<Condition, ConditionCreateRequest>({
       query: (createRequest) => ({ url: '/condition/list', method: 'POST', body: createRequest }),
       transformResponse: (response: ConditionCreateResponse): Condition => response,
-      invalidatesTags: [{ type: 'Condition' as const, id: 'LIST' }],
+      invalidatesTags: [{ type: 'Condition', id: 'LIST' }],
     }),
     updateCondition: builder.mutation<Condition, { id: number, body: ConditionUpdateRequest }>({
       query: (updateRequest) => ({ url: `/condition/list/${updateRequest.id}`, method: 'PUT', body: updateRequest.body }),
       transformResponse: (response: ConditionUpdateResponse): Condition => response,
       invalidatesTags: (result, error, updateRequest) => result ? [
-        { type: 'Condition' as const, id: result.id }, { type: 'Condition' as const, id: 'LIST' }]
-        : [{ type: 'Condition' as const, id: 'LIST' }],
+        { type: 'Condition', id: result.id }, { type: 'Condition', id: 'LIST' }, { type: 'PACPreview' }]
+        : [{ type: 'Condition', id: 'LIST' }],
     }),
     deleteCondition: builder.mutation<void, number>({
       query: (id) => ({ url: `/condition/list/${id}`, method: 'DELETE' }),
       invalidatesTags: (result, error, id) => error ? [
       ]
-        : [{ type: 'Condition' as const, id },
-        { type: 'Condition' as const, id: 'LIST' },]
+        : [{ type: 'Condition', id },
+        { type: 'Condition', id: 'LIST' },]
     }),
   }),
   overrideExisting: false,
