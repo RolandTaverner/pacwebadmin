@@ -14,6 +14,8 @@ It is suitable for small LANs, home networks with a dedicated server, or standal
 
 **Multiple PAC file support** - serve multiple PAC files, each generated from its own configuration.
 
+**Generated PAC file preview** – allows inspection of the resulting PAC file.
+
 **Shared proxy rules** across multiple PAC files for easier maintenance.
 
 **Standalone service** - runs independently with no external web server required.
@@ -41,8 +43,6 @@ It basically works (see Roadmap).
 Advanced input validation at backend and frontend.
 
 Polish UI.
-
-Generated PAC file preview.
 
 Install as Windows service.
 
