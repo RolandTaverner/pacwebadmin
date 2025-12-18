@@ -3,15 +3,17 @@ import './PACBoard.css';
 import React from 'react';
 
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { Box, Checkbox, Typography } from '@mui/material';
+import { Box, Checkbox, Paper, Typography } from '@mui/material';
 import Divider from '@mui/material/Divider';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
+import { PrismAsyncLight as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-import { useAllPACsQuery } from '../../../services/pac';
+import { useAllPACsQuery, usePreviewPACQuery } from '../../../services/pac';
 import type { PAC } from "../../../services/types";
 
 const PACBoard: React.FC<{}> = ({ }) => {
@@ -35,6 +37,7 @@ const PACBoard: React.FC<{}> = ({ }) => {
 
 const PACBoardEntry: React.FC<{ pac: PAC }> = ({ pac }) => {
   console.debug("=================== PACBoardEntry ", pac.id, pac.name);
+  const { data: pacPreview = '', isFetching: isFetchingPreview, isError: isFetchingPreviewError } = usePreviewPACQuery(pac.servePath);
 
   return (
     <Accordion sx={{ marginTop: '8px' }}>
@@ -76,6 +79,19 @@ const PACBoardEntry: React.FC<{ pac: PAC }> = ({ pac }) => {
           </Box>
         </Box>
         <Divider />
+        <Typography variant='h6'>Preview</Typography>
+        <Paper elevation={3} style={{ padding: '16px', marginTop: '16px', overflow: 'auto' }}>
+          <SyntaxHighlighter
+            language={'javascript'}
+            style={vs}
+            customStyle={{
+              maxHeight: '1000px',
+              overflowY: 'auto',
+            }}
+          >
+            {pacPreview}
+          </SyntaxHighlighter>
+        </Paper>
 
       </AccordionDetails>
     </Accordion>

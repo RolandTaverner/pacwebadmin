@@ -10,7 +10,7 @@ const userApi = api.injectEndpoints({
       {
         query: () => ({ url: '/user/profile' }),
         transformResponse: (response: ProfileResponse): ProfileResponse => response,
-        providesTags: (result, error) => [{ type: 'User' as const, id: '' }],
+        providesTags: (result, error) => [{ type: 'User', id: '' }],
       }
     ),
     loginUser: builder.mutation<LoginResponse, LoginRequest>({
@@ -20,11 +20,11 @@ const userApi = api.injectEndpoints({
           method: 'POST',
           params: { user: loginRequest.user, password: loginRequest.password }
         }),
-      invalidatesTags: [{ type: 'User' as const, id: '' }],
+      invalidatesTags: [{ type: 'User', id: '' }],
     }),
     logoutUser: builder.mutation<void, void>({
       query: () => ({ url: '/user/logout', method: 'POST' }),
-      invalidatesTags: [{ type: 'User' as const, id: '' }],
+      invalidatesTags: [{ type: 'User', id: '' }],
     }),
   }),
   overrideExisting: false,

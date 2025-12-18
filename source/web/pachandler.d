@@ -5,6 +5,7 @@ import std.file;
 import vibe.core.path : InetPath, relativeToWeb;
 import vibe.http.fileserver : HTTPFileServerSettings, sendFile;
 import vibe.http.server;
+import vibe.http.status : HTTPStatus;
 
 import model.model;
 import model.pacmanager;
@@ -35,19 +36,19 @@ class PACHandler
         if (!path.startsWith(m_prefix))
         {
             // should not happen here, but...
-            throw new HTTPStatusException(404, "invalid PAC URL");
+            throw new HTTPStatusException(HTTPStatus.notFound, "invalid PAC URL");
         }
         auto servePath = path.relativeToWeb(m_prefix).toString();
         auto pac = m_model.pacByServePath(servePath);
         if (!pac.serve())
         {
-            throw new HTTPStatusException(404, "not serving PAC " ~ servePath);
+            throw new HTTPStatusException(HTTPStatus.notFound, "not serving PAC " ~ servePath);
         }
 
         auto fileToServe = m_manager.getPACfilePath(servePath);
         if (!exists(fileToServe.toString()))
         {
-            throw new HTTPStatusException(500, "internal error: file not exists");
+            throw new HTTPStatusException(HTTPStatus.internalServerError, "internal error: file not exists");
         }
 
         sendFile(request, response, fileToServe, m_settings);
@@ -56,20 +57,24 @@ class PACHandler
     @safe void handlePACPreviewRequest(HTTPServerRequest request, HTTPServerResponse response)
     {
         m_authProvider.authenticate(request.headers.getAll("Authorization"));
-        
+
         auto path = request.requestPath;
         if (!path.startsWith(m_previewPrefix))
         {
             // should not happen here, but...
-            throw new HTTPStatusException(404, "invalid PAC preview URL");
+            throw new HTTPStatusException(HTTPStatus.notFound, "invalid PAC preview URL");
         }
         auto servePath = path.relativeToWeb(m_previewPrefix).toString();
-        auto pac = m_model.pacByServePath(servePath);
 
         auto fileToServe = m_manager.getPACfilePath(servePath);
         if (!exists(fileToServe.toString()))
         {
-            throw new HTTPStatusException(500, "internal error: file not exists");
+            throw new HTTPStatusException(HTTPStatus.internalServerError, "internal error: file not exists");
+        }
+
+        if ("Origin" in request.headers)
+        {
+            response.headers["Access-Control-Allow-Origin"] = request.headers["Origin"];
         }
 
         sendFile(request, response, fileToServe, m_settings);

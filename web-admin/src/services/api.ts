@@ -29,5 +29,5 @@ const baseQuery = fetchBaseQuery({
 export const api = createApi({
   baseQuery: baseQuery,
   endpoints: () => ({}),
-  tagTypes: ['Category', 'Proxy', 'Condition', 'ProxyRule', 'ProxyRuleConditions', 'PAC', 'PACProxyRules', 'User'],
+  tagTypes: ['Category', 'Proxy', 'Condition', 'ProxyRule', 'ProxyRuleConditions', 'PAC', 'PACProxyRules', 'User', 'PACPreview'],
 });

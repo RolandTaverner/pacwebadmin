@@ -383,7 +383,6 @@ dataDir = ".local/data"
 saveDir = ".local/save"
 serveCacheDir = ".local/servecache"
 servePath = "/pac/"
-servePreviewPath = "/preview/"
 logDir = ".local/log"
 wwwDir = "web-admin/dist"
 accessLogToConsole = false

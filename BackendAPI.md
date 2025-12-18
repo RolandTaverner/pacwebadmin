@@ -1,8 +1,10 @@
 # API
 
+When authorization is enabled, all API handlers require an `Authorization` header containing a valid token.
+
 ## Errors
 
-In case of an error, the service returns the appropriate HTTP status code and a response similar to this:
+In case of an error, the service returns an appropriate HTTP status code and a response similar to the following:
 
 ```json
 {
