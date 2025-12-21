@@ -1,5 +1,7 @@
 module model.pacbuilder;
 
+import std.algorithm.mutation : SwapStrategy;
+import std.algorithm.sorting : sort;
 import std.array : appender, Appender, replace;
 import std.conv;
 import std.string : toLower;
@@ -30,7 +32,14 @@ class PACBuilder
         app.put("function FindProxyForURL(url, host) {\n");
         app.put("    var host_lc = host.toLowerCase();\n\n");
 
-        foreach (ref const ProxyRulePriority prp; pacModel.proxyRules())
+        ProxyRulePriority[] sortedProxyRules;
+        foreach (const(ProxyRulePriority) prp; pacModel.proxyRules())
+        {
+            sortedProxyRules ~= new ProxyRulePriority(prp);
+        }
+        sort!((a, b) => a.priority() < b.priority(), SwapStrategy.stable)(sortedProxyRules);
+
+        foreach (ref const ProxyRulePriority prp; sortedProxyRules)
         {
             auto pr = prp.proxyRule();
             if (!pr.enabled())

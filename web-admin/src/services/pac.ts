@@ -1,7 +1,7 @@
 import { api } from './api';
 
 import type {
-  PAC, PACsResponse,
+  PAC, PACShort, PACsResponse,
   PACGetByIdResponse,
   PACCreateRequest, PACCreateResponse,
   PACUpdateRequest, PACUpdateResponse,
@@ -13,9 +13,9 @@ import type {
 
 const pacApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    allPACs: builder.query<PAC[], void>({
+    allPACs: builder.query<PACShort[], void>({
       query: () => ({ url: '/pac/list' }),
-      transformResponse: (response: PACsResponse): PAC[] => response.pacs,
+      transformResponse: (response: PACsResponse): PACShort[] => response.pacs,
       providesTags: (result) =>
         result
           ? [
@@ -40,7 +40,7 @@ const pacApi = api.injectEndpoints({
       query: ({ id, body }) => ({ url: `/pac/list/${id}`, method: 'PUT', body: body }),
       transformResponse: (response: PACUpdateResponse): PAC => response,
       invalidatesTags: (result, error, updateRequest) => result ? [
-        { type: 'PAC', id: result.id }, { type: 'PAC', id: 'LIST' }, { type: 'PACPreview' }]
+        { type: 'PAC', id: result.id }, { type: 'PAC', id: 'LIST' }, { type: 'PACPreview' }, { type: 'PACProxyRules', id: result.id }]
         : [{ type: 'PAC', id: 'LIST' }],
     }),
     deletePAC: builder.mutation<void, number>({
@@ -50,7 +50,7 @@ const pacApi = api.injectEndpoints({
         { type: 'PAC', id: 'LIST' }]
     }),
     pacProxyRules: builder.query<ProxyRuleWithPriority[], number>({
-      query: (id) => ({ url: `/pac/list/${id}/rules` }),
+      query: (id) => ({ url: `/pac/list/${id}/proxyrules` }),
       transformResponse: (response: PACProxyRulesResponse): ProxyRuleWithPriority[] => response.proxyRules,
       providesTags: (result, error, id) => error ? [] : [{ type: 'PACProxyRules', id }],
     }),

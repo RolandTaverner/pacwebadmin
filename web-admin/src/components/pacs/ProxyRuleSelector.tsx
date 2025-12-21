@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   Button,
   IconButton,
+  TextField,
   Tooltip,
 } from '@mui/material';
 
@@ -38,15 +39,62 @@ class RowData {
   }
 }
 
+interface PriorityEditProps {
+  initialValue: number;
+  onPriorityChange: (newPriority: number, updated: boolean) => void;
+}
+
+const PriorityEdit: React.FC<PriorityEditProps> = ({ initialValue, onPriorityChange }) => {
+  const [localValue, setLocalValue] = useState<string>(initialValue.toString());
+
+  const handleBlur = () => {
+    //console.debug('handleBlur');
+    const value = parseInt(localValue, 10);
+    if (!isNaN(value) && value > 0 && value !== initialValue) {
+      onPriorityChange(value, true);
+    } else {
+      setLocalValue(initialValue.toString());
+      onPriorityChange(initialValue, false);
+    }
+  };
+
+  return (
+    <TextField
+      type="number"
+      value={localValue}
+      onChange={(e) => {
+        setLocalValue(e.target.value);
+      }}
+      onBlur={handleBlur}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.currentTarget.blur();
+        }
+      }}
+      inputProps={{
+        min: 1,
+        step: 1,
+      }}
+      size="small"
+      fullWidth
+    />
+  );
+};
+
 const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
   proxyRuleIdsWithPriority,
   onSelectionChange,
 }) => {
   console.debug("=================== ProxyRuleSelector");
+  console.log('ProxyRuleSelector proxyRuleIdsWithPriority', proxyRuleIdsWithPriority);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { data: allProxyRules = [], isLoading } = useAllProxyRulesQuery();
   const [selectedProxyRules, setSelectedProxyRules] = useState<ProxyRuleIdWithPriority[]>(proxyRuleIdsWithPriority ? proxyRuleIdsWithPriority : []);
+
+  useEffect(() => {
+    setSelectedProxyRules(proxyRuleIdsWithPriority ? proxyRuleIdsWithPriority : []);
+  }, [proxyRuleIdsWithPriority]);
 
   const rows = selectedProxyRules.map(prp => ({ proxyRule: allProxyRules.find(pr => pr.id == prp.proxyRuleId), priority: prp.priority }))
     .filter(i => i.proxyRule != null)
@@ -56,27 +104,52 @@ const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
     })
     .map<RowData>(i => (new RowData(i.proxyRule?.id, i.proxyRule?.name, i.proxyRule?.proxy, i.priority)));
 
+  const handlePriorityChange = (proxyRuleId: number, newPriority: number) => {
+    const newSelected = selectedProxyRules.map(prp =>
+      prp.proxyRuleId === proxyRuleId
+        ? { ...prp, priority: newPriority }
+        : prp
+    );
+    setSelectedProxyRules(newSelected);
+    onSelectionChange(newSelected);
+  };
 
   const columns: MRT_ColumnDef<RowData>[] = [
     {
       accessorKey: 'proxyRuleId',
       header: 'Proxy rule ID',
-      maxSize: 100
+      maxSize: 100,
+      enableEditing: false,
     },
     {
       accessorKey: 'proxyRuleName',
       header: 'Name',
-      maxSize: 100
+      maxSize: 100,
+      enableEditing: false,
     },
     {
       accessorKey: 'displayProxyString',
       header: 'Proxy',
       size: 200,
+      enableEditing: false,
     },
     {
       accessorKey: 'priority',
       header: 'Priority',
-      maxSize: 90
+      maxSize: 90,
+      enableEditing: true,
+      Edit: ({ cell, row, table }) => (
+        <PriorityEdit
+          initialValue={cell.getValue<number>()}
+          onPriorityChange={(newPriority: number, updated: boolean) => {
+            console.debug('onPriorityChange', newPriority, updated);
+            if (updated) {
+              handlePriorityChange(row.original.proxyRuleId!, newPriority);
+            }
+            table.setEditingCell(null);
+          }}
+        />
+      ),
     },
   ];
 
@@ -85,8 +158,11 @@ const ProxyRuleSelector: React.FC<ProxyRuleSelectorProps> = ({
       <MaterialReactTable
         columns={columns}
         data={rows}
+        enableEditing
+        editDisplayMode="cell"
         enableRowActions
         positionActionsColumn="first"
+        getRowId={(row) => row.proxyRuleId?.toString() || ''}
         renderRowActions={({ row }) => (
           <Tooltip title="Remove proxy rule">
             <IconButton

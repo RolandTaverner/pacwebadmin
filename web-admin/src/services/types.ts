@@ -71,6 +71,19 @@ export interface PAC {
   fallbackProxy: Proxy;
 }
 
+export interface PACShort {
+  id: number;
+  name: string;
+  description: string;
+
+  serve: boolean;
+  servePath: string;
+
+  saveToFS: boolean;
+  saveToFSPath: string;
+
+  fallbackProxy: Proxy;
+}
 
 // ============================
 // Error response
@@ -211,7 +224,7 @@ export type ProxyRuleRemoveConditionResponse = ProxyRuleConditionsResponse;
 // ============================
 
 export interface PACsResponse {
-  pacs: PAC[];
+  pacs: PACShort[];
 }
 
 export interface ProxyRuleIdWithPriority {

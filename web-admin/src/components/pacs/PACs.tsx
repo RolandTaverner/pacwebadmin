@@ -32,9 +32,9 @@ import {
   type DropdownOption,
 } from 'material-react-table';
 
-import { useAllPACsQuery, useCreatePACMutation, useUpdatePACMutation, useDeletePACMutation } from '../../services/pac';
+import { useAllPACsQuery, useCreatePACMutation, useUpdatePACMutation, useDeletePACMutation, usePacProxyRulesQuery } from '../../services/pac';
 import { useAllProxiesQuery } from '../../services/proxy';
-import type { PAC, PACCreateRequest, PACUpdateRequest, ProxyRuleIdWithPriority, Proxy } from "../../services/types";
+import type { PAC, PACShort, PACCreateRequest, PACUpdateRequest, ProxyRuleIdWithPriority, Proxy } from "../../services/types";
 import { MutationError, getErrorMessage } from '../errors/errors';
 import ProxyRuleSelector from './ProxyRuleSelector';
 import CheckboxEdit from '../common/CheckboxEdit';
@@ -62,7 +62,6 @@ class RowData {
     saveToFS: boolean,
     saveToFSPath: string,
     fallbackProxy?: Proxy,
-    proxyRuleIdsWithPriority?: ProxyRuleIdWithPriority[]
   ) {
     this.id = id;
     this.name = name;
@@ -74,18 +73,17 @@ class RowData {
     this.fallbackProxy = fallbackProxy;
     this.fallbackProxyId = fallbackProxy?.id;
     this.fallbackProxyDisplayString = displayProxyString(fallbackProxy);
-    this.proxyRuleIdsWithPriority = proxyRuleIdsWithPriority;
+    this.proxyRuleIdsWithPriority = undefined;
   }
 }
 
-function RowDataFromPAC(p: PAC): RowData {
+function RowDataFromPAC(p: PACShort): RowData {
   return new RowData(p.id,
     p.name,
     p.description,
     p.serve, p.servePath,
     p.saveToFS, p.saveToFSPath,
     p.fallbackProxy,
-    p.proxyRules?.map<ProxyRuleIdWithPriority>(i => ({ proxyRuleId: i.proxyRule.id, priority: i.priority }))
   );
 }
 
@@ -108,6 +106,37 @@ const customGlobalFilter: FilterFn<RowData> = (row: Row<RowData>, columnId: stri
   }
 
   return filterFns.includesString(row as Row<RowData>, columnId, filterValue, addMeta);
+};
+
+interface ProxyRuleSelectorWrapperProps {
+  row: MRT_Row<RowData>;
+  component: 'create' | 'edit';
+}
+
+const ProxyRuleSelectorWrapper: React.FC<ProxyRuleSelectorWrapperProps> = ({ row, component }) => {
+  const pacId = row.original.id;
+  const { data: proxyRulesData } = usePacProxyRulesQuery(pacId, { skip: component === 'create' });
+
+  // Prefer cached values from row if they exist (user has made changes)
+  // Otherwise use fetched data from the query
+  const proxyRuleIdsWithPriority: ProxyRuleIdWithPriority[] =
+    row._valuesCache.proxyRuleIdsWithPriority ||
+    proxyRulesData?.map<ProxyRuleIdWithPriority>(i => ({
+      proxyRuleId: i.proxyRule.id,
+      priority: i.priority
+    })) || [];
+
+  console.debug(component, 'ProxyRuleSelectorWrapper proxyRuleIdsWithPriority', proxyRuleIdsWithPriority);
+
+  return (
+    <ProxyRuleSelector
+      proxyRuleIdsWithPriority={proxyRuleIdsWithPriority}
+      onSelectionChange={(proxyRuleIdsWithPriority) => {
+        console.debug("ProxyRuleSelectorWrapper.onSelectionChange", proxyRuleIdsWithPriority);
+        row._valuesCache.proxyRuleIdsWithPriority = proxyRuleIdsWithPriority;
+      }}
+    />
+  );
 };
 
 function PACs() {
@@ -167,7 +196,6 @@ function PACs() {
         ),
         Edit: ({ cell, column, row, table }) => {
           const onChange = (checked: boolean) => {
-            console.log('Edit.onChange()', checked);
             row._valuesCache[column.id] = checked;
           };
           const checkedInitial: boolean = cell.row.original.serve ? cell.row.original.serve : false;
@@ -199,7 +227,6 @@ function PACs() {
         ),
         Edit: ({ cell, column, row, table }) => {
           const onChange = (checked: boolean) => {
-            console.log('Edit.onChange()', checked);
             row._valuesCache[column.id] = checked;
           };
           const checkedInitial: boolean = cell.row.original.saveToFS ? cell.row.original.saveToFS : false;
@@ -264,7 +291,7 @@ function PACs() {
       proxyRules: values.proxyRuleIdsWithPriority ? values.proxyRuleIdsWithPriority : [],
     };
 
-    console.log("handleCreatePAC: createRequest", createRequest);
+    console.debug("handleCreatePAC: createRequest", createRequest);
 
     await createPAC(createRequest).unwrap()
       .then((value: PAC) => {
@@ -303,6 +330,8 @@ function PACs() {
       proxyRules: values.proxyRuleIdsWithPriority,
     };
     const updateRequest = { id: values.id, body: updateRequestBody }
+
+    console.debug("handleSavePAC: updateRequest", updateRequest);
 
     await updatePAC(updateRequest).unwrap()
       .then((value: PAC) => {
@@ -362,12 +391,9 @@ function PACs() {
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {internalEditComponents}
           <Typography variant="h6" sx={{ mt: 2 }}>Proxy rules</Typography>
-          <ProxyRuleSelector
-            proxyRuleIdsWithPriority={row.original.proxyRuleIdsWithPriority ? row.original.proxyRuleIdsWithPriority : []}
-            onSelectionChange={(proxyRuleIdsWithPriority) => {
-              console.debug("onSelectionChange", proxyRuleIdsWithPriority);
-              row._valuesCache.proxyRuleIdsWithPriority = proxyRuleIdsWithPriority;
-            }}
+          <ProxyRuleSelectorWrapper
+            row={row}
+            component='create'
           />
           {MutationError(mutationError)}
         </DialogContent>
@@ -382,12 +408,9 @@ function PACs() {
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {internalEditComponents}
           <Typography variant="h6" sx={{ mt: 2 }}>Proxy rules</Typography>
-          <ProxyRuleSelector
-            proxyRuleIdsWithPriority={row.original.proxyRuleIdsWithPriority ? row.original.proxyRuleIdsWithPriority : []}
-            onSelectionChange={(proxyRuleIdsWithPriority) => {
-              console.debug("onSelectionChange", proxyRuleIdsWithPriority);
-              row._valuesCache.proxyRuleIdsWithPriority = proxyRuleIdsWithPriority;
-            }}
+          <ProxyRuleSelectorWrapper
+            row={row}
+            component='edit'
           />
           {MutationError(mutationError)}
         </DialogContent>

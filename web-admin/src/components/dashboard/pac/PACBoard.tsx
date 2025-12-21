@@ -14,7 +14,7 @@ import { PrismAsyncLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import { useAllPACsQuery, usePreviewPACQuery } from '../../../services/pac';
-import type { PAC } from "../../../services/types";
+import type { PACShort } from "../../../services/types";
 
 const PACBoard: React.FC<{}> = ({ }) => {
   console.debug("=================== PACBoard");
@@ -35,7 +35,7 @@ const PACBoard: React.FC<{}> = ({ }) => {
   )
 };
 
-const PACBoardEntry: React.FC<{ pac: PAC }> = ({ pac }) => {
+const PACBoardEntry: React.FC<{ pac: PACShort }> = ({ pac }) => {
   console.debug("=================== PACBoardEntry ", pac.id, pac.name);
   const { data: pacPreview = '', isFetching: isFetchingPreview, isError: isFetchingPreviewError } = usePreviewPACQuery(pac.servePath);
 
