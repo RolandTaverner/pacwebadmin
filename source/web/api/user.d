@@ -14,7 +14,7 @@ interface UserAPI
     LoginResponse login(@viaQuery("user") in string _user, @viaQuery("password") in string _password);
 
     @anyAuth @method(HTTPMethod.POST) @path("/logout")
-    void logout();
+    void logout(@viaHeader("Authorization") in string _authorization);
 
     @anyAuth @method(HTTPMethod.GET) @path("/profile")
     ProfileResponse profile(@viaHeader("Authorization") in string _authorization);

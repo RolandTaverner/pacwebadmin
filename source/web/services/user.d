@@ -28,9 +28,9 @@ class UserService : UserAPI
         return response;
     }
 
-    @safe override void logout()
+    @safe override void logout(in string authorization)
     {
-        // TODO: invalidate token
+        m_authProvider.logout(authorization);
     }
 
     @safe override ProfileResponse profile(in string authorization)

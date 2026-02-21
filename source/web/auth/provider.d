@@ -1,14 +1,17 @@
 module web.auth.provider;
 
+import core.sync.rwmutex;
+import std.algorithm.iteration : filter;
 import std.algorithm.comparison : equal;
-import std.algorithm.searching : startsWith;
-import std.array : split;
+import std.algorithm.searching : count, startsWith;
+import std.array : array, split;
 import std.datetime.systime : Clock, SysTime;
 import std.datetime.timezone : UTC;
 import std.digest.sha : sha256Of;
 import std.exception : enforce;
 import std.stdio : File;
 import std.string : chomp, chompPrefix, indexOf, strip;
+import std.typecons : Tuple, tuple;
 
 import vibe.http.common : HTTPStatusException;
 import vibe.http.status : HTTPStatus;
@@ -24,6 +27,7 @@ struct AuthInfo
     string userName;
     bool reader;
     bool writer;
+    string token;
 
     bool isWriter() 
     {
@@ -35,6 +39,8 @@ struct AuthInfo
         return reader;
     }
 }
+
+enum MaxUserSessions = 100;
 
 class AuthProvider
 {
@@ -53,26 +59,45 @@ class AuthProvider
             lines ~= line.chomp().strip().idup;
         }
         parseUsers(lines, m_users);
+    
+        m_mutex = new ReadWriteMutex();
     }
 
     AuthInfo authenticate(in string[] authValues) @safe
     {
         if (m_noAuth)
         {
-            return AuthInfo("anybody", true, true);
+            return AuthInfo("anybody", true, true, "");
         }
 
-        JWTPayload payload = getValidPayload(authValues);
+        auto payloadAndToken = getValidPayload(authValues);
+        JWTPayload payload = payloadAndToken[0];
+        const string token = payloadAndToken[1];
+
         auto userInfo = payload.userName in m_users;
         if (userInfo == null)
         {
             throw new HTTPStatusException(HTTPStatus.forbidden, "user not found");
         }
 
+        synchronized (m_mutex.reader)
+        {
+            auto validTokens = userInfo.userName in m_validTokens;
+            if (validTokens is null)
+            {
+                throw new HTTPStatusException(HTTPStatus.forbidden, "invalid token");
+            }
+            if (count(*validTokens, token) == 0)
+            {
+                throw new HTTPStatusException(HTTPStatus.forbidden, "invalid token");
+            }
+        }
+
         AuthInfo ai = {
             userName: userInfo.userName,
             reader: userInfo.isReader,
-            writer: userInfo.isWriter
+            writer: userInfo.isWriter,
+            token: token,
         };
         return ai;
     }
@@ -105,7 +130,44 @@ class AuthProvider
             userName: userInfo.userName,
             createdAt: Clock.currTime(UTC())
         };
-        return createToken(m_secret, JWTAlgorithm.HS512, payload);
+        
+        auto newToken = createToken(m_secret, JWTAlgorithm.HS512, payload);
+        
+        synchronized (m_mutex.writer)
+        {
+            auto userTokens = userInfo.userName in m_validTokens;
+            if (userTokens is null)
+            {
+                m_validTokens[userInfo.userName] = [ newToken ];
+            }
+            else
+            {
+                if ((*userTokens).length < MaxUserSessions)
+                {
+                    m_validTokens[userInfo.userName] ~= newToken;
+                }
+                else
+                {
+                    m_validTokens[userInfo.userName] = (*userTokens)[1..$] ~ newToken;
+                }
+            }
+        }
+
+        return newToken;
+    }
+
+    void logout(in string authorization) @safe
+    {
+        auto userInfo = authenticate([authorization]);
+        synchronized (m_mutex.writer)
+        {
+            auto userTokens = userInfo.userName in m_validTokens;
+            if (userTokens is null || userTokens.length == 0)
+            {
+                return;
+            }
+            m_validTokens[userInfo.userName] = filter!(a => a != userInfo.token)(*userTokens).array;
+        }
     }
 
 private:
@@ -240,7 +302,7 @@ private:
         assert(payload.createdAt.toUnixTime() == decodedPayload.createdAt.toUnixTime()); // we save UnixTime not full time
     }
 
-    JWTPayload getValidPayload(in string[] authValues) @safe
+    Tuple!(JWTPayload, string) getValidPayload(in string[] authValues) @safe
     {
         const auto bearer = "Bearer ";
         foreach (authValue; authValues)
@@ -253,7 +315,7 @@ private:
 
             try
             {
-                return decodeToken(token, m_secret, JWTAlgorithm.HS512);
+                return tuple(decodeToken(token, m_secret, JWTAlgorithm.HS512), token);
             }
             catch (JWTError e)
             {
@@ -299,6 +361,9 @@ private:
     bool m_noAuth;
     UserInfo[string] m_users;
     string m_secret;
+    
+    ReadWriteMutex m_mutex;
+    string[][string] m_validTokens; // userName -> array of tokens
 }
 
 private ubyte[] hexStringToByteArray(in string hexString) @safe
