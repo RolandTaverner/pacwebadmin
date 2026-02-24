@@ -1110,7 +1110,9 @@ Response
 
 ### Logout
 
-curl -X POST http://127.0.0.1:8080/api/user/logout
+```bash
+curl -X POST http://127.0.0.1:8080/api/user/logout -H 'Authorization: Bearer eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6ImFkbWluIiwiY3JlYXRlZEF0IjoxNzY1MjIzNjU2fQ.3z8VeN0FerbZT4w8U8aCjkK7O9NouKMFScEwXly22FxIbTkkpADS-1yWZmTivIgqxA_G5ffH4-L8A2n-275ELg'
+```
 
 Response: HTTP 200 with empty body
 
