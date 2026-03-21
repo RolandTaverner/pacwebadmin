@@ -50,6 +50,20 @@ class DataObject(K, V:
         return m_value;
     }
 
+    // @safe bool valueEquals(in ThisType other) const pure
+    // {
+    //     if (other is null)
+    //     {
+    //         return false;
+    //     }
+
+    //     if (m_value is null) {
+    //         return other.m_value is null;
+    //     }
+        
+    //     return m_value.equals(other.m_value);
+    // }
+
     @safe override JSONValue toJSON() const
     {
         return JSONValue(["id": JSONValue(key()), "value": value().toJSON()]);
@@ -84,7 +98,7 @@ interface IRepository(K, V)
     alias KeyType = K;
     alias ValueType = V;
     alias DataObjectType = DataObject!(K, V).ThisType;
-    alias Predicate = bool delegate(in DataObjectType d) pure @safe;
+    alias Predicate = bool delegate(in DataObjectType d) @safe;
 
     const(DataObjectType)[] getAll();
     ulong countAll();

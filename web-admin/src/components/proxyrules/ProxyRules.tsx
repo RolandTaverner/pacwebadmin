@@ -170,8 +170,10 @@ function ProxyRules() {
 
   // CREATE action
   const handleCreateProxyRule: MRT_TableOptions<RowData>['onCreatingRowSave'] = async ({
-    values,
+    exitCreatingMode,
+    row,
     table,
+    values,
   }) => {
     console.debug("handleCreateProxyRule");
 
@@ -198,8 +200,10 @@ function ProxyRules() {
 
   // UPDATE action
   const handleSaveProxyRule: MRT_TableOptions<RowData>['onEditingRowSave'] = async ({
-    values,
+    exitEditingMode,
+    row,
     table,
+    values,
   }) => {
     console.debug("handleSaveProxyRule");
 

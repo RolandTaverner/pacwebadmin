@@ -278,6 +278,27 @@ export interface PACProxyRuleRemoveRequest {
 export type PACProxyRuleRemoveResponse = PACProxyRulesResponse;
 
 // ============================
+// Tool API
+// ============================
+
+export interface ToolQuickAddConditionsRequest {
+  type: ConditionType;
+  expressions: string[];
+  categoryId: number;
+  proxyRuleId: number;
+}
+
+export interface ToolQuickAddConditionError {
+  expression: string;
+  error: string;
+}
+
+export interface ToolQuickAddConditionsResponse {
+  conditions: Condition[];
+  errors: ToolQuickAddConditionError[];
+}
+
+// ============================
 // User API
 // ============================
 

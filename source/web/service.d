@@ -11,6 +11,7 @@ import web.api.proxy;
 import web.api.condition;
 import web.api.proxyrule;
 import web.api.pac;
+import web.api.tool;
 import web.api.user;
 
 import web.auth.provider : AuthProvider;
@@ -20,6 +21,7 @@ import web.services.proxy;
 import web.services.condition;
 import web.services.proxyrule;
 import web.services.pac;
+import web.services.tool;
 import web.services.user;
 
 import web.services.common.exceptions;
@@ -36,6 +38,7 @@ class Service : APIRoot
         m_conditionSvc = new ConditionService(m_model, authProvider);
         m_proxyRuleSvc = new ProxyRuleService(m_model, authProvider);
         m_pacSvc = new PACService(m_model, authProvider);
+        m_toolSvc = new ToolService(m_model, authProvider);
         m_userSvc = new UserService(authProvider);
     }
 
@@ -64,6 +67,11 @@ class Service : APIRoot
         return m_pacSvc;
     }
 
+    override @property ToolAPI tools()
+    {
+        return m_toolSvc;
+    }
+
     override @property UserAPI user()
     {
         return m_userSvc;
@@ -76,5 +84,6 @@ private:
     ConditionService m_conditionSvc;
     ProxyRuleService m_proxyRuleSvc;
     PACService m_pacSvc;
+    ToolService m_toolSvc;
     UserService m_userSvc;
 }

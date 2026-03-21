@@ -28,7 +28,7 @@ const Header: React.FC<{}> = ({ }) => {
   };
 
   return (
-    <Container sx={{ position: "relative", bgcolor: 'primary.light', display: 'flex', height: 40, width: 1500, justifyContent: 'space-between', alignItems: 'center' }} maxWidth={false} >
+    <Container sx={{ position: "relative", bgcolor: 'primary.light', display: 'flex', height: 40, width: '100%', justifyContent: 'space-between', alignItems: 'center' }} maxWidth={false} >
       <Typography color="#FFFFFF" variant="h5">
         PAC web admin
       </Typography>

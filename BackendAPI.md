@@ -1129,3 +1129,41 @@ Response
   "userName": "admin"
 }
 ```
+
+## Tool API requests
+
+### Quick add conditions
+
+Creates several conditions and adds them to specified proxy rule at once. Conditions already exists and/or already added to proxy rule are skipped.
+
+```bash
+curl -X POST http://127.0.0.1:80/api/tool/quick_add_conditions -H "Content-Type: application/json" -d '{"type":"host_domain_subdomain", "expressions":["aaa.com","bbb.com"], "categoryId":1, "proxyRuleId":1}'
+```
+
+Response
+
+```json
+{
+  "conditions": [
+    {
+      "id": 4,
+      "type": "host_domain_subdomain",
+      "expression": "aaa.com",
+      "category": {
+        "id": 1,
+        "name": "all"
+      }
+    },
+    {
+      "id": 5,
+      "type": "host_domain_subdomain",
+      "expression": "bbb.com",
+      "category": {
+        "id": 1,
+        "name": "all"
+      }
+    }
+  ],
+  "errors": []
+}
+```

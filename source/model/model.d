@@ -1,8 +1,10 @@
 module model.model;
 
 import core.sync.rwmutex;
-import std.algorithm.iteration : filter, map;
+import std.algorithm.iteration : filter, map, uniq;
+import std.algorithm.mutation : SwapStrategy;
 import std.algorithm.searching : canFind;
+import std.algorithm.sorting : sort;
 import std.array;
 import std.datetime.systime : Clock;
 import std.datetime.timezone : UTC;
@@ -24,6 +26,7 @@ import model.entities.proxy;
 import model.entities.proxyrule;
 import model.entities.pac;
 import model.errors.base : ConstraintError;
+import model.tool_types;
 
 class Model
 {
@@ -128,7 +131,7 @@ class Model
     {
         synchronized (m_mutex.reader)
         {
-            return array(proxies.getAll().map!(c => makeProxy(c)));
+            return array(proxies().getAll().map!(c => makeProxy(c)));
         }
     }
 
@@ -138,7 +141,7 @@ class Model
         {
             try
             {
-                return makeProxy(proxies.getByKey(id));
+                return makeProxy(proxies().getByKey(id));
             }
             catch (re.NotFoundError e)
             {
@@ -155,7 +158,7 @@ class Model
         {
             validateProxyModify(-1, i, false);
 
-            const auto created = proxies.create(
+            const auto created = proxies().create(
                 new dlproxy.ProxyValue(i.type.get().strip(), 
                     i.address.get().strip(), 
                     i.description ? i.description.get() : ""));
@@ -172,7 +175,7 @@ class Model
             validateProxyModify(id, i, true);
             try
             {
-                auto old = proxies.getByKey(id).value();
+                auto old = proxies().getByKey(id).value();
                 auto newType = i.type ? i.type.get().strip() : old.type();
                 string newAddress = i.address ? i.address.get().strip() : old.address();
                 auto newDescription = i.description ? i.description.get() : old.description();
@@ -182,7 +185,7 @@ class Model
                     newAddress = "";
                 }
 
-                const auto updated = proxies.update(id,
+                const auto updated = proxies().update(id,
                     new dlproxy.ProxyValue(newType, newAddress, newDescription));
                 
                 touchPACByProxy(id);
@@ -203,7 +206,7 @@ class Model
             try
             {
                 // TODO: update proxy rules
-                const auto deleted = proxies.remove(id);
+                const auto deleted = proxies().remove(id);
                 return makeProxy(deleted);
             }
             catch (re.NotFoundError e)
@@ -224,7 +227,7 @@ class Model
                     && (f.type.length == 0 || canFind(p.value().type(), f.type));
             };
 
-            auto filtered = proxies.filterBy(pred);
+            auto filtered = proxies().filterBy(pred);
 
             return filtered.map!(p => makeProxy(p)).array;
         }
@@ -236,7 +239,7 @@ class Model
     {
         synchronized (m_mutex.reader)
         {
-            return array(conditions.getAll().map!(c => makeCondition(c)));
+            return array(conditions().getAll().map!(c => makeCondition(c)));
         }
     }
 
@@ -246,7 +249,7 @@ class Model
         {
             try
             {
-                return makeCondition(conditions.getByKey(id));
+                return makeCondition(conditions().getByKey(id));
             }
             catch (re.NotFoundError e)
             {
@@ -263,7 +266,7 @@ class Model
         {
             validateConditionModify(-1, i, false);
 
-            const auto created = conditions.create(
+            const auto created = conditions().create(
                 new dlcondition.ConditionValue(i.type.get().strip(), i.expression.get().strip(), i.categoryId.get()));
             return makeCondition(created);
         }
@@ -278,12 +281,12 @@ class Model
             validateConditionModify(id, i, true);
             try
             {
-                auto old = conditions.getByKey(id).value();
+                auto old = conditions().getByKey(id).value();
                 auto newType = i.type ? i.type.get().strip() : old.type();
                 auto newExpression = i.expression ? i.expression.get().strip() : old.expression();
                 auto newCategoryId = i.categoryId ? i.categoryId.get() : old.categoryId();
 
-                const auto updated = conditions.update(id,
+                const auto updated = conditions().update(id,
                     new dlcondition.ConditionValue(newType, newExpression, newCategoryId));
                 
                 touchPACByCondition(id);
@@ -303,7 +306,7 @@ class Model
             validateConditionDelete(id);
             try
             {
-                const auto deleted = conditions.remove(id);
+                const auto deleted = conditions().remove(id);
                 return makeCondition(deleted);
             }
             catch (re.NotFoundError e)
@@ -319,7 +322,7 @@ class Model
     {
         synchronized (m_mutex.reader)
         {
-            return array(proxyRules.getAll().map!(c => makeProxyRule(c)));
+            return array(proxyRules().getAll().map!(c => makeProxyRule(c)));
         }
     }
 
@@ -329,7 +332,7 @@ class Model
         {
             try
             {
-                return makeProxyRule(proxyRules.getByKey(id));
+                return makeProxyRule(proxyRules().getByKey(id));
             }
             catch (re.NotFoundError e)
             {
@@ -346,7 +349,7 @@ class Model
         {
             validateProxyRuleModify(-1, i, false);
 
-            const auto created = proxyRules.create(
+            const auto created = proxyRules().create(
                 new dlproxyrule.ProxyRuleValue(i.proxyId.get(),
                     i.enabled.get(),
                     i.name.strip,
@@ -363,14 +366,14 @@ class Model
             validateProxyRuleModify(id, i, true);
             try
             {
-                auto old = proxyRules.getByKey(id).value();
+                auto old = proxyRules().getByKey(id).value();
                 auto newProxyId = i.proxyId ? i.proxyId.get() : old.proxyId();
                 auto newEnabled = i.enabled ? i.enabled.get() : old.enabled();
                 auto newName = valueOrDefault(i.name, old.name());
                 auto newConditionIds = i.conditionIds.length != 0 ? i.conditionIds
                     : old.conditionIds();
 
-                const auto updated = proxyRules.update(id,
+                const auto updated = proxyRules().update(id,
                     new dlproxyrule.ProxyRuleValue(newProxyId,
                         newEnabled,
                         newName,
@@ -388,21 +391,21 @@ class Model
 
     @trusted const(Condition[]) proxyRuleAddCondition(in long id, in long conditionId)
     {
-        enforce!bool(conditions.exists(conditionId), new ConditionNotFound(conditionId));
+        enforce!bool(conditions().exists(conditionId), new ConditionNotFound(conditionId));
 
         synchronized (m_mutex.writer)
         {
             try
             {
                 // TODO: check conditionIds uniqueness and existance
-                const auto pr = proxyRules.getByKey(id);
+                const auto pr = proxyRules().getByKey(id);
                 const auto hrIds = pr.value().conditionIds();
                 if (hrIds.canFind(conditionId))
                 {
                     throw new ConstraintError("already exists"); // TODO: add info
                 }
                 const auto newHrIds = hrIds ~ conditionId;
-                const auto updated = proxyRules.update(id, new dlproxyrule.ProxyRuleValue(pr.value()
+                const auto updated = proxyRules().update(id, new dlproxyrule.ProxyRuleValue(pr.value()
                         .proxyId(), pr.value().enabled(), pr.value().name(), newHrIds));
 
                 touchPACByProxyRule(id);
@@ -422,14 +425,14 @@ class Model
             try
             {
                 // TODO: check conditionIds uniqueness and existance
-                const auto pr = proxyRules.getByKey(id);
+                const auto pr = proxyRules().getByKey(id);
                 const auto hrIds = pr.value().conditionIds();
                 if (!hrIds.canFind(conditionId))
                 {
                     throw new ConstraintError("not exists"); // TODO: add info
                 }
                 const auto filteredHrIds = array(hrIds.filter!(i => i != conditionId));
-                const auto updated = proxyRules.update(id, new dlproxyrule.ProxyRuleValue(pr.value()
+                const auto updated = proxyRules().update(id, new dlproxyrule.ProxyRuleValue(pr.value()
                         .proxyId(), pr.value().enabled(), pr.value().name(), filteredHrIds));
 
                 touchPACByProxyRule(id);
@@ -449,7 +452,7 @@ class Model
             validateProxyRuleDelete(id);
             try
             {
-                const auto deleted = proxyRules.remove(id);
+                const auto deleted = proxyRules().remove(id);
                 return makeProxyRule(deleted);
             }
             catch (re.NotFoundError e)
@@ -571,7 +574,7 @@ class Model
     {
         synchronized (m_mutex.writer)
         {
-            enforce!bool(proxyRules.exists(proxyRuleId), new ProxyRuleNotFound(proxyRuleId));
+            enforce!bool(proxyRules().exists(proxyRuleId), new ProxyRuleNotFound(proxyRuleId));
 
             try
             {
@@ -610,7 +613,7 @@ class Model
     {
         synchronized (m_mutex.writer)
         {
-            enforce!bool(proxyRules.exists(proxyRuleId), new ProxyRuleNotFound(proxyRuleId));
+            enforce!bool(proxyRules().exists(proxyRuleId), new ProxyRuleNotFound(proxyRuleId));
 
             try
             {
@@ -649,7 +652,7 @@ class Model
     {
         synchronized (m_mutex.writer)
         {
-            enforce!bool(proxyRules.exists(proxyRuleId), new ProxyRuleNotFound(proxyRuleId));
+            enforce!bool(proxyRules().exists(proxyRuleId), new ProxyRuleNotFound(proxyRuleId));
 
             try
             {
@@ -700,7 +703,78 @@ class Model
         }
     }
 
-    //=======================
+    // Tools ======================
+
+    @trusted const(QuickAddConditionsResult) quickAddConditions(in string type,
+        in string[] expressions,
+        in long categoryId,
+        in long proxyRuleId)
+    {
+        validateConditionType(type);
+        QuickAddConditionsResult result;
+
+        synchronized (m_mutex.writer)
+        {
+            if (!categories.exists(categoryId))
+            {
+                throw new CategoryNotFound(categoryId);
+            }
+            if (!proxyRules().exists(proxyRuleId))
+            {
+                throw new ProxyRuleNotFound(proxyRuleId);
+            }
+
+            auto sortedUniqExpressions = expressions.map!(e => e.strip()).array.sort!().array.uniq!().array;
+
+            foreach (ref const string expression; sortedUniqExpressions)
+            {
+                try
+                {
+                    validateConditionExpression(expression);
+                }
+                catch (ConstraintError e)
+                {
+                    ExpressionError exprError = {expression: expression, error: e.msg};
+                    result.errors ~= exprError;
+                    continue;
+                }
+
+                auto condition = getOrCreateCondition(type, expression, categoryId);
+                const auto proxyRule = proxyRules().getByKey(proxyRuleId);
+                const auto conditionIds = proxyRule.value().conditionIds();
+                if (!conditionIds.canFind(condition.key()))
+                {
+                    const auto newConditionIds = conditionIds ~ condition.key();
+                    
+                    proxyRules().update(proxyRuleId,
+                        new dlproxyrule.ProxyRuleValue(proxyRule.value().proxyId(),
+                            proxyRule.value().enabled(),
+                            proxyRule.value().name(),
+                            newConditionIds)
+                        );
+                }
+
+                result.conditions ~= makeCondition(condition);
+            } // foreach
+
+            touchPACByProxyRule(proxyRuleId);
+        }
+
+        return result;
+    }
+
+    private const(dlcondition.Condition) getOrCreateCondition(in string type, in string expression, in long categoryId)
+    {
+        auto conditionValue = new dlcondition.ConditionValue(type.strip(), expression.strip(), categoryId);
+        auto filtered = conditions().filterBy(c => c.value().equals(conditionValue));
+        if (filtered.length != 0)
+        {
+            // Existing condition with the same parameters
+            return filtered[0];
+        }
+        // Create new condition
+        return conditions().create(conditionValue);
+    }
 
 protected:
     void validateCategoryModify(in long id, in CategoryInput i, in bool update)
@@ -718,7 +792,7 @@ protected:
             return c.value().categoryId() == id;
         };
 
-        enforce!bool(conditions.count(pred) == 0, new ConstraintError(
+        enforce!bool(conditions().count(pred) == 0, new ConstraintError(
                 "there are conditions referenced this category"));
     }
 
@@ -731,7 +805,7 @@ protected:
     {
         if (update)
         {
-            auto old = proxies.getByKey(id).value();
+            auto old = proxies().getByKey(id).value();
             auto newType = i.type ? i.type.get().strip() : old.type();
             auto newAddress = i.address ? i.address.get().strip() : old.address();
 
@@ -748,7 +822,7 @@ protected:
             return p.value().proxyId() == id;
         };
 
-        enforce!bool(proxyRules.count(predProxyRule) == 0, new ConstraintError(
+        enforce!bool(proxyRules().count(predProxyRule) == 0, new ConstraintError(
                 "there are proxy rules referenced this proxy"));
 
         auto predPAC = (in dlpac.PAC p) {
@@ -781,7 +855,7 @@ protected:
             return p.value().conditionIds().canFind(id);
         };
 
-        enforce!bool(proxyRules.count(pred) == 0,
+        enforce!bool(proxyRules().count(pred) == 0,
             new ConstraintError("there are proxy rules referenced this condition"));
     }
 
@@ -802,16 +876,16 @@ protected:
         auto pred = (in dlproxyrule.ProxyRule p) {
             return (!update || p.key() != id) && p.value().name().strip == i.name.strip;
         };
-        enforce!bool(proxyRules.count(pred) == 0, new ConstraintError("already exists"));
+        enforce!bool(proxyRules().count(pred) == 0, new ConstraintError("already exists"));
 
         if (update && !i.proxyId.isNull)
         {
-            enforce!bool(proxies.exists(i.proxyId.get), new ConstraintError("proxy not exists"));
+            enforce!bool(proxies().exists(i.proxyId.get), new ConstraintError("proxy not exists"));
         }
 
         foreach (conditionId; i.conditionIds)
         {
-            enforce!bool(conditions.exists(conditionId), new ConstraintError("condition not exists"));
+            enforce!bool(conditions().exists(conditionId), new ConstraintError("condition not exists"));
         }
     }
 
@@ -829,14 +903,14 @@ protected:
     {
         auto id = dto.key();
 
-        auto p = proxies.getByKey(dto.value().proxyId());
+        auto p = proxies().getByKey(dto.value().proxyId());
         auto proxy = makeProxy(p);
 
         auto enabled = dto.value().enabled();
         auto name = dto.value().name();
 
         auto conditions = dto.value().conditionIds()
-            .map!(id => makeCondition(conditions.getByKey(id))).array;
+            .map!(id => makeCondition(conditions().getByKey(id))).array;
 
         return new ProxyRule(id, proxy, enabled, name, conditions);
     }
@@ -919,10 +993,10 @@ protected:
         {
             foreach (prId; i.proxyRules.get().byKey())
             {
-                enforce!bool(proxyRules.exists(prId), new ProxyRuleNotFound(prId));
+                enforce!bool(proxyRules().exists(prId), new ProxyRuleNotFound(prId));
             }
         }
-        enforce!bool(i.fallbackProxyId.isNull || proxies.exists(i.fallbackProxyId.get()), new ProxyNotFound(i.fallbackProxyId.get()));
+        enforce!bool(i.fallbackProxyId.isNull || proxies().exists(i.fallbackProxyId.get()), new ProxyNotFound(i.fallbackProxyId.get()));
     }
 
     @safe PAC makePAC(in dlpac.PAC dto)
@@ -931,12 +1005,12 @@ protected:
 
         auto prs = dto.value().proxyRules()
             .map!(
-                pr => new ProxyRulePriority(makeProxyRule(proxyRules.getByKey(pr.proxyRuleId)),
+                pr => new ProxyRulePriority(makeProxyRule(proxyRules().getByKey(pr.proxyRuleId)),
                     pr.priority)
             )
             .array;
 
-        auto fallBackProxy = makeProxy(proxies.getByKey(dto.value().fallbackProxyId()));
+        auto fallBackProxy = makeProxy(proxies().getByKey(dto.value().fallbackProxyId()));
 
         return new PAC(id,
             dto.value().name(),

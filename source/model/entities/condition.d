@@ -72,32 +72,44 @@ struct ConditionInput
         if (!update)
         {
             enforce!bool(!type.isNull, new ConstraintError("type can't be null"));
-            enforce!bool(!expression.isNull, new ConstraintError("expression can't be null"));
-            enforce!bool(!categoryId.isNull, new ConstraintError("categoryId can't be null"));
-
             enforce!bool(type.get().strip().length != 0, new ConstraintError("type can't be empty"));
 
-            enforce!bool(expression.get().strip().length != 0, 
-                new ConstraintError("expression can't be empty"));
+            enforce!bool(!expression.isNull, new ConstraintError("expression can't be null"));
+            validateConditionExpression(expression.get());
+
+            enforce!bool(!categoryId.isNull, new ConstraintError("categoryId can't be null"));
         }
         else
         {
-            enforce!bool(type.isNull || type.get().strip().length != 0, 
+            enforce!bool(type.isNull || type.get().strip().length != 0,
                 new ConstraintError("type can't be empty"));
 
-            enforce!bool(expression.isNull || expression.get().strip().length != 0, 
-                new ConstraintError("expression can't be empty"));
+            enforce!bool(expression.isNull || expression.get().strip().length != 0,
+                    new ConstraintError("expression can't be empty"));
         }
 
         if (!type.isNull)
         {
-            const auto conditionTypeValues = [EnumMembers!ConditionType]
-                .map!(el => cast(string) el)
-                .array;
-
-            enforce!bool(conditionTypeValues.canFind(type.get()), new ConstraintError("invalid type"));
+            validateConditionType(type.get());
         }
     }
+}
+
+@safe void validateConditionType(in string type) pure
+{
+    enforce!bool(type.strip().length != 0, new ConstraintError("type can't be empty"));
+
+    const auto conditionTypeValues = [EnumMembers!ConditionType]
+        .map!(el => cast(string) el)
+        .array;
+
+    enforce!bool(conditionTypeValues.canFind(type), new ConstraintError("invalid type"));
+}
+
+@safe void validateConditionExpression(in string expression) pure
+{
+    enforce!bool(expression.strip().length != 0,
+        new ConstraintError("expression can't be empty"));
 }
 
 class ConditionNotFound : NotFoundBase!(Condition)
