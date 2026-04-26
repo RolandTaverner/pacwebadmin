@@ -11,12 +11,14 @@ import model.entities.proxy;
 import model.entities.condition;
 import model.entities.proxyrule;
 import model.entities.pac;
+import model.tool_types;
 
 import web.api.category;
 import web.api.proxy;
 import web.api.condition;
 import web.api.proxyrule;
 import web.api.pac;
+import web.api.tool;
 
 @safe CategoryDTO toDTO(in Category c) pure
 {
@@ -83,4 +85,9 @@ import web.api.pac;
         p.saveToFS(),
         p.saveToFSPath(),
         toDTO(p.fallbackProxy()));
+}
+
+@safe ExpressionErrorDTO toDTO(in ExpressionError e) pure
+{
+    return ExpressionErrorDTO(e.expression, e.error);
 }

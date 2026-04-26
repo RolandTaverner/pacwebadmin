@@ -8,6 +8,7 @@ import web.api.proxy : ProxyAPI;
 import web.api.condition : ConditionAPI;
 import web.api.proxyrule : ProxyRuleAPI;
 import web.api.pac : PACAPI;
+import web.api.tool : ToolAPI;
 import web.api.user : UserAPI;
 
 @path("/api/")
@@ -27,6 +28,9 @@ interface APIRoot
 
     @path("pac/")
     @property PACAPI pacs();
+
+    @path("tool/")
+    @property ToolAPI tools();
 
     @path("user/")
     @property UserAPI user();

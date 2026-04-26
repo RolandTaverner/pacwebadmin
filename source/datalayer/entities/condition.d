@@ -24,6 +24,18 @@ class ConditionValue : ISerializable
         m_categoryId = categoryId;
     }
 
+    bool equals(const ConditionValue other) const @safe pure nothrow @nogc
+    {
+        if (other is null)
+        {
+            return false;
+        }
+
+        return this.m_type == other.m_type
+            && this.m_expression == other.m_expression
+            && this.m_categoryId == other.m_categoryId;
+    }
+
     @safe const(string) type() const pure
     {
         return m_type;
