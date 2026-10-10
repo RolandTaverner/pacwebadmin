@@ -8,6 +8,10 @@ Provide a simple and user-friendly tool for managing, generating, and serving PA
 
 It is suitable for small LANs, home networks with a dedicated server, or standalone machines.
 
+![PAC web admin dashboard with generated PAC preview](docs/images/dashboard.png)
+
+📖 See the [User Manual](docs/USER_MANUAL.md) for a screenshot tour of the UI.
+
 # Features
 
 **Web-based interface** for managing PAC rules with an intuitive UI.
