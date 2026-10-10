@@ -86,6 +86,7 @@ int main(string[] args)
 			res.headers["Access-Control-Allow-Origin"] = req.headers["Origin"];
 		}
 		res.headers["Access-Control-Allow-Headers"] = "Authorization";
+		res.headers["Access-Control-Max-Age"] = "0";
 
 		res.writeVoidBody();
 	});
